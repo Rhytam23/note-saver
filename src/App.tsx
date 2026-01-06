@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { SpeedInsights } from "@vercel/speed-insights/react";
+import { Analytics } from "@vercel/analytics/react";
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from './contexts/AuthContext.tsx';
 import { useTheme } from './contexts/ThemeContext.tsx';
@@ -267,6 +268,7 @@ const App: React.FC = () => {
     <ErrorBoundary>
       <div className={`flex flex-col min-h-screen font-sans antialiased transition-colors duration-500 ${theme === 'dark' ? 'dark' : ''} ${colors.bgSimple}`}>
         <SpeedInsights />
+        <Analytics />
         <SeasonalAnimations />
         <AnimatePresence>
           {showIndependenceDayIntro && seasonalTheme === 'independence_day_in' && (
