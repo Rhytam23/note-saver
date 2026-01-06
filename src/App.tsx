@@ -128,22 +128,34 @@ const App: React.FC = () => {
   // Memoize filtered notes helpers
   const allTags = useMemo(() => {
     const tagSet = new Set<string>();
-    notes.forEach(note => note.tags.forEach(tag => tagSet.add(tag)));
+    notes.forEach(note => {
+      if (note.tags && Array.isArray(note.tags)) {
+        note.tags.forEach(tag => tagSet.add(tag));
+      }
+    });
     customTags.forEach(tag => tagSet.add(tag.name));
     return Array.from(tagSet).sort();
   }, [notes, customTags]);
 
   const filteredNotes = useMemo(() => {
     return notes.filter(note => {
-      const title = note.title || '';
-      const content = note.content || '';
+      const title = (note.title || '').toLowerCase();
+      const content = (note.content || '');
       const term = searchTerm.toLowerCase();
 
-      const searchMatch =
-        title.toLowerCase().includes(term) ||
-        stripHtml(content).toLowerCase().includes(term);
+      // Safe check for content
+      let contentMatch = false;
+      try {
+        const plainText = stripHtml(content).toLowerCase();
+        contentMatch = plainText.includes(term);
+      } catch (e) {
+        // Fallback if HTML parsing fails
+        contentMatch = content.toLowerCase().includes(term);
+      }
 
-      const tagMatch = !activeTag || (note.tags && note.tags.includes(activeTag));
+      const searchMatch = title.includes(term) || contentMatch;
+
+      const tagMatch = !activeTag || (note.tags && Array.isArray(note.tags) && note.tags.includes(activeTag));
       const priorityMatch = !activePriority || note.priority === activePriority;
       return searchMatch && tagMatch && priorityMatch;
     });
@@ -233,11 +245,12 @@ const App: React.FC = () => {
   }, [view, handleAddNewNote]);
 
   const stripHtml = (html: string) => {
-    if (!html) return "";
+    if (!html || typeof html !== 'string') return "";
     try {
       const doc = new DOMParser().parseFromString(html, 'text/html');
       return doc.body.textContent || "";
     } catch (e) {
+      console.warn("Error parsing HTML for search:", e);
       return "";
     }
   };
