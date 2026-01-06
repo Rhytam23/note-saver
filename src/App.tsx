@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, Suspense } from 'react';
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from './contexts/AuthContext.tsx';
@@ -13,25 +13,29 @@ import Sidebar from './components/Sidebar.tsx';
 import NoteList from './components/NoteList.tsx';
 import NoteEditor from './components/NoteEditor.tsx';
 import FloatingActionButton from './components/FloatingActionButton.tsx';
-import LandingPage from './components/LandingPage.tsx';
-import AuthScreen from './components/AuthScreen.tsx';
-import ProfileModal from './components/ProfileModal.tsx';
-import TutorialModal from './components/TutorialModal.tsx';
-import SeasonalAnimations from './components/SeasonalAnimations.tsx';
 import ErrorBoundary from './components/ErrorBoundary.tsx';
 import Footer from './components/Footer.tsx';
-import IndependenceDayIntro from './components/IndependenceDayIntro.tsx';
-import SummerIntroAnimation from './components/SummerIntroAnimation.tsx';
-import WinterIntroAnimation from './components/WinterIntroAnimation.tsx';
-import ChristmasIntroAnimation from './components/ChristmasIntroAnimation.tsx';
-import MonsoonIntroAnimation from './components/MonsoonIntroAnimation.tsx';
-import AutumnIntroAnimation from './components/AutumnIntroAnimation.tsx';
-import SpringIntroAnimation from './components/SpringIntroAnimation.tsx';
-import DiwaliIntroAnimation from './components/DiwaliIntroAnimation.tsx';
-import HoliIntroAnimation from './components/HoliIntroAnimation.tsx';
-import PongalIntroAnimation from './components/PongalIntroAnimation.tsx';
-import NavratriIntroAnimation from './components/NavratriIntroAnimation.tsx';
-import NewYearIntroAnimation from './components/NewYearIntroAnimation.tsx';
+import SeasonalAnimations from './components/SeasonalAnimations.tsx';
+
+// Lazy Load Major Views & Modals
+const LandingPage = React.lazy(() => import('./components/LandingPage.tsx'));
+const AuthScreen = React.lazy(() => import('./components/AuthScreen.tsx'));
+const ProfileModal = React.lazy(() => import('./components/ProfileModal.tsx'));
+const TutorialModal = React.lazy(() => import('./components/TutorialModal.tsx'));
+
+// Lazy Load Seasonal Intro Animations
+const IndependenceDayIntro = React.lazy(() => import('./components/IndependenceDayIntro.tsx'));
+const SummerIntroAnimation = React.lazy(() => import('./components/SummerIntroAnimation.tsx'));
+const WinterIntroAnimation = React.lazy(() => import('./components/WinterIntroAnimation.tsx'));
+const ChristmasIntroAnimation = React.lazy(() => import('./components/ChristmasIntroAnimation.tsx'));
+const MonsoonIntroAnimation = React.lazy(() => import('./components/MonsoonIntroAnimation.tsx'));
+const AutumnIntroAnimation = React.lazy(() => import('./components/AutumnIntroAnimation.tsx'));
+const SpringIntroAnimation = React.lazy(() => import('./components/SpringIntroAnimation.tsx'));
+const DiwaliIntroAnimation = React.lazy(() => import('./components/DiwaliIntroAnimation.tsx'));
+const HoliIntroAnimation = React.lazy(() => import('./components/HoliIntroAnimation.tsx'));
+const PongalIntroAnimation = React.lazy(() => import('./components/PongalIntroAnimation.tsx'));
+const NavratriIntroAnimation = React.lazy(() => import('./components/NavratriIntroAnimation.tsx'));
+const NewYearIntroAnimation = React.lazy(() => import('./components/NewYearIntroAnimation.tsx'));
 
 const App: React.FC = () => {
   const { user, loading, logout, updateUser, updatePassword } = useAuth() as any;
@@ -268,62 +272,70 @@ const App: React.FC = () => {
       <div className={`flex flex-col min-h-screen font-sans antialiased transition-colors duration-500 ${theme === 'dark' ? 'dark' : ''} ${colors.bgSimple}`}>
         <SpeedInsights />
         <SeasonalAnimations />
-        <AnimatePresence>
-          {showIndependenceDayIntro && seasonalTheme === 'independence_day_in' && (
-            <IndependenceDayIntro onAnimationComplete={() => setShowIndependenceDayIntro(false)} />
-          )}
-          {showSummerIntro && seasonalTheme === 'summer' && (
-            <SummerIntroAnimation onAnimationComplete={() => setShowSummerIntro(false)} />
-          )}
-          {showWinterIntro && seasonalTheme === 'winter' && (
-            <WinterIntroAnimation onAnimationComplete={() => setShowWinterIntro(false)} />
-          )}
-          {showChristmasIntro && seasonalTheme === 'christmas' && (
-            <ChristmasIntroAnimation onAnimationComplete={() => setShowChristmasIntro(false)} />
-          )}
-          {showMonsoonIntro && seasonalTheme === 'monsoon' && (
-            <MonsoonIntroAnimation onAnimationComplete={() => setShowMonsoonIntro(false)} />
-          )}
-          {showAutumnIntro && seasonalTheme === 'autumn' && (
-            <AutumnIntroAnimation onAnimationComplete={() => setShowAutumnIntro(false)} />
-          )}
-          {showSpringIntro && seasonalTheme === 'spring' && (
-            <SpringIntroAnimation onAnimationComplete={() => setShowSpringIntro(false)} />
-          )}
-          {showDiwaliIntro && seasonalTheme === 'diwali' && (
-            <DiwaliIntroAnimation onAnimationComplete={() => setShowDiwaliIntro(false)} />
-          )}
-          {showHoliIntro && seasonalTheme === 'holi' && (
-            <HoliIntroAnimation onAnimationComplete={() => setShowHoliIntro(false)} />
-          )}
-          {showPongalIntro && seasonalTheme === 'pongal' && (
-            <PongalIntroAnimation onAnimationComplete={() => setShowPongalIntro(false)} />
-          )}
-          {showNavratriIntro && seasonalTheme === 'navratri' && (
-            <NavratriIntroAnimation onAnimationComplete={() => setShowNavratriIntro(false)} />
-          )}
+        <Suspense fallback={null}>
+          <AnimatePresence>
+            {showIndependenceDayIntro && seasonalTheme === 'independence_day_in' && (
+              <IndependenceDayIntro onAnimationComplete={() => setShowIndependenceDayIntro(false)} />
+            )}
+            {showSummerIntro && seasonalTheme === 'summer' && (
+              <SummerIntroAnimation onAnimationComplete={() => setShowSummerIntro(false)} />
+            )}
+            {showWinterIntro && seasonalTheme === 'winter' && (
+              <WinterIntroAnimation onAnimationComplete={() => setShowWinterIntro(false)} />
+            )}
+            {showChristmasIntro && seasonalTheme === 'christmas' && (
+              <ChristmasIntroAnimation onAnimationComplete={() => setShowChristmasIntro(false)} />
+            )}
+            {showMonsoonIntro && seasonalTheme === 'monsoon' && (
+              <MonsoonIntroAnimation onAnimationComplete={() => setShowMonsoonIntro(false)} />
+            )}
+            {showAutumnIntro && seasonalTheme === 'autumn' && (
+              <AutumnIntroAnimation onAnimationComplete={() => setShowAutumnIntro(false)} />
+            )}
+            {showSpringIntro && seasonalTheme === 'spring' && (
+              <SpringIntroAnimation onAnimationComplete={() => setShowSpringIntro(false)} />
+            )}
+            {showDiwaliIntro && seasonalTheme === 'diwali' && (
+              <DiwaliIntroAnimation onAnimationComplete={() => setShowDiwaliIntro(false)} />
+            )}
+            {showHoliIntro && seasonalTheme === 'holi' && (
+              <HoliIntroAnimation onAnimationComplete={() => setShowHoliIntro(false)} />
+            )}
+            {showPongalIntro && seasonalTheme === 'pongal' && (
+              <PongalIntroAnimation onAnimationComplete={() => setShowPongalIntro(false)} />
+            )}
+            {showNavratriIntro && seasonalTheme === 'navratri' && (
+              <NavratriIntroAnimation onAnimationComplete={() => setShowNavratriIntro(false)} />
+            )}
 
-          {showNewYearIntro && seasonalTheme === 'new_year' && (
-            <NewYearIntroAnimation onAnimationComplete={() => setShowNewYearIntro(false)} />
-          )}
+            {showNewYearIntro && seasonalTheme === 'new_year' && (
+              <NewYearIntroAnimation onAnimationComplete={() => setShowNewYearIntro(false)} />
+            )}
 
-          {showNavratriBanner && seasonalTheme === 'navratri' && (
-            <motion.div
-              key="navratri-banner"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-              className={`fixed top-4 left-1/2 -translate-x-1/2 z-[100] p-3 rounded-full shadow-lg text-sm font-semibold border backdrop-blur-md ${colors.surface} ${colors.border} ${colors.primaryText}`}
-            >
-              🌼 Celebrating Navaratri — the triumph of light and devotion.
-            </motion.div>
-          )}
-        </AnimatePresence>
-        <AnimatePresence>
-          {view === 'landing' && <LandingPage key="landing" onGetStarted={() => setView('auth')} theme={theme} toggleTheme={toggleTheme} />}
-          {view === 'auth' && <AuthScreen key="auth" onBackToHome={() => setView('landing')} />}
-        </AnimatePresence>
+            {showNavratriBanner && seasonalTheme === 'navratri' && (
+              <motion.div
+                key="navratri-banner"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+                className={`fixed top-4 left-1/2 -translate-x-1/2 z-[100] p-3 rounded-full shadow-lg text-sm font-semibold border backdrop-blur-md ${colors.surface} ${colors.border} ${colors.primaryText}`}
+              >
+                🌼 Celebrating Navaratri — the triumph of light and devotion.
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </Suspense>
+        <Suspense fallback={
+          <div className={`h-screen w-screen flex items-center justify-center ${colors.bgSimple}`}>
+            <span className="text-4xl animate-pulse" role="img" aria-label="lamp">🪔</span>
+          </div>
+        }>
+          <AnimatePresence>
+            {view === 'landing' && <LandingPage key="landing" onGetStarted={() => setView('auth')} theme={theme} toggleTheme={toggleTheme} />}
+            {view === 'auth' && <AuthScreen key="auth" onBackToHome={() => setView('landing')} />}
+          </AnimatePresence>
+        </Suspense>
 
         {view === 'app' && user && (
           <div className="flex-1 flex w-full relative z-10">
@@ -379,19 +391,23 @@ const App: React.FC = () => {
                   />
                 )}
                 {isProfileModalOpen && (
-                  <ProfileModal
-                    user={user}
-                    onClose={() => setProfileModalOpen(false)}
-                    onLogout={() => {
-                      logout();
-                      setProfileModalOpen(false);
-                    }}
-                    onUpdateUser={updateUser}
-                    onUpdatePassword={updatePassword}
-                  />
+                  <Suspense fallback={null}>
+                    <ProfileModal
+                      user={user}
+                      onClose={() => setProfileModalOpen(false)}
+                      onLogout={() => {
+                        logout();
+                        setProfileModalOpen(false);
+                      }}
+                      onUpdateUser={updateUser}
+                      onUpdatePassword={updatePassword}
+                    />
+                  </Suspense>
                 )}
                 {isTutorialOpen && (
-                  <TutorialModal isOpen={isTutorialOpen} onClose={() => setTutorialOpen(false)} />
+                  <Suspense fallback={null}>
+                    <TutorialModal isOpen={isTutorialOpen} onClose={() => setTutorialOpen(false)} />
+                  </Suspense>
                 )}
               </AnimatePresence>
             </div>
