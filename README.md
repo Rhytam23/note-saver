@@ -2,7 +2,7 @@
 
 A beautiful, seasonal, and intelligent note-taking application designed to capture your thoughts with style.
 
-![NoteNirman Hero](public/features/landing_hero.png)
+
 
 ## 🌟 Key Features
 
