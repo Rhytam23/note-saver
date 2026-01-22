@@ -135,7 +135,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onBackToHome }) => {
   }
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center p-4 relative font-sans">
+    <div className="flex-1 flex flex-col items-center justify-center p-4 relative font-sans min-h-screen">
       <button
         onClick={onBackToHome}
         className={`absolute top-4 left-4 flex items-center space-x-2 ${colors.secondaryText} hover:text-accent transition-colors`}
@@ -161,10 +161,10 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onBackToHome }) => {
         }}
         transition={{
           type: "spring",
-          stiffness: 120,
-          damping: 15,
-          mass: 0.8,
-          delay: 0.1
+          stiffness: 100,
+          damping: 20,
+          mass: 1,
+          delay: 0
         }}
         className={`w-full max-w-md p-8 rounded-2xl shadow-lg border backdrop-blur-lg ${colors.bgSimple} ${colors.border}`}
       >
