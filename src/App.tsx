@@ -76,10 +76,10 @@ const App: React.FC = () => {
     return !hasSeenRequest;
   });
 
-  const handleWelcomeComplete = () => {
+  const handleWelcomeComplete = useCallback(() => {
     setShowWelcome(false);
     localStorage.setItem('hasSeenWelcome', 'true');
-  };
+  }, []);
 
   useEffect(() => {
     // If showing welcome, skip other intros for this session to avoid clutter
