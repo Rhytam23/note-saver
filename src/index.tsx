@@ -7,6 +7,8 @@ import { SeasonalProvider } from './contexts/SeasonalContext.tsx';
 import { ThemeProvider } from './contexts/ThemeContext.tsx';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
+import { Analytics } from "@vercel/analytics/react";
+
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
@@ -19,6 +21,7 @@ root.render(
       <ThemeProvider>
         <SeasonalProvider>
           <App />
+          <Analytics />
         </SeasonalProvider>
       </ThemeProvider>
     </AuthProvider>
