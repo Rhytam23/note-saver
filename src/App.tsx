@@ -238,12 +238,33 @@ const App: React.FC = () => {
     setSearchTerm('');
   };
 
+  // Force check session on mount to handle redirects reliably
+  useEffect(() => {
+    const initSession = async () => {
+      const { supabase } = await import('./services/supabase');
+      const { data: { session } } = await supabase.auth.getSession();
+      console.log('[App] Manual session check:', session ? 'Found User' : 'No User');
+      if (session?.user) {
+        // If we have a user but view is not 'app', force it
+        if (view !== 'app') {
+          console.log('[App] forcing view to app from manual check');
+          setView('app');
+        }
+      }
+    };
+    initSession();
+  }, []);
+
   useEffect(() => {
     console.log('[App] Auth State Update:', { loading, user: !!user, view, currentView: view });
     if (loading) return;
+
+    // If we have a user, ALWAYS ensure we are in app view
     if (user) {
-      console.log('[App] User found, switching to app');
-      setView('app');
+      if (view !== 'app') {
+        console.log('[App] User found, switching to app (state-based)');
+        setView('app');
+      }
     } else {
       console.log('[App] No user found');
       if (view === 'app') {
