@@ -239,6 +239,20 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
+    console.log('[App] Auth State Update:', { loading, user: !!user, view, currentView: view });
+    if (loading) return;
+    if (user) {
+      console.log('[App] User found, switching to app');
+      setView('app');
+    } else {
+      console.log('[App] No user found');
+      if (view === 'app') {
+        setView('landing');
+      }
+    }
+  }, [user, loading, view]);
+
+  useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key === 'n') {
         event.preventDefault();
