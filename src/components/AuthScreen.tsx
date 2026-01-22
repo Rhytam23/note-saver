@@ -147,7 +147,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onBackToHome }) => {
       <motion.div
         initial={{
           opacity: 0,
-          y: -300,
+          y: -800,
           scaleX: 0.1,
           scaleY: 0.1,
           borderRadius: "50px"
