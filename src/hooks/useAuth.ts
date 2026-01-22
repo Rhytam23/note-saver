@@ -23,8 +23,13 @@ export function useAuth(): AuthContextType {
   useEffect(() => {
     // 1. Get initial session
     const checkSession = async () => {
+      console.log('[useAuth] Checking session...');
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) console.error('[useAuth] Session check error:', error);
+
+        console.log('[useAuth] Initial session:', session ? 'Found' : 'Not found');
+
         if (session?.user) {
           setUser({
             id: session.user.id,
@@ -43,7 +48,9 @@ export function useAuth(): AuthContextType {
     checkSession();
 
     // 2. Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log(`[useAuth] Auth change event: ${event}`, session ? 'Session Active' : 'No Session');
+
       if (session?.user) {
         setUser({
           id: session.user.id,
