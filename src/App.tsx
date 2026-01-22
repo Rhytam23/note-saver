@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useCallback, Suspense } from 'react';
 import { SpeedInsights } from "@vercel/speed-insights/react";
+import { Analytics } from "@vercel/analytics/react";
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from './contexts/AuthContext.tsx';
 import { useTheme } from './contexts/ThemeContext.tsx';
@@ -462,6 +463,7 @@ const App: React.FC = () => {
 
         {view === 'landing' && <Footer />}
       </div>
+      <Analytics />
     </ErrorBoundary>
   );
 };
