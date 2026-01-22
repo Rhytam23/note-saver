@@ -14,15 +14,13 @@ const root = ReactDOM.createRoot(
 const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 root.render(
-  <React.StrictMode>
-    <GoogleOAuthProvider clientId={clientId}>
-      <AuthProvider>
-        <ThemeProvider>
-          <SeasonalProvider>
-            <App />
-          </SeasonalProvider>
-        </ThemeProvider>
-      </AuthProvider>
-    </GoogleOAuthProvider>
-  </React.StrictMode>
+  <GoogleOAuthProvider clientId={clientId}>
+    <AuthProvider>
+      <ThemeProvider>
+        <SeasonalProvider>
+          <App />
+        </SeasonalProvider>
+      </ThemeProvider>
+    </AuthProvider>
+  </GoogleOAuthProvider>
 );
