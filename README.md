@@ -2,10 +2,10 @@
 
 A thoughtfully designed note-taking app with seasonal theming, voice input, and AI-assisted writing.
 
-![NoteNirman Landing Page](public/landing-page.png)
+![NoteNirman Landing Page](Screenshot 2026-01-23 095414.png)
 
 <div align="center">
-  <img src="public/winter-splash.png" alt="Winter Seasonal Theme" width="45%">
+  <img src="Screenshot 2026-01-23 095341.png" alt="Winter Seasonal Theme" width="45%">
 </div>
 
 ## Why I built this
