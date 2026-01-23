@@ -2,11 +2,31 @@
 
 A thoughtfully designed note-taking app with seasonal theming, voice input, and AI-assisted writing.
 
-![NoteNirman Landing Page](public/landing-page.png)
+![License](https://img.shields.io/badge/License-PolyForm%20Noncommercial-orange.svg)
+![React](https://img.shields.io/badge/React-18-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
+![Vite](https://img.shields.io/badge/Vite-4.0-purple)
+![Supabase](https://img.shields.io/badge/Supabase-Auth%20%26%20Database-green)
 
 <div align="center">
-  <img src="public/winter-splash.png" alt="Winter Seasonal Theme" width="45%">
+  <img src="public/landing-page.png" alt="NoteNirman Landing Page" width="100%">
+  <br/>
+  <br/>
+  <img src="public/winter-splash.png" alt="Winter Seasonal Theme" width="60%">
 </div>
+
+---
+
+## 📑 Table of Contents
+- [Why I built this](#why-i-built-this)
+- [Features](#-features)
+- [Getting Started](#-getting-started)
+- [Database Setup](#-database-setup)
+- [Tech Stack](#-tech-stack)
+- [Contributing](#-contributing)
+- [Security](#-security)
+
+---
 
 ## Why I built this
 I built NoteNirman to explore how software can feel seasonal and personal, not just functional. I wanted a space where the interface adapts to the world outside—celebrating festivals like Diwali or the calm of Monsoon—while still being a powerful tool for capturing ideas.
