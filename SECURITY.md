@@ -2,16 +2,11 @@
 
 ## Supported Versions
 
-Use this section to tell people about which versions of your project are currently being supported with security updates.
-
-| Version | Supported          |
-| ------- | ------------------ |
-| 1.0.x   | :white_check_mark: |
-| < 1.0   | :x:                |
+This project is under active development and only the latest version is supported.
 
 ## Reporting a Vulnerability
 
-We take the security of **Note Saver** seriously. If you discover a vulnerability, please report it responsibly.
+The security of **NoteNirman** is taken seriously. If you discover a vulnerability, please report it responsibly.
 
 ### How to Report
 
@@ -21,13 +16,13 @@ Please do **NOT** create a public GitHub issue for security vulnerabilities. Ins
     - Include a description of the issue.
     - Steps to reproduce.
     - Potential impact.
-2.  We will acknowledge your report within 48 hours.
-3.  We will provide a timeline for the fix and credit you in the release notes (if desired).
+2.  The aim is to acknowledge reports within 48 hours.
+3.  A timeline for the fix will be provided, and credit given in release notes (if desired).
 
 ### Best Practices for Contributors
 
 - **Never commit `.env` files.** Ensure all environment variables are kept local.
-- **Do not hardcode secrets.** Use the `import.meta.env` or `process.env` patterns.
+- **Do not hardcode secrets.** Use the `import.meta.env` pattern.
 - **Review Row Level Security (RLS)** in Supabase before deploying new database features.
 
-Thank you for helping keep Note Saver secure! 🛡️
+Thank you for helping keep NoteNirman secure! 🛡️
