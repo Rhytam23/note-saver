@@ -2,7 +2,9 @@
 
 A thoughtfully designed note-taking app with seasonal theming, voice input, and AI-assisted writing.
 
-![NoteNirman Landing Page]([Screenshot 2026-01-23 095414.png](https://github.com/Rhytam23/note-saver/blob/60d8a01b82b29f9a806dbd5399709eec84a9bc43/Screenshot%202026-01-23%20095414.png))
+<div align="center">
+  <img src="Screenshot 2026-01-23 095414.png" alt="Landing Page" width="45%">
+</div>
 
 <div align="center">
   <img src="Screenshot 2026-01-23 095341.png" alt="Winter Seasonal Theme" width="45%">
