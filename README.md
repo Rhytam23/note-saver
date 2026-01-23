@@ -2,13 +2,31 @@
 
 A thoughtfully designed note-taking app with seasonal theming, voice input, and AI-assisted writing.
 
-<div align="center">
-  <img src="Screenshot 2026-01-23 095414.png" alt="Landing Page" width="45%">
-</div>
+![License](https://img.shields.io/badge/License-MIT-blue.svg)
+![React](https://img.shields.io/badge/React-18-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
+![Vite](https://img.shields.io/badge/Vite-4.0-purple)
+![Supabase](https://img.shields.io/badge/Supabase-Auth%20%26%20Database-green)
 
 <div align="center">
-  <img src="Screenshot 2026-01-23 095341.png" alt="Winter Seasonal Theme" width="45%">
+  <img src="public/landing-page.png" alt="NoteNirman Landing Page" width="100%">
+  <br/>
+  <br/>
+  <img src="public/winter-splash.png" alt="Winter Seasonal Theme" width="60%">
 </div>
+
+---
+
+## 📑 Table of Contents
+- [Why I built this](#why-i-built-this)
+- [Features](#-features)
+- [Getting Started](#-getting-started)
+- [Database Setup](#-database-setup)
+- [Tech Stack](#-tech-stack)
+- [Contributing](#-contributing)
+- [Security](#-security)
+
+---
 
 ## Why I built this
 I built NoteNirman to explore how software can feel seasonal and personal, not just functional. I wanted a space where the interface adapts to the world outside—celebrating festivals like Diwali or the calm of Monsoon—while still being a powerful tool for capturing ideas.
@@ -67,6 +85,33 @@ I built NoteNirman to explore how software can feel seasonal and personal, not j
 
 > **Troubleshooting Tip:** If Google Sign-In fails locally (redirects to error or nothing happens), double-check that `http://localhost:5173` is added to your **Authorized Redirect URIs** in the Google Cloud Console.
 
+### 🗄️ Database Setup (Supabase)
+
+To run the app, you need to create the `notes` table in your Supabase SQL Editor:
+
+```sql
+create table public.notes (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references auth.users not null,
+  title text,
+  content text,
+  tags text[],
+  is_pinned boolean default false,
+  priority text default 'low', // 'high', 'medium', 'low', 'none'
+  cover_image text,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Enable Row Level Security (RLS)
+alter table public.notes enable row level security;
+
+-- Create Policy: Users can only see their own notes
+create policy "Users can crud their own notes"
+on public.notes for all
+using (auth.uid() = user_id);
+```
+
 ---
 
 ## 🛠️ Tech Stack
@@ -83,11 +128,11 @@ I built NoteNirman to explore how software can feel seasonal and personal, not j
 
 ```
 src/
-├── components/          # UI building blocks
+├── components/          # Reusable UI components
 ├── contexts/            # Global state (Auth, Theme, Season)
-├── hooks/               # Logic encapsulation (useAuth, useNotes)
+├── hooks/               # Encapsulated logic (useAuth, useNotes)
 ├── services/            # API clients (Supabase)
-└── App.tsx              # Routing and Layout
+└── App.tsx              # Main routing and layout
 ```
 
 > *Note: Some component structures are evolving. You might find some logic in `App.tsx` that is slowly being refactored into custom hooks.*
