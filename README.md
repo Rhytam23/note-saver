@@ -9,10 +9,10 @@ A thoughtfully designed note-taking app with seasonal theming, voice input, and 
 ![Supabase](https://img.shields.io/badge/Supabase-Auth%20%26%20Database-green)
 
 <div align="center">
-  <img src="public/landing-page.png" alt="NoteNirman Landing Page" width="100%">
+  <img src="wintertheme" alt="NoteNirman Landing Page" width="100%">
   <br/>
   <br/>
-  <img src="public/winter-splash.png" alt="Winter Seasonal Theme" width="60%">
+  <img src="landing_page" alt="Winter Seasonal Theme" width="60%">
 </div>
 
 ---
