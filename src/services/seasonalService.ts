@@ -27,11 +27,32 @@ const festivalData: Record<string, Festival[]> = {
 const getSeasonalTheme = (date: Date, latitude: number, country: string): SeasonalTheme => {
     const month = date.getMonth(); // 0-11
 
-    // Specific seasonal logic for India
+    // Specific seasonal logic for India (approximate ranges)
     if (country === 'IN') {
-        if (month >= 2 && month <= 5) return 'summer';   // Mar - Jun (Summer)
-        if (month >= 6 && month <= 9) return 'monsoon';  // Jul - Oct (Monsoon)
-        return 'winter';                                 // Nov - Feb (Winter)
+        const day = date.getDate();
+
+        // Mid-Feb to Mid-Apr: Spring (Vasant)
+        if ((month === 1 && day >= 15) || (month === 2) || (month === 3 && day < 15)) {
+            return 'spring';
+        }
+
+        // Mid-Apr to Mid-Jun: Summer (Grishma)
+        if ((month === 3 && day >= 15) || (month === 4) || (month === 5 && day < 15)) {
+            return 'summer';
+        }
+
+        // Mid-Jun to Mid-Aug: Monsoon (Varsha)
+        if ((month === 5 && day >= 15) || (month === 6) || (month === 7 && day < 15)) {
+            return 'monsoon';
+        }
+
+        // Mid-Aug to Mid-Oct: Autumn (Sharad)
+        if ((month === 7 && day >= 15) || (month === 8) || (month === 9 && day < 15)) {
+            return 'autumn';
+        }
+
+        // Mid-Oct to Mid-Feb: Winter (Hemant/Shishir) - Default fallback
+        return 'winter';
     }
 
     // Standard hemisphere-based logic for other countries
