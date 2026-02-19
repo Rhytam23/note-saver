@@ -377,7 +377,7 @@ const App: React.FC = () => {
             <span className="text-4xl animate-pulse" role="img" aria-label="lamp">🪔</span>
           </div>
         }>
-          <AnimatePresence>
+          <AnimatePresence mode="wait">
             {view === 'landing' && <LandingPage key="landing" onGetStarted={() => setView('auth')} theme={theme} toggleTheme={toggleTheme} />}
             {view === 'auth' && <AuthScreen key="auth" onBackToHome={() => setView('landing')} />}
           </AnimatePresence>
