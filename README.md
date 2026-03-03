@@ -45,12 +45,25 @@ I built NoteNirman to explore how software can feel seasonal and personal, not j
 *   **Rich Organization**: Organizing with Tags, Pins, Search, and Priority filtering.
 *   **Export**: Export your notes to PDF for safekeeping.
 *   **Analytics**: Integrated Vercel Web Analytics for traffic insights.
+## Why I built this
+I built NoteNirman to explore how software can feel seasonal and personal, not just functional. I wanted a space where the interface adapts to the world outside—celebrating festivals like Diwali or the calm of Monsoon—while still being a powerful tool for capturing ideas.
+
+---
+
+## 🌟 Features
+
+*   **Seasonal Themes**: Automatic and manual themes (Diwali, Holi, Pongal, Monsoon, Winter, etc.) that vividly transform the app's look and feel with animations and soundscapes. *Currently fully implemented: Diwali, Holi, Monsoon, Winter.*
+*   **Intelligent Auth**: Secure Google Sign-In and Email authentication powered by Supabase with a custom "unfolding" login animation.
+*   **Voice Dictation**: Capture thoughts instantly with browser-native speech-to-text integration (supports English).
+*   **Notion-Style Covers**: Add beautiful gradients, solid colors, or Unsplash images to your note headers.
+*   **AI Assistant**: Powered by Google Gemini, offering real-time summarization, proofreading, and creative writing assistance. (Client-side integration; no background data processing).
+*   **Rich Organization**: Organizing with Tags, Pins, Search, and Priority filtering.
+*   **Export**: Export your notes to PDF for safekeeping.
+*   **Analytics**: Integrated Vercel Web Analytics for traffic insights.
 
 ---
 
 ## 🚀 Getting Started
-
-Follow these steps to set up the project locally.
 
 ### Prerequisites
 *   **Node.js** (v18+)
@@ -79,42 +92,35 @@ Follow these steps to set up the project locally.
     VITE_GOOGLE_CLIENT_ID=your_google_client_id
     VITE_GEMINI_API_KEY=your_gemini_api_key
     ```
-    > Note: You need to enable Google Sign-In in your Supabase Authentication settings.
 
 4.  **Run Locally:**
     ```bash
     npm run dev
     ```
-    The app will open at `http://localhost:5173`.
+
+> **Troubleshooting Tip:** If Google Sign-In fails locally (redirects to error or nothing happens), double-check that `http://localhost:5173` is added to your **Authorized Redirect URIs** in the Google Cloud Console.
+
+---
+
+## �️ Tech Stack
+
+*   **React + Vite**: Chosen for fast development iteration and performance.
+*   **Supabase**: Handles Authentication and Database (PostgreSQL with RLS) so we don't need a custom backend.
+*   **Tailwind CSS**: For rapid, utility-first styling.
+*   **Framer Motion**: Used sparingly for key interactions (like the login unfold and welcome animations).
+*   **Google Gemini API**: Direct API calls for AI features.
 
 ---
 
 ## 📂 Project Structure
 
-Here is a quick overview of the file structure to help you navigate the codebase:
-
 ```
 src/
-├── components/          # Reusable UI components
-│   ├── AuthScreen.tsx       # Login/Signup forms with animations
-│   ├── NoteEditor.tsx       # Main rich text editor interface
-│   ├── SeasonalAnimations.tsx # Logic for seasonal effects
-│   ├── ... (Feature-specific components)
-├── contexts/            # React Context providers
-│   ├── AuthContext.tsx      # User session management
-│   ├── SeasonalContext.tsx  # Theme/Season state management
-│   └── ThemeContext.tsx     # Dark/Light mode toggle
-├── hooks/               # Custom React hooks
-│   ├── useAuth.ts           # Authentication logic hook
-│   ├── useNotes.ts          # CRUD operations for notes
-│   ├── useSpeechRecognition.ts # Voice-to-text logic
-│   └── ...
-├── services/            # API integrations
-│   ├── supabase.ts          # Database client configuration
-│   └── ...
-├── App.tsx              # Main application entry point & routing
-├── index.tsx            # React root and Provider wrapping
-└── index.css            # Global styles & Tailwind directives
+├── components/          # UI building blocks
+├── contexts/            # Global state (Auth, Theme, Season)
+├── hooks/               # Logic encapsulation (useAuth, useNotes)
+├── services/            # API clients (Supabase)
+└── App.tsx              # Routing and Layout
 ```
 
 ---
@@ -157,6 +163,8 @@ using (auth.uid() = user_id);
 *   **Backend / Auth**: Supabase (PostgreSQL with RLS) so we don't need a custom backend
 *   **AI**: Google Gemini API (Direct API calls accessing keys via environment variables)
 *   **Analytics**: Vercel Analytics
+
+> *Note: Some component structures are evolving. You might find some logic in `App.tsx` that is slowly being refactored into custom hooks.*
 
 ---
 
