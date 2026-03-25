@@ -2,6 +2,7 @@
 
 A thoughtfully designed note-taking app with seasonal theming, voice input, and AI-assisted writing.
 
+![NoteNirman](public/og-image.png)
 ![License](https://img.shields.io/badge/License-PolyForm%20Noncommercial-orange.svg)
 ![React](https://img.shields.io/badge/React-18-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
@@ -23,6 +24,7 @@ A thoughtfully designed note-taking app with seasonal theming, voice input, and 
 - [Getting Started](#-getting-started)
 - [Database Setup](#-database-setup)
 - [Tech Stack](#-tech-stack)
+- [Project Structure](#-project-structure)
 - [Contributing](#-contributing)
 - [Security](#-security)
 
@@ -35,27 +37,21 @@ I built NoteNirman to explore how software can feel seasonal and personal, not j
 
 ## 🌟 Features
 
-### Core Features
-*   **Seasonal Themes**: The app adapts its visual theme (colors, backgrounds, animations) based on the season or festival. Themes can be switched manually, with an optional automatic selection based on the calendar.
-*   **Voice Dictation**: Browser-native speech-to-text integration for quick note capture (supports English).
-*   **AI Assistant**: Uses Google Gemini to summarize long notes, proofread text, and offer creative suggestions on demand. (Client-side integration; no background data processing).
-
-### Additional Features
-*   **Animated Auth**: "Unfolding" login animation with secure Google & Email auth.
-*   **Notion-Style Covers**: Customizable headers with gradients or solid colors.
-*   **Organization**: Tags, Pins, Search, and Priority filtering.
-*   **Export**: Simple PDF export for offline backup.
-*   **Analytics**: Basic traffic insights via Vercel Analytics.
+*   **Seasonal Themes**: Automatic and manual themes (Diwali, Holi, Pongal, Monsoon, Winter, etc.) that vividly transform the app's look and feel with animations and soundscapes.
+*   **Intelligent Auth**: Secure Google Sign-In and Email authentication powered by Supabase with a custom "unfolding" login animation.
+*   **Voice Dictation**: Capture thoughts instantly with browser-native speech-to-text integration.
+*   **Notion-Style Covers**: Add beautiful gradients, solid colors, or Unsplash images to your note headers.
+*   **AI Assistant**: Powered by Google Gemini, offering real-time summarization, proofreading, and creative writing assistance. (Client-side integration; no background data processing).
+*   **Rich Organization**: Organizing with Tags, Pins, Search, and Priority filtering.
+*   **Export**: Export your notes to PDF for safekeeping.
+*   **Analytics**: Integrated Vercel Web Analytics for traffic insights.
 
 ---
 
 ## 🚀 Getting Started
 
-Follow these steps to set up the project locally.
-
 ### Prerequisites
 *   **Node.js** (v18+)
-<<<<<<< HEAD
 *   **Supabase Account** (Auth & Database)
 *   **Google Cloud Console Project** (OAuth Client ID)
 =======
@@ -158,7 +154,6 @@ using (auth.uid() = user_id);
 
 ## 🛠️ Tech Stack
 
-<<<<<<< HEAD
 *   **React + Vite**: Chosen for fast development iteration and performance.
 *   **Supabase**: Handles Authentication and Database (PostgreSQL with RLS) so we don't need a custom backend.
 *   **Tailwind CSS**: For rapid, utility-first styling.
@@ -179,34 +174,11 @@ src/
 ```
 
 > *Note: Some component structures are evolving. You might find some logic in `App.tsx` that is slowly being refactored into custom hooks.*
-=======
-*   **Frontend**: React, TypeScript, Vite
-*   **Styling**: Tailwind CSS, Framer Motion (for animations)
-*   **Backend / Auth**: Supabase (PostgreSQL)
-*   **AI**: Google Gemini API
-*   **Analytics**: Vercel Analytics
->>>>>>> 25193f3 (Update README with detailed project documentation)
 
 ---
 
 ## 🤝 Contributing
-<<<<<<< HEAD
 This is primarily a personal portfolio project, but suggestions and issues are welcome! If you find a bug or have an idea, feel free to open an issue or a PR.
-=======
-
-We welcome contributions! Please follow these steps:
-
-1.  **Fork** the repository.
-2.  Create a new branch (`git checkout -b feature/AmazingFeature`).
-3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`).
-4.  Push to the branch (`git push origin feature/AmazingFeature`).
-5.  Open a **Pull Request**.
-
-### Development Guidelines
-*   **Linting**: Ensure no console errors or lint warnings before pushing.
-*   **Mobile First**: Always check layout responsiveness on mobile views.
-*   **Animations**: keep animations smooth (60fps) using Framer Motion.
->>>>>>> 25193f3 (Update README with detailed project documentation)
 
 ---
 
