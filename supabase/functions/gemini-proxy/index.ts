@@ -34,10 +34,26 @@ serve(async (req) => {
         return new Response('Unauthorized - Invalid Session', { status: 401, headers: corsHeaders })
     }
 
-    // Rate limiting placeholder logic (Requires Upstash Redis or similar for real rate limiting)
-    // TODO: Connect to Redis to enforce e.g. 5 requests / min / user.id
-    // const rateLimitPassed = await checkRateLimit(user.id);
-    // if (!rateLimitPassed) return new Response('Rate limit exceeded', { status: 429 });
+    const redisUrl = Deno.env.get('UPSTASH_REDIS_REST_URL');
+    const redisToken = Deno.env.get('UPSTASH_REDIS_REST_TOKEN');
+
+    if (redisUrl && redisToken) {
+      // Import ratelimit dynamically to avoid throwing if keys are missing initially
+      const { Ratelimit } = await import('https://esm.sh/@upstash/ratelimit@1.1.3');
+      const { Redis } = await import('https://esm.sh/@upstash/redis@1.28.0');
+
+      const ratelimit = new Ratelimit({
+        redis: new Redis({ url: redisUrl, token: redisToken }),
+        limiter: Ratelimit.slidingWindow(5, '1 m'), // 5 requests per minute
+      });
+
+      const { success } = await ratelimit.limit(user.id);
+      if (!success) {
+         return new Response(JSON.stringify({ error: 'Rate limit exceeded. Please try again in a minute.' }), { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+    } else {
+        console.warn("Upstash Redis credentials are not configured. Rate limiting is bypassed.");
+    }
 
     const { prompt, action } = await req.json()
     const geminiApiKey = Deno.env.get('GEMINI_API_KEY')

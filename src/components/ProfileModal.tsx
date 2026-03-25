@@ -4,6 +4,7 @@ import { CloseIcon, LogoutIcon, SaveIcon, SpinnerIcon, EditIcon } from './Icons'
 import type { User, SeasonalTheme } from '../types';
 import { useSeason } from '../contexts/SeasonalContext';
 import { supabase } from '../services/supabase';
+import DOMPurify from 'dompurify';
 
 interface ProfileModalProps {
   user: User;
@@ -191,9 +192,9 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose, onLogout, on
       };
 
       notes.forEach((note, index) => {
-        // Strip HTML for plain text PDF
+        // Strip HTML securely for plain text PDF
         const tempDiv = document.createElement("div");
-        tempDiv.innerHTML = note.content;
+        tempDiv.innerHTML = DOMPurify.sanitize(note.content);
         const plainTextContent = tempDiv.textContent || tempDiv.innerText || "";
 
         // Note Container Page Break Check (approximate)

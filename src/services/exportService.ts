@@ -1,6 +1,7 @@
 import type { Note } from '../types';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import DOMPurify from 'dompurify';
 
 // --- Helper Functions ---
 
@@ -107,8 +108,8 @@ const exportAsPdf = async (note: Note) => {
   document.body.appendChild(tempContainer);
   
   tempContainer.innerHTML = `
-    <h1 style="font-family: Poppins, sans-serif; font-size: 24px; border-bottom: 1px solid #ccc; padding-bottom: 8px; margin-bottom: 16px;">${note.title}</h1>
-    <div style="font-size: 14px; line-height: 1.6;">${note.content}</div>
+    <h1 style="font-family: Poppins, sans-serif; font-size: 24px; border-bottom: 1px solid #ccc; padding-bottom: 8px; margin-bottom: 16px;">${DOMPurify.sanitize(note.title)}</h1>
+    <div style="font-size: 14px; line-height: 1.6;">${DOMPurify.sanitize(note.content)}</div>
   `;
 
   const canvas = await html2canvas(tempContainer, { scale: 2 });
