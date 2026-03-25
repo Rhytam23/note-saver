@@ -9,9 +9,7 @@ type Festival = {
 // Date ranges are made more general for demonstration purposes.
 const festivalData: Record<string, Festival[]> = {
     IN: [ // India
-        { theme: 'pongal', isActive: (d) => d.getMonth() === 0 && d.getDate() >= 14 && d.getDate() <= 17 }, // Jan
-        { theme: 'holi', isActive: (d) => d.getMonth() === 2 }, // March
-        { theme: 'independence_day_in', isActive: (d) => d.getMonth() === 7 && d.getDate() >= 10 && d.getDate() <= 17 }, // Aug 10-17
+        { theme: 'holi', isActive: (d) => d.getMonth() === 2 && d.getDate() <= 15 }, // March 1-15
         { theme: 'navratri', isActive: (d) => d.getMonth() === 9 && d.getDate() >= 3 && d.getDate() <= 12 }, // Oct 3-12
         { theme: 'diwali', isActive: (d) => d.getMonth() === 10 }, // November
         { theme: 'christmas', isActive: (d) => d.getMonth() === 11 && d.getDate() >= 24 && d.getDate() <= 26 }, // Dec
@@ -69,6 +67,37 @@ const getSeasonalTheme = (date: Date, latitude: number, country: string): Season
         if (month >= 2 && month <= 4) return 'autumn';   // Mar-May
         return 'winter'; // Jun-Aug
     }
+};
+
+
+export const getThemeFromCalendarEvents = (eventTitles: string[]): SeasonalTheme | null => {
+    const themeKeywords: Record<string, SeasonalTheme> = {
+        'holi': 'holi',
+        'diwali': 'diwali',
+        'deepavali': 'diwali',
+        'christmas': 'christmas',
+        'xmas': 'christmas',
+        'pongal': 'pongal',
+        'navratri': 'navratri',
+        'independence day': 'independence_day_in',
+        'new year': 'new_year',
+        'monsoon': 'monsoon',
+        'winter': 'winter',
+        'spring': 'spring',
+        'summer': 'summer',
+        'autumn': 'autumn',
+    };
+
+    for (const title of eventTitles) {
+        const lowerTitle = title.toLowerCase();
+        for (const [keyword, theme] of Object.entries(themeKeywords)) {
+            if (lowerTitle.includes(keyword)) {
+                return theme;
+            }
+        }
+    }
+
+    return null;
 };
 
 export const getDynamicTheme = (location: UserLocation): SeasonalTheme => {

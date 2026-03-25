@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
-import { getDynamicTheme } from '../services/seasonalService.ts';
+import { getDynamicTheme, getThemeFromCalendarEvents } from '../services/seasonalService.ts';
 import { getUserLocation } from '../services/locationService.ts';
+import { fetchTodayEvents } from '../services/calendarService.ts';
 // import type { SeasonalTheme } from '../types.ts';
 import { getThemeColors } from '../services/themeColorService.ts';
 import { useAuth } from './AuthContext.tsx';
@@ -50,6 +51,17 @@ export const SeasonalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
       // Fallback to automatic detection
       try {
+        // 1. Try Google Calendar events first
+        const eventTitles = await fetchTodayEvents();
+        if (eventTitles.length > 0) {
+          const calendarTheme = getThemeFromCalendarEvents(eventTitles);
+          if (calendarTheme) {
+            setSeasonalTheme(calendarTheme);
+            return;
+          }
+        }
+
+        // 2. Fallback to location-based seasonal logic
         const location = await getUserLocation();
         const dynamicTheme = getDynamicTheme(location);
         setSeasonalTheme(dynamicTheme);
