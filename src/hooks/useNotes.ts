@@ -136,13 +136,13 @@ export function useNotes(userId: string | undefined) {
     if (!userId) return;
     try {
       if (action === 'DELETE') {
-        await supabase.from('notes').delete().eq('id', note.id);
+        await supabase.from('notes').delete().eq('id', note.id).eq('user_id', userId);
       } else if (action === 'INSERT') {
         const dbRow = noteToDb(note, userId);
         await supabase.from('notes').insert(dbRow);
       } else {
         const dbRow = noteToDb(note, userId);
-        await supabase.from('notes').update({ ...dbRow, updated_at: new Date().toISOString() }).eq('id', note.id);
+        await supabase.from('notes').update({ ...dbRow, updated_at: new Date().toISOString() }).eq('id', note.id).eq('user_id', userId);
       }
     } catch (err) {
       console.error('Failed to sync note:', err);
