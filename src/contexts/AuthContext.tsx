@@ -1,5 +1,5 @@
 import React, { createContext, useContext } from 'react';
-import { useAuth as useAuthHook } from '../hooks/useAuth';
+import { useAuth as useAuthHook } from '@/src/hooks/useAuth';
 
 // Inline types
 interface User {
@@ -20,13 +20,10 @@ export interface AuthContextType {
   updateUser: (updatedFields: Partial<User>) => Promise<void>;
 }
 
-// Use the return type of the hook to define the context type
-// type AuthContextType = ReturnType<typeof useAuthHook>;
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const auth = useAuthHook();
+  const auth = useAuthHook() as any;
   return <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>;
 };
 

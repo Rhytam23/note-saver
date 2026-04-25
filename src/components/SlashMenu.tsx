@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useRef } from 'react';
+﻿import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useSeason } from '../contexts/SeasonalContext.tsx';
+import { useSeason } from "../contexts/SeasonalContext";
 import {
     H1Icon, H2Icon, H3Icon,
     ListBulletIcon, ListOrderedIcon,

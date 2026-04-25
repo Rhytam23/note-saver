@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+﻿import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 interface IntroAnimationProps {
@@ -34,7 +34,7 @@ const PongalIntroAnimation: React.FC<IntroAnimationProps> = ({ onAnimationComple
                 transition={{ duration: 1 }}
                 className="absolute left-[10%] bottom-0 text-9xl transform -rotate-12 opacity-80"
             >
-                🎋
+                ðŸŽ‹
             </motion.div>
             <motion.div
                 initial={{ y: 100, opacity: 0 }}
@@ -42,7 +42,7 @@ const PongalIntroAnimation: React.FC<IntroAnimationProps> = ({ onAnimationComple
                 transition={{ duration: 1, delay: 0.2 }}
                 className="absolute right-[10%] bottom-0 text-9xl transform rotate-12 opacity-80"
             >
-                🎋
+                ðŸŽ‹
             </motion.div>
 
             {/* Main Pot Content */}
@@ -53,19 +53,19 @@ const PongalIntroAnimation: React.FC<IntroAnimationProps> = ({ onAnimationComple
                 className="z-10 flex flex-col items-center text-center p-8"
             >
                 <div className="relative text-8xl md:text-9xl mb-4">
-                    🍯
+                    ðŸ¯
                     <motion.div
                         className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 text-5xl"
                         animate={{ y: [-10, -20, -10], opacity: [0, 1, 0] }}
                         transition={{ duration: 2, repeat: Infinity }}
                     >
-                        ✨
+                        âœ¨
                     </motion.div>
                 </div>
                 <h1 className="text-5xl md:text-7xl font-bold text-orange-800 font-serif mb-2 drop-shadow-sm">
                     Happy Pongal
                 </h1>
-                <p className="text-xl text-orange-700 font-medium">Overflowing with joy and prosperity 🌾</p>
+                <p className="text-xl text-orange-700 font-medium">Overflowing with joy and prosperity ðŸŒ¾</p>
             </motion.div>
         </motion.div>
     );

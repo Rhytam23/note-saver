@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+﻿import { supabase } from './supabase';
 
 const generateContentWithRetry = async (prompt: string, systemInstruction?: string): Promise<string> => {
   try {

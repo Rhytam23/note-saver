@@ -1,4 +1,4 @@
-
+﻿
 import React from 'react';
 import { motion, Variants } from 'framer-motion';
 import { useSeason } from '../contexts/SeasonalContext';
@@ -14,7 +14,7 @@ const features = [
   {
     icon: <TagIcon className="h-8 w-8 text-accent" />,
     title: 'Powerful, Visual Organization',
-    description: 'Don\'t just tag your notes—make them your own. Assign unique colors and image icons to your tags for a fast, visual way to find what you need. Filter by tags, priority, or search terms with ease.',
+    description: 'Don\'t just tag your notesâ€”make them your own. Assign unique colors and image icons to your tags for a fast, visual way to find what you need. Filter by tags, priority, or search terms with ease.',
     image: '/features/tags-mockup.png',
   },
   {

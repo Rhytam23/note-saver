@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+﻿import React, { useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 
 interface IntroAnimationProps {
@@ -58,14 +58,14 @@ const NavratriIntroAnimation: React.FC<IntroAnimationProps> = ({ onAnimationComp
                         transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
                         className="text-7xl md:text-9xl origin-bottom-right"
                     >
-                        🥢  {/* Using chopsticks emoji as abstract representation of Dandiya sticks if needed, or stick-like object */}
+                        ðŸ¥¢  {/* Using chopsticks emoji as abstract representation of Dandiya sticks if needed, or stick-like object */}
                     </motion.div>
                     <motion.div
                         animate={{ rotate: [0, 15, 0] }}
                         transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
                         className="text-7xl md:text-9xl origin-bottom-left transform scale-x-[-1]"
                     >
-                        🥢
+                        ðŸ¥¢
                     </motion.div>
 
                     {/* Sparkle/Clash Effect */}
@@ -74,7 +74,7 @@ const NavratriIntroAnimation: React.FC<IntroAnimationProps> = ({ onAnimationComp
                         animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
                         transition={{ duration: 0.25, repeat: Infinity }}
                     >
-                        💥
+                        ðŸ’¥
                     </motion.div>
                 </div>
 
@@ -82,7 +82,7 @@ const NavratriIntroAnimation: React.FC<IntroAnimationProps> = ({ onAnimationComp
                     Happy Navratri
                 </h1>
                 <p className="text-xl text-pink-200 mt-4 font-medium tracking-wide">
-                    Celebrate the triumph of good over evil 🔱
+                    Celebrate the triumph of good over evil ðŸ”±
                 </p>
             </motion.div>
         </motion.div>

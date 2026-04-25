@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 
 export const SunIcon: any = (props) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
@@ -232,7 +232,7 @@ export const AshokaStambhaIcon: any = (props) => (
     <path d="M50 190 Q100 170 150 190" stroke="currentColor" fill="none" strokeWidth="4" />
     <path d="M100 190 Q50 170 0 190" stroke="currentColor" fill="none" strokeWidth="4" />
     <circle cx="100" cy="155" r="35" />
-    <text x="100" y="160" textAnchor="middle" fontSize="14" fill="#FFF">सत्यमेव जयते</text>
+    <text x="100" y="160" textAnchor="middle" fontSize="14" fill="#FFF">à¤¸à¤¤à¥à¤¯à¤®à¥‡à¤µ à¤œà¤¯à¤¤à¥‡</text>
     <path d="M100 120 L130 90 L140 30 L100 60 L60 30 L70 90 Z" />
     <path d="M100 60 Q120 40 140 30" stroke="#FFF" fill="none" strokeWidth="2" />
     <path d="M100 60 Q80 40 60 30" stroke="#FFF" fill="none" strokeWidth="2" />

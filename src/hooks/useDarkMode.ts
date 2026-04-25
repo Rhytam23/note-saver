@@ -1,4 +1,4 @@
-// This hook is obsolete and has been replaced by the ThemeContext.
+﻿// This hook is obsolete and has been replaced by the ThemeContext.
 // Keeping the file prevents import errors in older components, but its logic is removed
 // to ensure the new, more stable theme management system is used exclusively.
 export function useDarkMode() {

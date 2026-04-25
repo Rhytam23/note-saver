@@ -1,8 +1,8 @@
-import React, { useState, useRef } from 'react';
+﻿import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
-import type { User, Tag, PriorityFilter, NotePriority } from '../types.ts';
-import { useSeason } from '../contexts/SeasonalContext.tsx';
-import { useClickOutside } from '../hooks/useClickOutside.ts';
+import type { User, Tag, PriorityFilter, NotePriority } from "../types";
+import { useSeason } from "../contexts/SeasonalContext";
+import { useClickOutside } from "../hooks/useClickOutside";
 import {
     TagIcon,
     NotesIcon,
@@ -14,7 +14,7 @@ import {
     ImageIcon,
     CloseIcon
 } from './Icons.tsx';
-import { getTextColorClass, tagColorOptions } from '../services/colorService.ts';
+import { getTextColorClass, tagColorOptions } from "../services/colorService";
 
 interface SidebarProps {
     user: User;

@@ -1,4 +1,4 @@
-import type { Tag } from '../types';
+﻿import type { Tag } from '../types';
 
 export const tagColorOptions = [
     { name: 'sky', textClass: 'text-sky-400', bgClass: 'bg-sky-500/10', borderClass: 'border-sky-500/20', swatchClass: 'bg-sky-400' },

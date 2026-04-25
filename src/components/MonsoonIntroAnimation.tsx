@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+﻿import React, { useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { LightningBoltIcon } from './Icons';
 
@@ -59,7 +59,7 @@ const MonsoonIntroAnimation: React.FC<IntroAnimationProps> = ({ onAnimationCompl
                 transition={{ duration: 1.5, ease: "easeOut" }}
                 className="mb-8 z-10 text-8xl"
             >
-                ⛈️
+                â›ˆï¸
             </motion.div>
 
             <motion.div
@@ -69,7 +69,7 @@ const MonsoonIntroAnimation: React.FC<IntroAnimationProps> = ({ onAnimationCompl
                 className="text-center z-10 text-white"
             >
                 <h1 className="text-4xl md:text-6xl font-mono font-bold mb-2">Monsoon Season</h1>
-                <p className="text-lg text-blue-200">Let the rhythm of rain inspire you 🌧️</p>
+                <p className="text-lg text-blue-200">Let the rhythm of rain inspire you ðŸŒ§ï¸</p>
             </motion.div>
         </motion.div>
     );

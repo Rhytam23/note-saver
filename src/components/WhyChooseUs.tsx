@@ -1,4 +1,4 @@
-
+﻿
 import React from 'react';
 import { motion, Variants } from 'framer-motion';
 import { useSeason } from '../contexts/SeasonalContext';
@@ -11,7 +11,7 @@ const reasons = [
   },
   {
     title: 'Visual Organization',
-    description: 'With Cover Images and Tags, your notes aren\'t just text—they are beautiful visual cards. Simple, fast, and inspiring.',
+    description: 'With Cover Images and Tags, your notes aren\'t just textâ€”they are beautiful visual cards. Simple, fast, and inspiring.',
   },
   {
     title: 'Local-First & Private',

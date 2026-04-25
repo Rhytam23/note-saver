@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+﻿import React, { useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 
 interface IntroAnimationProps {
@@ -63,13 +63,13 @@ const HoliIntroAnimation: React.FC<IntroAnimationProps> = ({ onAnimationComplete
                 className="z-10 text-center p-8 bg-white/80 backdrop-blur-md rounded-3xl border border-gray-200 shadow-xl"
             >
                 <div className="text-7xl md:text-9xl mb-4">
-                    🎨
+                    ðŸŽ¨
                 </div>
                 <h1 className="text-5xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 font-sans tracking-tight">
                     Happy Holi
                 </h1>
                 <p className="text-xl text-gray-600 font-semibold mt-2">
-                    Let the colors of joy spread! 🌈
+                    Let the colors of joy spread! ðŸŒˆ
                 </p>
             </motion.div>
         </motion.div>

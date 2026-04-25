@@ -1,4 +1,4 @@
-
+﻿
 import React from 'react';
 import { motion, Variants } from 'framer-motion';
 import { SparklesIcon, PaletteIcon, TagIcon } from './Icons';

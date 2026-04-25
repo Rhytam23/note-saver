@@ -1,4 +1,4 @@
-import { Extension } from '@tiptap/core';
+﻿import { Extension } from '@tiptap/core';
 import Suggestion from '@tiptap/suggestion';
 
 export default Extension.create({

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+﻿import React, { useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 
 interface IntroAnimationProps {
@@ -15,7 +15,7 @@ const AutumnIntroAnimation: React.FC<IntroAnimationProps> = ({ onAnimationComple
 
     const leaves = useMemo(() => Array.from({ length: 20 }).map((_, i) => ({
         id: i,
-        char: Math.random() > 0.5 ? '🍂' : '🍁',
+        char: Math.random() > 0.5 ? 'ðŸ‚' : 'ðŸ',
         left: `${random(0, 100)}%`,
         delay: random(0, 4),
         duration: random(3, 6),
@@ -60,7 +60,7 @@ const AutumnIntroAnimation: React.FC<IntroAnimationProps> = ({ onAnimationComple
                 className="text-center z-10 p-8 rounded-xl bg-white/30 backdrop-blur-md border border-white/20 shadow-xl dark:bg-black/30"
             >
                 <h1 className="text-4xl md:text-6xl font-serif font-bold mb-2 text-amber-900 dark:text-amber-100">Autumn Breeze</h1>
-                <p className="text-lg text-amber-800 dark:text-amber-200">Cozy thoughts and fallen leaves 🍂</p>
+                <p className="text-lg text-amber-800 dark:text-amber-200">Cozy thoughts and fallen leaves ðŸ‚</p>
             </motion.div>
         </motion.div>
     );

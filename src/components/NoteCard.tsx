@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+﻿import React, { useState, useRef } from 'react';
 import type { Note, Tag, NotePriority } from '../types';
 import { DeleteIcon, TagIcon, ExportIcon, PinIcon, FlagIcon } from './Icons';
 import { motion, AnimatePresence } from 'framer-motion';
