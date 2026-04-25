@@ -13,7 +13,7 @@ interface LandingPageProps {
   onGetStarted: () => void;
   theme: Theme;
   toggleTheme: () => void;
-  setView: (view: 'landing' | 'auth' | 'app' | 'privacy' | 'terms') => void;
+  setView: (view: 'landing' | 'auth' | 'app' | 'privacy' | 'terms' | 'faq') => void;
 }
 
 const containerVariants: any = {
@@ -136,6 +136,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, theme, toggleTh
           variant="detailed" 
           onPrivacyClick={() => setView('privacy')} 
           onTermsClick={() => setView('terms')} 
+          onFAQClick={() => setView('faq')}
         />
       </div>
 

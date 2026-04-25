@@ -7,6 +7,7 @@ interface FooterProps {
     variant?: 'simple' | 'detailed';
     onPrivacyClick?: () => void;
     onTermsClick?: () => void;
+    onFAQClick?: () => void;
 }
 
 const socialLinks = [
@@ -17,7 +18,7 @@ const socialLinks = [
   { href: 'mailto:rhytambiswas@gmail.com', label: 'Email', icon: <MailIcon className="h-6 w-6" /> },
 ];
 
-const Footer: React.FC<FooterProps> = ({ variant = 'simple', onPrivacyClick, onTermsClick }) => {
+const Footer: React.FC<FooterProps> = ({ variant = 'simple', onPrivacyClick, onTermsClick, onFAQClick }) => {
   const { colors, theme } = useSeason();
   const isSummer = theme === 'summer';
   const isNavratri = theme === 'navratri';
@@ -83,7 +84,7 @@ const Footer: React.FC<FooterProps> = ({ variant = 'simple', onPrivacyClick, onT
             <h3 className={`font-bold text-sm uppercase tracking-wider ${colors.primaryText}`}>Support</h3>
             <ul className={`space-y-2 text-sm ${colors.secondaryText}`}>
                 <li><a href="mailto:rhytambiswas@gmail.com" className="hover:text-accent">Contact Us</a></li>
-                <li><a href="#" className="hover:text-accent">FAQs</a></li>
+                <li><button onClick={onFAQClick} className="hover:text-accent">FAQs</button></li>
                 <li><a href="#" className="hover:text-accent">Feedback</a></li>
             </ul>
         </div>
