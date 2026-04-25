@@ -433,6 +433,7 @@ const App: React.FC = () => {
               <AnimatePresence>
                 {selectedNoteId && (
                   <NoteEditor
+                    key={selectedNoteId}
                     note={notes.find(n => n.id === selectedNoteId) || null}
                     onSave={handleSaveNote}
                     onClose={() => setSelectedNoteId(null)}

@@ -5,7 +5,6 @@ import {
     H1Icon, H2Icon, H3Icon,
     ListBulletIcon, ListOrderedIcon,
     BlockquoteIcon, CodeBracketIcon,
-    BlockquoteIcon, CodeBracketIcon,
     SparklesIcon, LightBulbIcon
 } from './Icons.tsx';
 
