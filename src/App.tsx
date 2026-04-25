@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo, useEffect, useCallback, Suspense } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, Suspense } from 'react';
 import { SpeedInsights } from "@vercel/speed-insights/react";
 
 import { AnimatePresence, motion } from 'framer-motion';
@@ -17,6 +17,7 @@ import FloatingActionButton from "./components/FloatingActionButton";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Footer from "./components/Footer";
 import SeasonalAnimations from "./components/SeasonalAnimations";
+import SeasonalLoading from "./components/SeasonalLoading";
 
 // Lazy Load Major Views & Modals
 const LandingPage = React.lazy(() => import('./components/LandingPage.tsx'));
@@ -303,11 +304,7 @@ const App: React.FC = () => {
   };
 
   if (loading) {
-    return (
-      <div className={`h-screen w-screen flex items-center justify-center ${colors.bgSimple}`}>
-        <span className="text-4xl animate-pulse" role="img" aria-label="lamp">ðŸª”</span>
-      </div>
-    );
+    return <SeasonalLoading />;
   }
 
   return (
@@ -374,11 +371,7 @@ const App: React.FC = () => {
             )}
           </AnimatePresence>
         </Suspense>
-        <Suspense fallback={
-          <div className={`h-screen w-screen flex items-center justify-center ${colors.bgSimple}`}>
-            <span className="text-4xl animate-pulse" role="img" aria-label="lamp">ðŸª”</span>
-          </div>
-        }>
+        <Suspense fallback={<SeasonalLoading />}>
           <AnimatePresence mode="wait">
             {view === 'landing' && <LandingPage key="landing" onGetStarted={() => setView('auth')} theme={theme} toggleTheme={toggleTheme} />}
             {view === 'auth' && <AuthScreen key="auth" onBackToHome={() => setView('landing')} />}
