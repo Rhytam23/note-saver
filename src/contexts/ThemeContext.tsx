@@ -7,7 +7,7 @@ const getInitialTheme = (): Theme => {
     return 'light';
   }
   try {
-    const savedTheme = window.localStorage.getItem('notenirman-theme') as Theme | null;
+    const savedTheme = window.localStorage.getItem('Notenirman-theme') as Theme | null;
     if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
       return savedTheme;
     }
@@ -35,7 +35,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       document.documentElement.classList.remove('dark');
     }
     try {
-      window.localStorage.setItem('notenirman-theme', theme);
+      window.localStorage.setItem('Notenirman-theme', theme);
     } catch (e) {
       console.error("Failed to save theme to localStorage", e);
     }
