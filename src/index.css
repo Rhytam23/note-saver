@@ -829,6 +829,53 @@ html.light .quill-editor-custom .ql-toolbar {
     border-radius: 0.5rem;
 }
 
+/* Task List / Checkbox Styles */
+.ProseMirror ul[data-type="taskList"] {
+    list-style: none;
+    padding: 0;
+}
+
+.ProseMirror ul[data-type="taskList"] li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.ProseMirror ul[data-type="taskList"] input[type="checkbox"] {
+    margin-top: 0.4rem;
+    cursor: pointer;
+    width: 1.1rem;
+    height: 1.1rem;
+    accent-color: var(--accent-color);
+}
+
+.ProseMirror ul[data-type="taskList"] li[data-checked="true"] > div > p {
+    text-decoration: line-through;
+    color: var(--secondary-text);
+    opacity: 0.6;
+}
+
+/* Callout Block Styles */
+.ProseMirror .callout {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 0.75rem;
+    border: 1px solid var(--divider);
+    background: var(--surface-color);
+}
+
+.ProseMirror .callout-icon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.ProseMirror .callout-content {
+    flex: 1;
+}
+
 /* Mobile Safe Area Utilities */
 .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom, 24px);

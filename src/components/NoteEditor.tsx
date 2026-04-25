@@ -1,15 +1,21 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-// Tiptap removed due to incompatibility with current build setup
-// import { useEditor, EditorContent } from '@tiptap/react';
-// import StarterKit from '@tiptap/starter-kit';
-// import Placeholder from '@tiptap/extension-placeholder';
+import { useEditor, EditorContent, BubbleMenu } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import Placeholder from '@tiptap/extension-placeholder';
+import Underline from '@tiptap/extension-underline';
+import TaskList from '@tiptap/extension-task-list';
+import TaskItem from '@tiptap/extension-task-item';
+import Strike from '@tiptap/extension-strike';
 import type { Note, Tag, NotePriority } from '../types.ts';
-import { CloseIcon, ChevronDownIcon, SpinnerIcon, ImageIcon, MicrophoneIcon, StopIcon } from './Icons.tsx';
+import { CloseIcon, ChevronDownIcon, SpinnerIcon, ImageIcon, MicrophoneIcon, StopIcon, BoldIcon, ItalicIcon, UnderlineIcon, StrikeIcon, ListCheckIcon } from './Icons.tsx';
 import AiAssistant from './AiAssistant.tsx';
 import CoverImagePicker from './CoverImagePicker.tsx';
-// SlashMenu removed temporarily
-// import SlashMenu from './SlashMenu.tsx';
+import SlashMenu from './SlashMenu.tsx';
+import EmojiMenu from './EmojiMenu.tsx';
+import SlashCommand from '../extensions/SlashCommand.ts';
+import EmojiSuggestion from '../extensions/EmojiSuggestion.ts';
+import Callout from '../extensions/Callout.ts';
 import { useSeason } from '../contexts/SeasonalContext.tsx';
 import { getTagColorClasses } from '../services/colorService.ts';
 import { useClickOutside } from '../hooks/useClickOutside.ts';
@@ -36,6 +42,124 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onClose, allTags,
   const [isTagSuggestionsOpen, setIsTagSuggestionsOpen] = useState(false);
   const [isPriorityOpen, setIsPriorityOpen] = useState(false);
   const [showCoverPicker, setShowCoverPicker] = useState(false);
+
+  // Slash Menu State
+  const [slashMenuProps, setSlashMenuProps] = useState<{
+    position: { top: number; left: number };
+    filterText: string;
+    range: any;
+  } | null>(null);
+
+  // Emoji Menu State
+  const [emojiMenuProps, setEmojiMenuProps] = useState<{
+    position: { top: number; left: number };
+    filterText: string;
+    range: any;
+  } | null>(null);
+
+  // Tiptap Editor Initialization
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      Underline,
+      Strike,
+      TaskList,
+      TaskItem.configure({
+        nested: true,
+      }),
+      Placeholder.configure({
+        placeholder: 'Start writing...',
+      }),
+      SlashCommand.configure({
+        suggestion: {
+          items: ({ query }: { query: string }) => query,
+          render: () => {
+            return {
+              onStart: (props: any) => {
+                const { clientRect, query, range } = props;
+                if (!clientRect) return;
+                const rect = clientRect();
+                setSlashMenuProps({
+                  position: { top: rect.bottom + window.scrollY, left: rect.left + window.scrollX },
+                  filterText: query,
+                  range,
+                });
+              },
+              onUpdate: (props: any) => {
+                const { clientRect, query, range } = props;
+                if (!clientRect) return;
+                const rect = clientRect();
+                setSlashMenuProps({
+                  position: { top: rect.bottom + window.scrollY, left: rect.left + window.scrollX },
+                  filterText: query,
+                  range,
+                });
+              },
+              onKeyDown: (props: any) => {
+                if (props.event.key === 'Escape') {
+                  setSlashMenuProps(null);
+                  return true;
+                }
+                return false;
+              },
+              onExit: () => {
+                setSlashMenuProps(null);
+              },
+            };
+          },
+        },
+      }),
+      EmojiSuggestion.configure({
+        suggestion: {
+          items: ({ query }: { query: string }) => query,
+          render: () => {
+            return {
+              onStart: (props: any) => {
+                const { clientRect, query, range } = props;
+                if (!clientRect) return;
+                const rect = clientRect();
+                setEmojiMenuProps({
+                  position: { top: rect.bottom + window.scrollY, left: rect.left + window.scrollX },
+                  filterText: query,
+                  range,
+                });
+              },
+              onUpdate: (props: any) => {
+                const { clientRect, query, range } = props;
+                if (!clientRect) return;
+                const rect = clientRect();
+                setEmojiMenuProps({
+                  position: { top: rect.bottom + window.scrollY, left: rect.left + window.scrollX },
+                  filterText: query,
+                  range,
+                });
+              },
+              onKeyDown: (props: any) => {
+                if (props.event.key === 'Escape') {
+                  setEmojiMenuProps(null);
+                  return true;
+                }
+                return false;
+              },
+              onExit: () => {
+                setEmojiMenuProps(null);
+              },
+            };
+          },
+        },
+      }),
+      Callout,
+    ],
+    content: note?.content || '',
+    onUpdate: ({ editor }) => {
+      setEditedNote(prev => prev ? { ...prev, content: editor.getHTML() } : null);
+    },
+    editorProps: {
+      attributes: {
+        class: `prose prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none min-h-[300px] ${colors.primaryText}`,
+      },
+    },
+  });
 
   // Voice Dictation Hook
   const { isListening, transcript, startListening, stopListening, hasRecognitionSupport, resetTranscript } = useSpeechRecognition();
@@ -73,12 +197,11 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onClose, allTags,
 
   // Append final transcript when listening stops
   useEffect(() => {
-    if (!isListening && transcript && editedNote) {
-      const newContent = (editedNote.content ? editedNote.content + ' ' : '') + transcript;
-      setEditedNote(prev => prev ? { ...prev, content: newContent } : null);
+    if (!isListening && transcript && editor) {
+      editor.commands.insertContent(transcript + ' ');
       resetTranscript();
     }
-  }, [isListening, transcript]); // Only trigger when isListening goes false
+  }, [isListening, transcript, editor]); // Only trigger when isListening goes false
 
 
   const tagInputContainerRef = useRef<HTMLDivElement>(null);
@@ -106,8 +229,8 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onClose, allTags,
     setEditedNote(prev => prev ? { ...prev, title: e.target.value } : null);
   };
 
-  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setEditedNote(prev => prev ? { ...prev, content: e.target.value } : null);
+  const handleContentChange = (content: string) => {
+    setEditedNote(prev => prev ? { ...prev, content } : null);
   };
 
   const handleCoverSelect = (coverImage: string) => {
@@ -156,6 +279,30 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onClose, allTags,
   const handlePriorityChange = (priority: NotePriority) => {
     if (!editedNote) return;
     setEditedNote({ ...editedNote, priority });
+  };
+
+  const handleSlashCommand = (id: string) => {
+    if (!editor || !slashMenuProps) return;
+
+    const { range } = slashMenuProps;
+    editor.chain().focus().deleteRange(range).run();
+
+    switch (id) {
+      case 'h1': editor.chain().focus().toggleHeading({ level: 1 }).run(); break;
+      case 'h2': editor.chain().focus().toggleHeading({ level: 2 }).run(); break;
+      case 'h3': editor.chain().focus().toggleHeading({ level: 3 }).run(); break;
+      case 'bullet': editor.chain().focus().toggleBulletList().run(); break;
+      case 'ordered': editor.chain().focus().toggleOrderedList().run(); break;
+      case 'quote': editor.chain().focus().toggleBlockquote().run(); break;
+      case 'code': editor.chain().focus().toggleCodeBlock().run(); break;
+      case 'callout': editor.chain().focus().insertContent({ type: 'callout', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Important info here...' }] }] }).run(); break;
+      case 'ai':
+        // Trigger AI Assistant (could be a focus or a specific mode)
+        const aiButton = document.getElementById('ai-assistant-trigger');
+        if (aiButton) aiButton.click();
+        break;
+    }
+    setSlashMenuProps(null);
   };
 
   if (!editedNote) return null;
@@ -253,13 +400,104 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onClose, allTags,
                 className={`w-full bg-transparent text-2xl md:text-3xl font-bold font-serif focus:outline-none mb-4 text-left ${colors.primaryText}`}
               />
 
-              <div className="flex-1 min-h-0 flex flex-col relative overflow-y-auto">
-                <textarea
-                  value={editedNote.content + (isListening ? (editedNote.content ? ' ' : '') + transcript + '...' : '')}
-                  onChange={handleContentChange}
-                  placeholder="Start writing..."
-                  className={`flex-grow w-full h-full resize-none bg-transparent focus:outline-none ${colors.primaryText} leading-relaxed text-lg p-2`}
-                />
+              <div className="flex-1 min-h-0 flex flex-col relative overflow-y-auto custom-editor">
+                {editor && (
+                  <BubbleMenu editor={editor} tippyOptions={{ duration: 100 }} className={`flex items-center gap-1 p-1 rounded-lg border shadow-xl backdrop-blur-md ${colors.surface} ${colors.border}`}>
+                    <button
+                      onClick={() => editor.chain().focus().toggleBold().run()}
+                      className={`p-1.5 rounded hover:bg-black/10 dark:hover:bg-white/10 ${editor.isActive('bold') ? 'text-accent' : colors.primaryText}`}
+                    >
+                      <BoldIcon className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => editor.chain().focus().toggleItalic().run()}
+                      className={`p-1.5 rounded hover:bg-black/10 dark:hover:bg-white/10 ${editor.isActive('italic') ? 'text-accent' : colors.primaryText}`}
+                    >
+                      <ItalicIcon className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => editor.chain().focus().toggleUnderline().run()}
+                      className={`p-1.5 rounded hover:bg-black/10 dark:hover:bg-white/10 ${editor.isActive('underline') ? 'text-accent' : colors.primaryText}`}
+                    >
+                      <UnderlineIcon className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => editor.chain().focus().toggleStrike().run()}
+                      className={`p-1.5 rounded hover:bg-black/10 dark:hover:bg-white/10 ${editor.isActive('strike') ? 'text-accent' : colors.primaryText}`}
+                    >
+                      <StrikeIcon className="h-4 w-4" />
+                    </button>
+                  </BubbleMenu>
+                )}
+
+                <div className={`flex items-center gap-2 mb-2 p-1 rounded-lg border w-fit ${colors.surface} ${colors.border}`}>
+                  <button
+                    onClick={() => editor?.chain().focus().toggleBold().run()}
+                    className={`p-2 rounded hover:bg-black/10 dark:hover:bg-white/10 ${editor?.isActive('bold') ? 'text-accent' : colors.primaryText}`}
+                    title="Bold"
+                  >
+                    <BoldIcon className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => editor?.chain().focus().toggleItalic().run()}
+                    className={`p-2 rounded hover:bg-black/10 dark:hover:bg-white/10 ${editor?.isActive('italic') ? 'text-accent' : colors.primaryText}`}
+                    title="Italic"
+                  >
+                    <ItalicIcon className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => editor?.chain().focus().toggleUnderline().run()}
+                    className={`p-2 rounded hover:bg-black/10 dark:hover:bg-white/10 ${editor?.isActive('underline') ? 'text-accent' : colors.primaryText}`}
+                    title="Underline"
+                  >
+                    <UnderlineIcon className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => editor?.chain().focus().toggleStrike().run()}
+                    className={`p-2 rounded hover:bg-black/10 dark:hover:bg-white/10 ${editor?.isActive('strike') ? 'text-accent' : colors.primaryText}`}
+                    title="Strikethrough"
+                  >
+                    <StrikeIcon className="h-4 w-4" />
+                  </button>
+                  <div className={`w-px h-4 mx-1 ${colors.border}`} />
+                  <button
+                    onClick={() => editor?.chain().focus().toggleTaskList().run()}
+                    className={`p-2 rounded hover:bg-black/10 dark:hover:bg-white/10 ${editor?.isActive('taskList') ? 'text-accent' : colors.primaryText}`}
+                    title="Checklist"
+                  >
+                    <ListCheckIcon className="h-4 w-4" />
+                  </button>
+                </div>
+
+                <EditorContent editor={editor} className="flex-grow w-full h-full" />
+                {isListening && (
+                  <div className="absolute bottom-4 left-4 bg-accent/20 backdrop-blur-md px-3 py-1 rounded-full text-sm border border-accent/30 animate-pulse">
+                    🎤 {transcript}...
+                  </div>
+                )}
+                <AnimatePresence>
+                  {slashMenuProps && (
+                    <SlashMenu
+                      position={slashMenuProps.position}
+                      filterText={slashMenuProps.filterText}
+                      onSelect={handleSlashCommand}
+                      onClose={() => setSlashMenuProps(null)}
+                    />
+                  )}
+                  {emojiMenuProps && (
+                    <EmojiMenu
+                      position={emojiMenuProps.position}
+                      filterText={emojiMenuProps.filterText}
+                      onSelect={(emoji) => {
+                        if (editor && emojiMenuProps) {
+                          editor.chain().focus().insertContentAt(emojiMenuProps.range, emoji).run();
+                        }
+                        setEmojiMenuProps(null);
+                      }}
+                      onClose={() => setEmojiMenuProps(null)}
+                    />
+                  )}
+                </AnimatePresence>
               </div>
 
               {/* Cover Picker Popover */}
