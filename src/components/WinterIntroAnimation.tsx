@@ -84,7 +84,7 @@ const WinterIntroAnimation: React.FC<WinterIntroAnimationProps> = ({ onAnimation
                 className={`absolute bottom-8 md:bottom-12 w-full text-center z-50 ${isDark ? 'text-white' : 'text-slate-800'}`}
             >
                 <h1 className="text-3xl md:text-5xl font-mono font-bold" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.3)' }}>
-                    Note Saver
+                    Notenirman
                 </h1>
                 <p className="text-md md:text-lg font-semibold mt-2 opacity-90">
                     Winter chill, fresh thoughts ❄️

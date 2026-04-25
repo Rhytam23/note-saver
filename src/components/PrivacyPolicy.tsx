@@ -32,7 +32,7 @@ const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onBack }) => {
                 <section className="space-y-4">
                     <h2 className="text-2xl font-bold">1. Introduction</h2>
                     <p>
-                        Welcome to Note Saver. We respect your privacy and are committed to protecting your personal data. 
+                        Welcome to Notenirman. We respect your privacy and are committed to protecting your personal data. 
                         This privacy policy will inform you as to how we look after your personal data when you visit our website 
                         and tell you about your privacy rights.
                     </p>
@@ -53,7 +53,7 @@ const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onBack }) => {
                 <section className="space-y-4">
                     <h2 className="text-2xl font-bold">3. How We Use Your Data</h2>
                     <p>
-                        We use your data only to provide the Note Saver service, including:
+                        We use your data only to provide the Notenirman service, including:
                     </p>
                     <ul className="list-disc pl-6 space-y-2">
                         <li>Authenticating your account.</li>

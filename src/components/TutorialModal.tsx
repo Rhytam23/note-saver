@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSeason } from '../contexts/SeasonalContext';
 import { CloseIcon, TagIcon, PinIcon, PaletteIcon, FlagIcon, PlusIcon, KeyboardIcon } from './Icons';
@@ -66,7 +66,7 @@ const TutorialModal: React.FC<TutorialModalProps> = ({ isOpen, onClose }) => {
                         className={`relative w-full max-w-2xl rounded-xl shadow-2xl border flex flex-col ${colors.bgSimple} ${colors.border}`}
                     >
                         <header className="p-4 flex items-center justify-between border-b border-divider-light dark:border-divider">
-                            <h2 className="text-xl font-mono font-bold">How to Use Note Saver</h2>
+                            <h2 className="text-xl font-mono font-bold">How to Use Notenirman</h2>
                             <button onClick={onClose} className={`p-2 rounded-full ${colors.hover}`}>
                                 <CloseIcon className="h-6 w-6" />
                             </button>

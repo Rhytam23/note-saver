@@ -1,4 +1,4 @@
-﻿
+
 import React from 'react';
 import { motion, Variants } from 'framer-motion';
 import { SparklesIcon, PaletteIcon, TagIcon } from './Icons';
@@ -51,7 +51,7 @@ const KeyFeatures: React.FC = () => {
         >
           <h2 className={`text-3xl md:text-4xl font-bold font-serif text-center mb-4 ${colors.primaryText}`}>Everything You Need to Think Clearly</h2>
           <p className={`max-w-2xl mx-auto text-center text-lg ${colors.secondaryText} mb-12`}>
-            Note Saver isn't just a digital notebook; it's a tool to enhance your focus and creativity.
+            Notenirman isn't just a digital notebook; it's a tool to enhance your focus and creativity.
           </p>
         </motion.div>
 

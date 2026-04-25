@@ -82,7 +82,7 @@ const Header: React.FC<HeaderProps> = ({ theme, toggleTheme, searchTerm, setSear
             <ThemeIcon />
             <div className="flex flex-col">
               <h1 className={`text-lg md:text-2xl font-mono font-bold leading-tight ${colors.primaryText}`}>
-                Note Saver
+                Notenirman
               </h1>
               {isIndependenceDay && (
                 <motion.p

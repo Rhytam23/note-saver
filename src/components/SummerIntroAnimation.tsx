@@ -40,7 +40,7 @@ const SummerIntroAnimation: React.FC<SummerIntroAnimationProps> = ({ onAnimation
                 className="absolute top-[25%] text-center"
             >
                 <h1 className="text-4xl md:text-6xl font-mono font-bold text-white" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.2)' }}>
-                    Note Saver
+                    Notenirman
                 </h1>
                 <motion.p
                     initial={{ opacity: 0 }}

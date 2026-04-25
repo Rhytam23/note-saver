@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import type { Note, Tag, PriorityFilter } from "../types";
 import NoteCard from "./NoteCard";
 import { motion, AnimatePresence, Variants } from 'framer-motion';

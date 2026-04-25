@@ -1,11 +1,11 @@
-﻿
+
 import React from 'react';
 import { motion, Variants } from 'framer-motion';
 import { useSeason } from '../contexts/SeasonalContext';
 
 const testimonials = [
   {
-    quote: "The AI assistant is a game-changer for my productivity. I can draft, refine, and summarize my thoughts faster than ever before. Note Saver has become indispensable.",
+    quote: "The AI assistant is a game-changer for my productivity. I can draft, refine, and summarize my thoughts faster than ever before. Notenirman has become indispensable.",
     name: 'Aisha Khan',
     title: 'Software Developer',
     avatar: '/avatars/aisha.jpg',
@@ -51,7 +51,7 @@ const Testimonials: React.FC = () => {
         >
           <h2 className={`text-3xl md:text-4xl font-bold font-serif text-center mb-4 ${colors.primaryText}`}>Loved by Creatives & Professionals</h2>
           <p className={`max-w-2xl mx-auto text-center text-lg ${colors.secondaryText} mb-12`}>
-            Don't just take our word for it. Here's what people are saying about Note Saver.
+            Don't just take our word for it. Here's what people are saying about Notenirman.
           </p>
         </motion.div>
 

@@ -52,7 +52,7 @@ const WhyChooseUs: React.FC = () => {
           viewport={{ once: true, amount: 0.5 }}
           transition={{ duration: 0.5 }}
         >
-          <h2 className={`text-3xl md:text-4xl font-bold font-serif text-center mb-4 ${colors.primaryText}`}>Why Note Saver?</h2>
+          <h2 className={`text-3xl md:text-4xl font-bold font-serif text-center mb-4 ${colors.primaryText}`}>Why Notenirman?</h2>
           <p className={`max-w-2xl mx-auto text-center text-lg ${colors.secondaryText} mb-12`}>
             In a world of complex apps, we focus on simplicity, beauty, and intelligence to create the best note-taking experience.
           </p>

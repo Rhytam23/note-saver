@@ -55,7 +55,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, theme, toggleTh
       <header className={`absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-20`}>
         <div className="flex items-center space-x-2">
           <span className="text-3xl" role="img" aria-label="lamp">🪔</span>
-          <h1 className={`text-2xl font-mono font-bold ${colors.primaryText}`}>Note Saver</h1>
+          <h1 className={`text-2xl font-mono font-bold ${colors.primaryText}`}>Notenirman</h1>
         </div>
         <button
           onClick={toggleTheme}
