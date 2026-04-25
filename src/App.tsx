@@ -27,6 +27,7 @@ const TutorialModal = React.lazy(() => import('./components/TutorialModal.tsx'))
 const WelcomeIntroAnimation = React.lazy(() => import('./components/WelcomeIntroAnimation.tsx'));
 const PrivacyPolicy = React.lazy(() => import('./components/PrivacyPolicy.tsx'));
 const TermsOfService = React.lazy(() => import('./components/TermsOfService.tsx'));
+const FAQ = React.lazy(() => import('./components/FAQ.tsx'));
 
 // Lazy Load Seasonal Intro Animations
 const IndependenceDayIntro = React.lazy(() => import('./components/IndependenceDayIntro.tsx'));
@@ -48,14 +49,15 @@ const App: React.FC = () => {
   const { notes, addNote, updateNote, deleteNote, customTags, addOrUpdateCustomTag, deleteCustomTag } = useNotes(user?.id);
   const { theme: seasonalTheme, colors } = useSeason();
 
-  const [view, setView] = useState<'landing' | 'auth' | 'app' | 'privacy' | 'terms'>('landing');
+  const [view, setView] = useState<'landing' | 'auth' | 'app' | 'privacy' | 'terms' | 'faq'>('landing');
   
-  // Handle direct links to Privacy/Terms for Google Verification
+  // Handle direct links to Privacy/Terms/FAQ for Google Verification
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const viewParam = params.get('view');
     if (viewParam === 'privacy') setView('privacy');
     if (viewParam === 'terms') setView('terms');
+    if (viewParam === 'faq') setView('faq');
   }, []);
 
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
@@ -388,6 +390,7 @@ const App: React.FC = () => {
             {view === 'auth' && <AuthScreen key="auth" onBackToHome={() => setView('landing')} />}
             {view === 'privacy' && <PrivacyPolicy key="privacy" onBack={() => setView('landing')} />}
             {view === 'terms' && <TermsOfService key="terms" onBack={() => setView('landing')} />}
+            {view === 'faq' && <FAQ key="faq" onBack={() => setView('landing')} />}
           </AnimatePresence>
         </Suspense>
 
