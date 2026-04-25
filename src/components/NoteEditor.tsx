@@ -166,43 +166,21 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onClose, allTags,
 
   // Effect to append transcript to content
   useEffect(() => {
-    if (!transcript) return;
+    if (!transcript || !editor) return;
 
-    // We update the edited note with the transcript. 
-    // This is simple "live" appending. For more complex cursor handling, we'd need a different approach.
-    setEditedNote(prev => {
-      if (!prev) return null;
-      // Check if the transcript is already at the end to prevent duplication in React 18 strict mode
-      if (prev.content.endsWith(transcript)) return prev;
+    // Use Tiptap command to insert content at the current cursor position
+    editor.commands.insertContent(transcript + ' ');
+    
+    // Clear transcript after inserting to avoid double insertion
+    resetTranscript();
+  }, [transcript, editor, resetTranscript]);
 
-      // This is a simplified approach: we append the *latest segment* 
-      // Real implementation often requires comparing against previous transcript state
-
-      // BETTER APPROACH: Only update when transcript *changes* significantly or on stop. 
-      // But for this simple hook, let's just use the transcript buffer.
-
-      // Actually, the hook accumulates transcript. So we should append it *once* when it changes?
-      // Let's rely on the user stopping, OR better:
-      // Use a separate "previousTranscript" ref to append only new parts?
-      // For simplicity: We will display the transcript in a temporary "overlay" or just append it.
-      // Let's TRY appending only when listening stops to be safe? 
-      // No, user wants real time.
-
-      // Let's try this: 
-      // We WON'T update `editedNote.content` automatically in this effect to avoid loops.
-      // We will show the transcript in the UI, and then append it on stop?
-      return prev;
-    });
-  }, [transcript]);
-
-  // Append final transcript when listening stops
+  // Sync editor content when note prop changes (as fallback if key is not used)
   useEffect(() => {
-    if (!isListening && transcript && editor) {
-      editor.commands.insertContent(transcript + ' ');
-      resetTranscript();
+    if (editor && note && note.content !== editor.getHTML()) {
+      editor.commands.setContent(note.content);
     }
-  }, [isListening, transcript, editor]); // Only trigger when isListening goes false
-
+  }, [note?.id, editor]);
 
   const tagInputContainerRef = useRef<HTMLDivElement>(null);
   const priorityContainerRef = useRef<HTMLDivElement>(null);
