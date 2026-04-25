@@ -1,4 +1,4 @@
-﻿import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { getDynamicTheme, getThemeFromCalendarEvents } from "../services/seasonalService";
 import { getUserLocation } from "../services/locationService";
 import { fetchTodayEvents } from "../services/calendarService";

@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../contexts/AuthContext';
@@ -170,7 +170,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onBackToHome }) => {
       >
         <div className="text-center mb-8">
           <h1 className={`text-3xl font-mono font-bold ${colors.primaryText} mb-2 flex items-center justify-center`}>
-            {isForgotPasswordView ? 'Reset Password' : (isLoginView ? 'Welcome Back' : 'Join Note Saver')}
+            {isForgotPasswordView ? 'Reset Password' : (isLoginView ? 'Welcome Back' : 'Join Notenirman')}
           </h1>
           <p className={colors.secondaryText}>
             {isForgotPasswordView ? 'Enter your email to receive a reset link.' : (isLoginView ? 'Sign in to access your notes.' : 'Create an account to start your journey.')}

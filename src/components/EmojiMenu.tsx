@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSeason } from "../contexts/SeasonalContext";
 import { EMOJIS } from "../extensions/EmojiSuggestion";
 

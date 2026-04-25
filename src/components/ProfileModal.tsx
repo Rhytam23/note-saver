@@ -1,4 +1,4 @@
-﻿import React, { useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, Variants } from 'framer-motion';
 import { CloseIcon, LogoutIcon, SaveIcon, SpinnerIcon, EditIcon } from './Icons';
 import type { User, SeasonalTheme } from '../types';

@@ -44,7 +44,7 @@ const Footer: React.FC<FooterProps> = ({ variant = 'simple', onPrivacyClick, onT
             ))}
         </div>
         <p className={`text-xs ${colors.secondaryText} opacity-60`}>
-            © {new Date().getFullYear()} Note Saver
+            © {new Date().getFullYear()} Notenirman
         </p>
       </motion.footer>
     );
@@ -63,7 +63,7 @@ const Footer: React.FC<FooterProps> = ({ variant = 'simple', onPrivacyClick, onT
         <div className="space-y-4">
           <div className="flex items-center space-x-2">
             <span className="text-3xl">📄</span>
-            <h2 className={`text-2xl font-bold font-mono ${colors.primaryText}`}>NOTE SAVER</h2>
+            <h2 className={`text-2xl font-bold font-mono ${colors.primaryText}`}>Notenirman</h2>
           </div>
           <p className={`text-sm ${colors.secondaryText} uppercase tracking-widest`}>Crafted for Thoughts</p>
           {isNavratri && <DiyaIcon className="h-8 w-8 text-amber-400" />}
@@ -117,7 +117,7 @@ const Footer: React.FC<FooterProps> = ({ variant = 'simple', onPrivacyClick, onT
             "Designed to be beautiful, built to be smart."
           </p>
           <p className={`text-xs ${colors.secondaryText}`}>
-            © {new Date().getFullYear()} Note Saver. All rights reserved.
+            © {new Date().getFullYear()} Notenirman. All rights reserved.
           </p>
       </div>
     </motion.footer>

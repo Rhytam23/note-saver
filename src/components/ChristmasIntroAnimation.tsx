@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { SantaSleighIcon } from './Icons';
 import { useTheme } from '../contexts/ThemeContext';
@@ -83,7 +83,7 @@ const ChristmasIntroAnimation: React.FC<ChristmasIntroAnimationProps> = ({ onAni
                 className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none"
             >
                 <div className="text-[12rem] md:text-[18rem] drop-shadow-2xl filter brightness-110 -translate-y-[10%]">
-                    ðŸŽ„
+                    🎄
                 </div>
             </motion.div>
 
@@ -113,10 +113,10 @@ const ChristmasIntroAnimation: React.FC<ChristmasIntroAnimationProps> = ({ onAni
                 className={`absolute bottom-8 md:bottom-12 w-full text-center z-50 ${isDark ? 'text-white' : 'text-slate-800'}`}
             >
                 <h1 className="text-3xl md:text-5xl font-mono font-bold" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.3)' }}>
-                    Note Saver
+                    Notenirman
                 </h1>
                 <p className="text-md md:text-lg font-semibold mt-2 opacity-90">
-                    Wishing you a magical and festive season! ðŸŽ„
+                    Wishing you a magical and festive season! 🎄
                 </p>
             </motion.div>
         </motion.div>

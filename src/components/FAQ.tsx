@@ -9,8 +9,8 @@ interface FAQProps {
 
 const faqs = [
     {
-        question: "What is Note Saver?",
-        answer: "Note Saver is an intelligent, seasonally-aware note-taking application designed to help you organize your thoughts with the power of Gemini AI. It changes its look and feel based on the current season or festival."
+        question: "What is Notenirman?",
+        answer: "Notenirman is an intelligent, seasonally-aware note-taking application designed to help you organize your thoughts with the power of Gemini AI. It changes its look and feel based on the current season or festival."
     },
     {
         question: "How do I create my first note?",
@@ -22,7 +22,7 @@ const faqs = [
     },
     {
         question: "What are 'Seasonal Themes'?",
-        answer: "Note Saver automatically detects the time of year and applies a unique theme. For example, in October you might see a Navratri theme, and in December, a Christmas theme. You can also manually switch between light and dark modes using the sun/moon icon in the header."
+        answer: "Notenirman automatically detects the time of year and applies a unique theme. For example, in October you might see a Navratri theme, and in December, a Christmas theme. You can also manually switch between light and dark modes using the sun/moon icon in the header."
     },
     {
         question: "How do I organize my notes?",
@@ -34,19 +34,19 @@ const faqs = [
     },
     {
         question: "How does the AI work?",
-        answer: "Note Saver uses Google's Gemini AI to provide features like smart tagging, content summarization, and writing assistance. You can use slash commands (/) in the editor to trigger AI actions."
+        answer: "Notenirman uses Google's Gemini AI to provide features like smart tagging, content summarization, and writing assistance. You can use slash commands (/) in the editor to trigger AI actions."
     },
     {
         question: "Does it work offline?",
-        answer: "Note Saver is a web application that requires an internet connection to sync your notes and use AI features. However, we are working on a PWA (Progressive Web App) version for basic offline viewing."
+        answer: "Notenirman is a web application that requires an internet connection to sync your notes and use AI features. However, we are working on a PWA (Progressive Web App) version for basic offline viewing."
     },
     {
         question: "Can I customize the themes?",
         answer: "The app automatically updates its theme based on the current season (Summer, Monsoon, Winter, etc.) and major festivals (Diwali, Christmas, etc.). You can also manually toggle between Light and Dark modes."
     },
     {
-        question: "Is Note Saver free to use?",
-        answer: "Yes! Note Saver is currently free to use. Our goal is to provide a beautiful and intelligent space for everyone to capture their ideas."
+        question: "Is Notenirman free to use?",
+        answer: "Yes! Notenirman is currently free to use. Our goal is to provide a beautiful and intelligent space for everyone to capture their ideas."
     }
 ];
 
@@ -111,7 +111,7 @@ const FAQ: React.FC<FAQProps> = ({ onBack }) => {
                         Frequently Asked <span className="text-accent">Questions</span>
                     </h1>
                     <p className={`${colors.secondaryText} text-lg`}>
-                        Everything you need to know about Note Saver.
+                        Everything you need to know about Notenirman.
                     </p>
                 </div>
 

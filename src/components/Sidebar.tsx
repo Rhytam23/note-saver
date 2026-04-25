@@ -1,4 +1,4 @@
-﻿import React, { useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
 import type { User, Tag, PriorityFilter, NotePriority } from "../types";
 import { useSeason } from "../contexts/SeasonalContext";

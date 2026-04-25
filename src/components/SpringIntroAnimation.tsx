@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 
 interface IntroAnimationProps {
@@ -47,7 +47,7 @@ const SpringIntroAnimation: React.FC<IntroAnimationProps> = ({ onAnimationComple
                     className="absolute text-xl text-pink-400"
                     style={{ left: petal.left }}
                 >
-                    ðŸŒ¸
+                    🌸
                 </motion.div>
             ))}
 
@@ -57,9 +57,9 @@ const SpringIntroAnimation: React.FC<IntroAnimationProps> = ({ onAnimationComple
                 transition={{ duration: 1 }}
                 className="text-center z-10"
             >
-                <div className="text-8xl mb-4 animate-bounce" style={{ animationDuration: '3s' }}>ðŸŒ·</div>
+                <div className="text-8xl mb-4 animate-bounce" style={{ animationDuration: '3s' }}>🌷</div>
                 <h1 className="text-4xl md:text-6xl font-serif font-bold mb-2 text-pink-700 dark:text-pink-300">Spring Awakening</h1>
-                <p className="text-lg text-green-700 dark:text-green-300">New beginnings, fresh ideas ðŸŒ±</p>
+                <p className="text-lg text-green-700 dark:text-green-300">New beginnings, fresh ideas 🌱</p>
             </motion.div>
         </motion.div>
     );

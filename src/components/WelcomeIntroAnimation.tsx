@@ -1,4 +1,4 @@
-﻿import React, { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSeason } from '../contexts/SeasonalContext';
 
@@ -32,7 +32,7 @@ const WelcomeIntroAnimation: React.FC<WelcomeIntroAnimationProps> = ({ onAnimati
                     transition={{ duration: 1, ease: "easeOut" }}
                     className="flex items-center justify-center mb-6"
                 >
-                    <span className="text-6xl md:text-8xl" role="img" aria-label="lamp">ðŸª”</span>
+                    <span className="text-6xl md:text-8xl" role="img" aria-label="lamp">🪔</span>
                 </motion.div>
 
                 <div className={`text-4xl md:text-6xl font-serif font-bold text-center ${colors.primaryText}`}>
@@ -50,7 +50,7 @@ const WelcomeIntroAnimation: React.FC<WelcomeIntroAnimationProps> = ({ onAnimati
                         transition={{ delay: 1.5, duration: 0.8, type: "spring", stiffness: 100 }}
                         className="block text-accent"
                     >
-                        Note Saver
+                        Notenirman
                     </motion.span>
                 </div>
 
