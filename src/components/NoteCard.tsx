@@ -91,12 +91,12 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, customTags, onSelectNote, onD
           style={{ background: note.coverImage.includes('gradient') || note.coverImage.startsWith('#') ? note.coverImage : `url(${note.coverImage})` }}
         />
       )}
-      <div className="p-6 flex-1">
-        <h3 className={`text-lg font-mono font-bold ${colors.primaryText} truncate flex items-center`}>
+      <div className="p-4 sm:p-6 flex-1">
+        <h3 className={`text-base sm:text-lg font-mono font-bold ${colors.primaryText} truncate flex items-center`}>
           {note.priority && note.priority !== 'none' && (
             <span title={priorityStyles[note.priority].title}>
               <FlagIcon
-                className={`h-5 w-5 mr-2 flex-shrink-0 ${priorityStyles[note.priority].iconClass}`}
+                className={`h-4 w-4 sm:h-5 sm:w-5 mr-2 flex-shrink-0 ${priorityStyles[note.priority].iconClass}`}
                 filled
               />
             </span>
@@ -104,7 +104,7 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, customTags, onSelectNote, onD
           <span className="truncate">{note.title}</span>
         </h3>
         {plainContent && (
-          <p className={`${colors.secondaryText} mt-2 text-sm leading-relaxed line-clamp-4`}>
+          <p className={`${colors.secondaryText} mt-2 text-xs sm:text-sm leading-relaxed line-clamp-3 sm:line-clamp-4`}>
             {plainContent}
           </p>
         )}
@@ -128,10 +128,10 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, customTags, onSelectNote, onD
               })}
             </div>
           </div>
-          <div className="relative flex items-center">
+          <div className="relative flex items-center space-x-1 sm:space-x-0">
             <button
               onClick={handleTogglePin}
-              className={`p-1 rounded-full ${colors.secondaryText} transition-colors duration-200 ${note.isPinned ? 'text-accent' : 'hover:bg-accent/10 hover:text-accent'}`}
+              className={`p-2 sm:p-1 rounded-full ${colors.secondaryText} transition-colors duration-200 ${note.isPinned ? 'text-accent' : 'hover:bg-accent/10 hover:text-accent'}`}
               aria-label={note.isPinned ? "Unpin note" : "Pin note"}
               title={note.isPinned ? "Unpin this note" : "Pin this note to top"}
             >
@@ -139,14 +139,14 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, customTags, onSelectNote, onD
             </button>
             <button
               onClick={handleToggleExportMenu}
-              className={`p-1 rounded-full ${colors.secondaryText} hover:bg-success/10 hover:text-success transition-colors duration-200`}
+              className={`p-2 sm:p-1 rounded-full ${colors.secondaryText} hover:bg-success/10 hover:text-success transition-colors duration-200`}
               aria-label="Export note"
             >
               <ExportIcon className="h-5 w-5" />
             </button>
             <button
               onClick={handleDelete}
-              className={`p-1 rounded-full ${colors.secondaryText} hover:bg-error/10 hover:text-error transition-colors duration-200`}
+              className={`p-2 sm:p-1 rounded-full ${colors.secondaryText} hover:bg-error/10 hover:text-error transition-colors duration-200`}
               aria-label="Delete note"
             >
               <DeleteIcon className="h-5 w-5" />

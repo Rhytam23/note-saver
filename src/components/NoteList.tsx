@@ -91,7 +91,7 @@ const NoteList: React.FC<NoteListProps> = ({ pinnedNotes, unpinnedNotes, customT
               variants={containerVariants}
               initial="hidden"
               animate="visible"
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6"
             >
               {pinnedNotes.map(note => (
                 <NoteCard key={note.id} note={note} customTags={customTags} onSelectNote={onSelectNote} onDeleteNote={onDeleteNote} onTogglePin={onTogglePin} />
@@ -109,7 +109,7 @@ const NoteList: React.FC<NoteListProps> = ({ pinnedNotes, unpinnedNotes, customT
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6"
           >
             <AnimatePresence>
               {unpinnedNotes.map(note => (

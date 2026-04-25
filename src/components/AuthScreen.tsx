@@ -138,10 +138,10 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onBackToHome }) => {
     <div className="flex-1 flex flex-col items-center justify-center p-4 relative font-sans min-h-screen">
       <button
         onClick={onBackToHome}
-        className={`absolute top-4 left-4 flex items-center space-x-2 ${colors.secondaryText} hover:text-accent transition-colors`}
+        className={`absolute top-6 left-6 flex items-center space-x-2 ${colors.secondaryText} hover:text-accent transition-colors z-50`}
       >
         <ChevronLeftIcon className="h-6 w-6" />
-        <span>Back to Home</span>
+        <span className="font-medium">Back</span>
       </button>
 
       <motion.div
@@ -166,7 +166,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onBackToHome }) => {
           mass: 1,
           delay: 0
         }}
-        className={`w-full max-w-md p-8 rounded-2xl shadow-lg border backdrop-blur-lg ${colors.bgSimple} ${colors.border}`}
+        className={`w-full max-w-md p-6 sm:p-8 rounded-2xl shadow-lg border backdrop-blur-lg ${colors.bgSimple} ${colors.border} mt-12 sm:mt-0`}
       >
         <div className="text-center mb-8">
           <h1 className={`text-3xl font-mono font-bold ${colors.primaryText} mb-2 flex items-center justify-center`}>
@@ -296,10 +296,10 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onBackToHome }) => {
 
             <button
               onClick={handleGoogleAuth}
-              className="w-full py-2 px-4 flex items-center justify-center gap-3 bg-white text-gray-700 font-semibold rounded-full hover:bg-gray-50 transition-colors shadow-md border border-gray-200"
+              className="w-full py-3 px-4 flex items-center justify-center gap-3 bg-white text-gray-700 font-semibold rounded-full hover:bg-gray-50 transition-colors shadow-md border border-gray-200"
             >
               <GoogleIcon className="h-5 w-5" />
-              <span>Sign in with Google</span>
+              <span>Continue with Google</span>
             </button>
 
             <p className="mt-8 text-center text-sm">

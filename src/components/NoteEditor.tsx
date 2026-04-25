@@ -180,8 +180,13 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onClose, allTags,
         transition={{ type: 'spring', stiffness: 200, damping: 25 }}
         className={`relative w-full h-full md:w-[95%] md:h-[90%] lg:w-4/5 xl:w-2/3 md:rounded-2xl shadow-2xl flex flex-col border overflow-hidden ${colors.surface} ${colors.border} ${colors.primaryText}`}
       >
-        <header className={`flex-shrink-0 p-4 flex items-center justify-between border-b ${colors.border}`}>
-          <h2 className="text-xl font-mono font-bold">Edit Note</h2>
+        <header className={`flex-shrink-0 p-3 sm:p-4 flex items-center justify-between border-b ${colors.border}`}>
+          <div className="flex items-center space-x-2">
+            <button onClick={onClose} className={`p-2 rounded-full md:hidden ${colors.hover}`}>
+              <ChevronDownIcon className="h-6 w-6 rotate-90" />
+            </button>
+            <h2 className="text-lg md:text-xl font-mono font-bold truncate">Edit Note</h2>
+          </div>
           <div className="flex items-center space-x-2">
             {/* Voice Dictation Button */}
             {hasRecognitionSupport && (
@@ -196,13 +201,13 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onClose, allTags,
 
             <button
               onClick={handleSave}
-              className="px-4 py-2 text-sm bg-accent text-primary-bg font-semibold rounded-lg flex items-center disabled:opacity-50"
+              className="px-3 sm:px-4 py-2 text-sm bg-accent text-primary-bg font-semibold rounded-lg flex items-center disabled:opacity-50"
               disabled={isSaving}
             >
               {isSaving && <SpinnerIcon className="h-4 w-4 mr-2" />}
-              {isSaving ? 'Saving...' : 'Save & Close'}
+              <span>{isSaving ? 'Saving...' : 'Save'}</span>
             </button>
-            <button onClick={onClose} className={`p-2 rounded-full ${colors.hover}`}>
+            <button onClick={onClose} className={`hidden md:flex p-2 rounded-full ${colors.hover}`}>
               <CloseIcon className="h-6 w-6" />
             </button>
           </div>
@@ -272,7 +277,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onClose, allTags,
             </div>
           </main>
 
-          <aside className={`w-full md:w-80 flex-shrink-0 border-t md:border-t-0 md:border-l p-4 space-y-6 overflow-y-auto ${colors.border} ${colors.bgSimple}`}>
+          <aside className={`w-full md:w-80 flex-shrink-0 border-t md:border-t-0 md:border-l p-4 sm:p-6 space-y-6 overflow-y-auto ${colors.border} ${colors.bgSimple}`}>
             <div>
               <h3 className={`text-sm font-semibold mb-2 ${colors.secondaryText}`}>AI Assistant</h3>
               <AiAssistant noteContent={editedNote.content} onApply={handleAIAssist} />
