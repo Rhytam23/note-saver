@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import type { Theme, SeasonalTheme } from "../types";
 import { SunIcon, MoonIcon, SearchIcon, MenuIcon, SantaSleighIcon } from "./Icons";
 import { motion } from 'framer-motion';
@@ -15,19 +15,19 @@ interface HeaderProps {
 }
 
 const themeIconMap: Record<SeasonalTheme, { icon: string, animation: string }> = {
-  none: { icon: 'ðŸ“', animation: 'animation-none' },
-  winter: { icon: 'â„ï¸', animation: 'animate-[icon-snowflake-drift_4s_ease-in-out_infinite]' },
-  autumn: { icon: 'ðŸ', animation: 'animate-[icon-leaf-sway_3s_ease-in-out_infinite]' },
-  spring: { icon: 'ðŸŒ¸', animation: 'animate-[icon-bloom_4s_ease-in-out_infinite]' },
-  summer: { icon: 'ðŸŒž', animation: 'animate-[icon-sun-rotate_8s_linear_infinite]' },
-  monsoon: { icon: 'ðŸŒ§ï¸', animation: 'animate-[icon-rain-drip_2s_ease-in-out_infinite]' },
-  diwali: { icon: 'ðŸª”', animation: 'animate-[icon-flame-flicker_2s_ease-in-out_infinite]' },
-  holi: { icon: 'ðŸŽ¨', animation: 'animate-[icon-color-splash_3s_ease-in-out_infinite]' },
-  pongal: { icon: 'ðŸš', animation: 'animate-[icon-pulse_2s_ease-in-out_infinite]' },
-  navratri: { icon: 'ðŸ’ƒ', animation: 'animate-[icon-dance-pulse_3s_ease-in-out_infinite]' },
-  christmas: { icon: 'ðŸŒŸ', animation: 'animate-[icon-star-twinkle_3s_ease-in-out_infinite]' },
-  new_year: { icon: 'ðŸŽ†', animation: 'animate-[icon-firework-burst_2s_ease-in-out_infinite]' },
-  independence_day_in: { icon: 'ðŸ‡®ðŸ‡³', animation: 'animate-[icon-flag-wave_2s_ease-in-out_infinite]' },
+  none: { icon: '📄', animation: 'animation-none' },
+  winter: { icon: '❄️', animation: 'animate-[icon-snowflake-drift_4s_ease-in-out_infinite]' },
+  autumn: { icon: '🍂', animation: 'animate-[icon-leaf-sway_3s_ease-in-out_infinite]' },
+  spring: { icon: '🌸', animation: 'animate-[icon-bloom_4s_ease-in-out_infinite]' },
+  summer: { icon: '☀️', animation: 'animate-[icon-sun-rotate_8s_linear_infinite]' },
+  monsoon: { icon: '🌧️', animation: 'animate-[icon-rain-drip_2s_ease-in-out_infinite]' },
+  diwali: { icon: '🪔', animation: 'animate-[icon-flame-flicker_2s_ease-in-out_infinite]' },
+  holi: { icon: '🎨', animation: 'animate-[icon-color-splash_3s_ease-in-out_infinite]' },
+  pongal: { icon: '🏺', animation: 'animate-[icon-pulse_2s_ease-in-out_infinite]' },
+  navratri: { icon: '💃', animation: 'animate-[icon-dance-pulse_3s_ease-in-out_infinite]' },
+  christmas: { icon: '🌟', animation: 'animate-[icon-star-twinkle_3s_ease-in-out_infinite]' },
+  new_year: { icon: '🎉', animation: 'animate-[icon-firework-burst_2s_ease-in-out_infinite]' },
+  independence_day_in: { icon: '🇮🇳', animation: 'animate-[icon-flag-wave_2s_ease-in-out_infinite]' },
 };
 
 const ThemeIcon: React.FC = () => {
@@ -91,7 +91,7 @@ const Header: React.FC<HeaderProps> = ({ theme, toggleTheme, searchTerm, setSear
                   transition={{ delay: 0.2 }}
                   className="text-[10px] font-semibold opacity-80"
                 >
-                  India ðŸ‡®ðŸ‡³
+                  India 🇮🇳
                 </motion.p>
               )}
             </div>
