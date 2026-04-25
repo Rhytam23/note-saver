@@ -59,6 +59,7 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ noteContent, onApply }) => {
         {actionButtons.map(({ action, icon, label }) => (
           <button
             key={action}
+            id={action === 'summarize' ? 'ai-assistant-trigger' : undefined}
             onClick={() => handleAction(action)}
             disabled={isLoading}
             className={`flex items-center justify-center space-x-1.5 text-xs px-3 py-1.5 rounded-md transition-colors disabled:opacity-60 ${colors.hover} ${colors.primaryText}`}
