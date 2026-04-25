@@ -145,7 +145,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose, onLogout, on
   const handleExport = async () => {
     setIsSaving(true);
     try {
-      const notesString = localStorage.getItem(`notenirman-notes-${user.id}`);
+      const notesString = localStorage.getItem(`Notenirman-notes-${user.id}`);
       if (!notesString) {
         alert("No notes to export.");
         setIsSaving(false);
@@ -243,7 +243,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose, onLogout, on
         cursorY += 15; // Spacing after note
       });
 
-      doc.save(`notenirman-notes-${new Date().toISOString().split('T')[0]}.pdf`);
+      doc.save(`Notenirman-notes-${new Date().toISOString().split('T')[0]}.pdf`);
 
     } catch (e) {
       console.error("Export failed", e);
