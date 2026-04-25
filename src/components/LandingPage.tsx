@@ -129,6 +129,27 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, theme, toggleTh
       {/* Subsequent sections */}
       <div className="w-full z-10">
         <KeyFeatures />
+        
+        {/* Purpose Section for Google Verification */}
+        <section className={`py-20 px-4 border-y ${colors.border} ${colors.surface}`}>
+          <div className="max-w-4xl mx-auto text-center space-y-8">
+            <h2 className={`text-3xl md:text-5xl font-serif font-bold ${colors.primaryText}`}>
+              Our <span className="text-accent">Purpose</span>
+            </h2>
+            <p className={`text-xl md:text-2xl leading-relaxed ${colors.secondaryText}`}>
+              Notenirman is an intelligent, seasonally-aware note-taking application designed to help you organize your thoughts with the power of Gemini AI. 
+              Our mission is to provide a beautiful and focused space where your ideas can grow, colored by the world around you.
+            </p>
+            <div className="flex justify-center gap-4 pt-4 text-4xl">
+              <span title="Notes">📄</span>
+              <span className="text-accent">+</span>
+              <span title="AI Support">🤖</span>
+              <span className="text-accent">+</span>
+              <span title="Seasonal Inspiration">🌸</span>
+            </div>
+          </div>
+        </section>
+
         <FeatureHighlights />
         <WhyChooseUs />
         <Testimonials />
