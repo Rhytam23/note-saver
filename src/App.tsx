@@ -49,6 +49,15 @@ const App: React.FC = () => {
   const { theme: seasonalTheme, colors } = useSeason();
 
   const [view, setView] = useState<'landing' | 'auth' | 'app' | 'privacy' | 'terms'>('landing');
+  
+  // Handle direct links to Privacy/Terms for Google Verification
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const viewParam = params.get('view');
+    if (viewParam === 'privacy') setView('privacy');
+    if (viewParam === 'terms') setView('terms');
+  }, []);
+
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTag, setActiveTag] = useState<string | null>(null);
@@ -425,7 +434,7 @@ const App: React.FC = () => {
                   onTogglePin={handleTogglePin}
                 />
               </main>
-              <Footer onPrivacyClick={() => setView('privacy')} onTermsClick={() => setView('terms')} />
+              <Footer variant="simple" />
               <FloatingActionButton onClick={handleAddNewNote} />
               <AnimatePresence>
                 {selectedNoteId && (

@@ -132,7 +132,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, theme, toggleTh
         <FeatureHighlights />
         <WhyChooseUs />
         <Testimonials />
-        <Footer onPrivacyClick={() => setView('privacy')} onTermsClick={() => setView('terms')} />
+        <Footer 
+          variant="detailed" 
+          onPrivacyClick={() => setView('privacy')} 
+          onTermsClick={() => setView('terms')} 
+        />
       </div>
 
     </motion.div>
