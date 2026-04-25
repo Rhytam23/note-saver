@@ -63,7 +63,7 @@ const Footer: React.FC<FooterProps> = ({ variant = 'simple', onPrivacyClick, onT
         <div className="space-y-4">
           <div className="flex items-center space-x-2">
             <span className="text-3xl">📄</span>
-            <h2 className={`text-2xl font-bold font-mono ${colors.primaryText}`}>Notenirman</h2>
+            <h2 className={`text-2xl font-bold font-mono ${colors.primaryText}`}>NOTENIRMAN</h2>
           </div>
           <p className={`text-sm ${colors.secondaryText} uppercase tracking-widest`}>Crafted for Thoughts</p>
           {isNavratri && <DiyaIcon className="h-8 w-8 text-amber-400" />}
@@ -84,7 +84,11 @@ const Footer: React.FC<FooterProps> = ({ variant = 'simple', onPrivacyClick, onT
             <h3 className={`font-bold text-sm uppercase tracking-wider ${colors.primaryText}`}>Support</h3>
             <ul className={`space-y-2 text-sm ${colors.secondaryText}`}>
                 <li><a href="mailto:rhytambiswas@gmail.com" className="hover:text-accent">Contact Us</a></li>
-                <li><button onClick={onFAQClick} className="hover:text-accent">FAQs</button></li>
+                <li><a 
+                    href="/?view=faq" 
+                    onClick={(e) => { e.preventDefault(); onFAQClick?.(); }}
+                    className="hover:text-accent"
+                >FAQs</a></li>
                 <li><a href="#" className="hover:text-accent">Feedback</a></li>
             </ul>
         </div>
@@ -93,8 +97,16 @@ const Footer: React.FC<FooterProps> = ({ variant = 'simple', onPrivacyClick, onT
         <div className="space-y-4">
             <h3 className={`font-bold text-sm uppercase tracking-wider ${colors.primaryText}`}>Legal</h3>
             <ul className={`space-y-2 text-sm ${colors.secondaryText}`}>
-                <li><button onClick={onPrivacyClick} className="hover:text-accent">Privacy Policy</button></li>
-                <li><button onClick={onTermsClick} className="hover:text-accent">Terms of Service</button></li>
+                <li><a 
+                    href="/?view=privacy" 
+                    onClick={(e) => { e.preventDefault(); onPrivacyClick?.(); }}
+                    className="hover:text-accent"
+                >Privacy Policy</a></li>
+                <li><a 
+                    href="/?view=terms" 
+                    onClick={(e) => { e.preventDefault(); onTermsClick?.(); }}
+                    className="hover:text-accent"
+                >Terms of Service</a></li>
                 <li><a href="#" className="hover:text-accent">Data Security</a></li>
             </ul>
         </div>
