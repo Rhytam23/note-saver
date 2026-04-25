@@ -1,20 +1,20 @@
-import { Extension } from '@tiptap/core';
+﻿import { Extension } from '@tiptap/core';
 import Suggestion from '@tiptap/suggestion';
 
 export const EMOJIS = [
-    { name: 'smile', emoji: '😊' },
-    { name: 'heart', emoji: '❤️' },
-    { name: 'sun', emoji: '☀️' },
-    { name: 'sparkles', emoji: '✨' },
-    { name: 'fire', emoji: '🔥' },
-    { name: 'rocket', emoji: '🚀' },
-    { name: 'lamp', emoji: '🪔' },
-    { name: 'party', emoji: '🎉' },
-    { name: 'check', emoji: '✅' },
-    { name: 'warning', emoji: '⚠️' },
-    { name: 'lightbulb', emoji: '💡' },
-    { name: 'memo', emoji: '📝' },
-    { name: 'pushpin', emoji: '📌' },
+    { name: 'smile', emoji: 'ðŸ˜Š' },
+    { name: 'heart', emoji: 'â¤ï¸' },
+    { name: 'sun', emoji: 'â˜€ï¸' },
+    { name: 'sparkles', emoji: 'âœ¨' },
+    { name: 'fire', emoji: 'ðŸ”¥' },
+    { name: 'rocket', emoji: 'ðŸš€' },
+    { name: 'lamp', emoji: 'ðŸª”' },
+    { name: 'party', emoji: 'ðŸŽ‰' },
+    { name: 'check', emoji: 'âœ…' },
+    { name: 'warning', emoji: 'âš ï¸' },
+    { name: 'lightbulb', emoji: 'ðŸ’¡' },
+    { name: 'memo', emoji: 'ðŸ“' },
+    { name: 'pushpin', emoji: 'ðŸ“Œ' },
 ];
 
 export default Extension.create({

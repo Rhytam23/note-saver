@@ -1,4 +1,4 @@
-import type { SeasonalTheme, UserLocation } from '../types.ts';
+﻿import type { SeasonalTheme, UserLocation } from "../types";
 
 type Festival = {
     theme: SeasonalTheme;

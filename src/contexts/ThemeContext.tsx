@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import type { Theme } from '../types.ts';
+﻿import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import type { Theme } from "../types";
 
 const getInitialTheme = (): Theme => {
   // This function needs to be safe for server-side rendering, even if not used there, as a best practice.

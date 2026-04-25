@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { motion } from 'framer-motion';
 import { AshokaChakraIcon } from './Icons';
 import { useSeason } from '../contexts/SeasonalContext';
@@ -46,7 +46,7 @@ const IndependenceDayIntro: React.FC<IndependenceDayIntroProps> = ({ onAnimation
                     Note Saver
                 </h1>
                 <p className={`text-md md:text-lg font-semibold mt-2 text-green-800`}>
-                    Proudly Made in India 🇮🇳
+                    Proudly Made in India ðŸ‡®ðŸ‡³
                 </p>
             </motion.div>
         </motion.div>

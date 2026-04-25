@@ -1,7 +1,7 @@
-
+﻿
 import { useState, useEffect, useCallback } from 'react';
-import type { Note, Tag } from '../types.ts';
-import { supabase } from '../services/supabase.ts';
+import type { Note, Tag } from "../types";
+import { supabase } from "../services/supabase";
 
 // Helper: Convert DB row (snake_case) to App Note (camelCase)
 const dbToNote = (dbNote: any): Note => ({

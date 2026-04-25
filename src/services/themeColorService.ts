@@ -1,4 +1,4 @@
-import type { SeasonalTheme } from '../types.ts';
+﻿import type { SeasonalTheme } from "../types";
 
 /**
  * Defines the set of dynamic color classes that change based on the seasonal theme.

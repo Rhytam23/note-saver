@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSeason } from '../contexts/SeasonalContext';
 import { CloseIcon, TagIcon, PinIcon, PaletteIcon, FlagIcon, PlusIcon, KeyboardIcon } from './Icons';

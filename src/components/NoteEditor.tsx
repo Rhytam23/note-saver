@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+﻿import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEditor, EditorContent, BubbleMenu } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -7,19 +7,19 @@ import Underline from '@tiptap/extension-underline';
 import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
 import Strike from '@tiptap/extension-strike';
-import type { Note, Tag, NotePriority } from '../types.ts';
-import { CloseIcon, ChevronDownIcon, SpinnerIcon, ImageIcon, MicrophoneIcon, StopIcon, BoldIcon, ItalicIcon, UnderlineIcon, StrikeIcon, ListCheckIcon } from './Icons.tsx';
-import AiAssistant from './AiAssistant.tsx';
-import CoverImagePicker from './CoverImagePicker.tsx';
-import SlashMenu from './SlashMenu.tsx';
-import EmojiMenu from './EmojiMenu.tsx';
-import SlashCommand from '../extensions/SlashCommand.ts';
-import EmojiSuggestion from '../extensions/EmojiSuggestion.ts';
-import Callout from '../extensions/Callout.ts';
-import { useSeason } from '../contexts/SeasonalContext.tsx';
-import { getTagColorClasses } from '../services/colorService.ts';
-import { useClickOutside } from '../hooks/useClickOutside.ts';
-import { useSpeechRecognition } from '../hooks/useSpeechRecognition.ts';
+import type { Note, Tag, NotePriority } from "../types";
+import { CloseIcon, ChevronDownIcon, SpinnerIcon, ImageIcon, MicrophoneIcon, StopIcon, BoldIcon, ItalicIcon, UnderlineIcon, StrikeIcon, ListCheckIcon } from "./Icons";
+import AiAssistant from "./AiAssistant";
+import CoverImagePicker from "./CoverImagePicker";
+import SlashMenu from "./SlashMenu";
+import EmojiMenu from "./EmojiMenu";
+import SlashCommand from "../extensions/SlashCommand";
+import EmojiSuggestion from "../extensions/EmojiSuggestion";
+import Callout from "../extensions/Callout";
+import { useSeason } from "../contexts/SeasonalContext";
+import { getTagColorClasses } from "../services/colorService";
+import { useClickOutside } from "../hooks/useClickOutside";
+import { useSpeechRecognition } from "../hooks/useSpeechRecognition";
 
 // Add custom styling for the editor to match app theme
 import '../index.css';
@@ -450,7 +450,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onClose, allTags,
                 <EditorContent editor={editor} className="flex-grow w-full h-full" />
                 {isListening && (
                   <div className="absolute bottom-4 left-4 bg-accent/20 backdrop-blur-md px-3 py-1 rounded-full text-sm border border-accent/30 animate-pulse">
-                    🎤 {transcript}...
+                    ðŸŽ¤ {transcript}...
                   </div>
                 )}
                 <AnimatePresence>

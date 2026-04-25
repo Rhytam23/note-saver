@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+﻿import React, { useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 
 interface IntroAnimationProps {
@@ -101,7 +101,7 @@ const DiwaliIntroAnimation: React.FC<IntroAnimationProps> = ({ onAnimationComple
                 className="z-20 flex flex-col items-center text-center p-8 backdrop-blur-sm rounded-3xl border border-white/10 bg-black/20"
             >
                 <div className="text-8xl md:text-9xl mb-4 drop-shadow-[0_0_30px_rgba(255,215,0,0.8)] animate-pulse">
-                    ✨
+                    âœ¨
                 </div>
                 {/* Changed Icon to something less specific or just clearer text focus as per image which had less focus on emojis */}
                 <h1 className="text-5xl md:text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-orange-400 to-red-500 drop-shadow-[0_0_10px_rgba(255,165,0,0.5)] font-serif mb-2">

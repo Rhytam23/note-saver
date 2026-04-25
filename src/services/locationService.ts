@@ -1,4 +1,4 @@
-import type { UserLocation } from '../types';
+﻿import type { UserLocation } from '../types';
 
 export const DEFAULT_LOCATION: UserLocation = { country: 'US', latitude: 39.8283 };
 

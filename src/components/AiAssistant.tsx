@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { summarizeText, proofreadText, generateIdeas } from '../services/geminiService';
 import { DocumentTextIcon, CheckBadgeIcon, LightBulbIcon, SpinnerIcon } from './Icons';
 import { useSeason } from '../contexts/SeasonalContext';

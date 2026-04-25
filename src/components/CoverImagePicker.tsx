@@ -1,7 +1,7 @@
-import React from 'react';
+﻿import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useSeason } from '../contexts/SeasonalContext.tsx';
-import { CloseIcon, ImageIcon } from './Icons.tsx';
+import { useSeason } from "../contexts/SeasonalContext";
+import { CloseIcon, ImageIcon } from "./Icons";
 
 interface CoverImagePickerProps {
     onSelect: (imageUrl: string) => void;

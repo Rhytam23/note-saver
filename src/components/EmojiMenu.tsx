@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { useSeason } from '../contexts/SeasonalContext.tsx';
-import { EMOJIS } from '../extensions/EmojiSuggestion.ts';
+﻿import React, { useEffect, useState } from 'react';
+import { useSeason } from "../contexts/SeasonalContext";
+import { EMOJIS } from "../extensions/EmojiSuggestion";
 
 interface EmojiMenuProps {
     position: { top: number; left: number };

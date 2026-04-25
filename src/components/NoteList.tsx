@@ -1,8 +1,8 @@
-import React from 'react';
-import type { Note, Tag, PriorityFilter } from '../types.ts';
-import NoteCard from './NoteCard.tsx';
+﻿import React from 'react';
+import type { Note, Tag, PriorityFilter } from "../types";
+import NoteCard from "./NoteCard";
 import { motion, AnimatePresence, Variants } from 'framer-motion';
-import { useSeason } from '../contexts/SeasonalContext.tsx';
+import { useSeason } from "../contexts/SeasonalContext";
 
 interface NoteListProps {
   pinnedNotes: Note[];

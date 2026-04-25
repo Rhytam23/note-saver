@@ -1,22 +1,22 @@
-import React, { useState, useMemo, useEffect, useCallback, Suspense } from 'react';
+﻿import React, { useState, useMemo, useEffect, useCallback, Suspense } from 'react';
 import { SpeedInsights } from "@vercel/speed-insights/react";
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { useAuth } from './contexts/AuthContext.tsx';
-import { useTheme } from './contexts/ThemeContext.tsx';
-import { useNotes } from './hooks/useNotes.ts';
-import type { Note, Tag, User, NotePriority, PriorityFilter } from './types.ts';
-import { useSeason } from './contexts/SeasonalContext.tsx';
+import { useAuth } from "./contexts/AuthContext";
+import { useTheme } from "./contexts/ThemeContext";
+import { useNotes } from "./hooks/useNotes";
+import type { Note, Tag, User, NotePriority, PriorityFilter } from "./types";
+import { useSeason } from "./contexts/SeasonalContext";
 import { v4 as uuidv4 } from 'uuid';
 
-import Header from './components/Header.tsx';
-import Sidebar from './components/Sidebar.tsx';
-import NoteList from './components/NoteList.tsx';
-import NoteEditor from './components/NoteEditor.tsx';
-import FloatingActionButton from './components/FloatingActionButton.tsx';
-import ErrorBoundary from './components/ErrorBoundary.tsx';
-import Footer from './components/Footer.tsx';
-import SeasonalAnimations from './components/SeasonalAnimations.tsx';
+import Header from "./components/Header";
+import Sidebar from "./components/Sidebar";
+import NoteList from "./components/NoteList";
+import NoteEditor from "./components/NoteEditor";
+import FloatingActionButton from "./components/FloatingActionButton";
+import ErrorBoundary from "./components/ErrorBoundary";
+import Footer from "./components/Footer";
+import SeasonalAnimations from "./components/SeasonalAnimations";
 
 // Lazy Load Major Views & Modals
 const LandingPage = React.lazy(() => import('./components/LandingPage.tsx'));
@@ -305,7 +305,7 @@ const App: React.FC = () => {
   if (loading) {
     return (
       <div className={`h-screen w-screen flex items-center justify-center ${colors.bgSimple}`}>
-        <span className="text-4xl animate-pulse" role="img" aria-label="lamp">🪔</span>
+        <span className="text-4xl animate-pulse" role="img" aria-label="lamp">ðŸª”</span>
       </div>
     );
   }
@@ -369,14 +369,14 @@ const App: React.FC = () => {
                 transition={{ type: 'spring', stiffness: 200, damping: 20 }}
                 className={`fixed top-4 left-1/2 -translate-x-1/2 z-[100] p-3 rounded-full shadow-lg text-sm font-semibold border backdrop-blur-md ${colors.surface} ${colors.border} ${colors.primaryText}`}
               >
-                🌼 Celebrating Navaratri — the triumph of light and devotion.
+                ðŸŒ¼ Celebrating Navaratri â€” the triumph of light and devotion.
               </motion.div>
             )}
           </AnimatePresence>
         </Suspense>
         <Suspense fallback={
           <div className={`h-screen w-screen flex items-center justify-center ${colors.bgSimple}`}>
-            <span className="text-4xl animate-pulse" role="img" aria-label="lamp">🪔</span>
+            <span className="text-4xl animate-pulse" role="img" aria-label="lamp">ðŸª”</span>
           </div>
         }>
           <AnimatePresence mode="wait">

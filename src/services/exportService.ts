@@ -1,4 +1,4 @@
-import type { Note } from '../types';
+﻿import type { Note } from '../types';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import DOMPurify from 'dompurify';
@@ -18,7 +18,7 @@ export const stripHtml = (html: string): string => {
         el.replaceWith(document.createTextNode('\n'));
     });
     tempDiv.querySelectorAll('li').forEach(el => {
-        el.prepend(document.createTextNode('• '));
+        el.prepend(document.createTextNode('â€¢ '));
         el.appendChild(document.createTextNode('\n'));
     });
 

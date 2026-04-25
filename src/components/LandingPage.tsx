@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { motion, Variants } from 'framer-motion';
 import type { Theme } from '../types';
 import { SunIcon, MoonIcon } from './Icons';
@@ -52,7 +52,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, theme, toggleTh
     >
       <header className={`absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-20`}>
         <div className="flex items-center space-x-2">
-          <span className="text-3xl" role="img" aria-label="lamp">🪔</span>
+          <span className="text-3xl" role="img" aria-label="lamp">ðŸª”</span>
           <h1 className={`text-2xl font-mono font-bold ${colors.primaryText}`}>Note Saver</h1>
         </div>
         <button
@@ -93,9 +93,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, theme, toggleTh
               </svg>
             ) : (
               <div className="flex items-center gap-4">
-                <span className="text-6xl md:text-7xl drop-shadow-xl animate-bounce" style={{ animationDuration: '3s' }}>📝</span>
+                <span className="text-6xl md:text-7xl drop-shadow-xl animate-bounce" style={{ animationDuration: '3s' }}>ðŸ“</span>
                 <span className="text-4xl md:text-5xl text-accent">+</span>
-                <span className="text-6xl md:text-7xl drop-shadow-xl animate-bounce" style={{ animationDuration: '3s', animationDelay: '0.2s' }}>🤖</span>
+                <span className="text-6xl md:text-7xl drop-shadow-xl animate-bounce" style={{ animationDuration: '3s', animationDelay: '0.2s' }}>ðŸ¤–</span>
               </div>
             )}
           </motion.div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+﻿import React, { useState, useEffect, useMemo } from 'react';
 import { useSeason } from '../contexts/SeasonalContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AshokaChakraIcon, LightningBoltIcon } from './Icons';
@@ -186,7 +186,7 @@ const ChristmasThemeBackground: React.FC<ThemeProps> = ({ isDarkMode }) => {
 
 
 const Autumn: React.FC = () => {
-    const leaves = ['🍂', '🍁'];
+    const leaves = ['ðŸ‚', 'ðŸ'];
     return (
         <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
             <div className="absolute inset-0 bg-gradient-to-b from-[#FFB347]/20 to-[#3B0A45]/30"></div>
@@ -220,7 +220,7 @@ const Spring: React.FC<ThemeProps> = ({ isDarkMode }) => {
                 filter: isDarkMode ? 'drop-shadow(0 0 5px rgba(255, 182, 193, 0.7))' : 'none'
             }}
         >
-            🌸
+            ðŸŒ¸
         </div>
     ));
 
@@ -569,7 +569,7 @@ const Eid: React.FC<ThemeProps> = ({ isDarkMode }) => {
         <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-b from-[#0F172A] to-[#3B0A45]"></div>
             <div className="absolute top-[10%] right-[15%] text-6xl opacity-80" style={{ color: '#FFD700', filter: 'drop-shadow(0 0 15px #FFD700)' }}>
-                🌙
+                ðŸŒ™
             </div>
             {Array.from({ length: 15 }).map((_, i) => (
                 <div
@@ -584,7 +584,7 @@ const Eid: React.FC<ThemeProps> = ({ isDarkMode }) => {
                         filter: `drop-shadow(0 0 10px #FFB347)`,
                     }}
                 >
-                    🏮
+                    ðŸ®
                 </div>
             ))}
             {/* Sparkles */}
@@ -682,7 +682,7 @@ const LunarNewYear: React.FC = () => (
                     filter: `drop-shadow(0 0 20px #FFD700)`,
                 }}
             >
-                🏮
+                ðŸ®
             </div>
         ))}
     </div>
@@ -727,7 +727,7 @@ const Diwali: React.FC = () => (
                     transform: `scale(${random(0.5, 1.5)})`
                 }}
             >
-                ✨
+                âœ¨
             </div>
         ))}
         {/* Additional Bokeh Sparkles */}

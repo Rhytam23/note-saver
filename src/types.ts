@@ -1,4 +1,4 @@
-import { MotionStyle } from 'framer-motion';
+﻿import { MotionStyle } from 'framer-motion';
 
 export type NotePriority = 'high' | 'medium' | 'low' | 'none';
 

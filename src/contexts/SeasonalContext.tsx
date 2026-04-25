@@ -1,11 +1,11 @@
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
-import { getDynamicTheme, getThemeFromCalendarEvents } from '../services/seasonalService.ts';
-import { getUserLocation } from '../services/locationService.ts';
-import { fetchTodayEvents } from '../services/calendarService.ts';
-// import type { SeasonalTheme } from '../types.ts';
-import { getThemeColors } from '../services/themeColorService.ts';
-import { useAuth } from './AuthContext.tsx';
-import { useTheme } from './ThemeContext.tsx';
+﻿import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import { getDynamicTheme, getThemeFromCalendarEvents } from "../services/seasonalService";
+import { getUserLocation } from "../services/locationService";
+import { fetchTodayEvents } from "../services/calendarService";
+// import type { SeasonalTheme } from "../types";
+import { getThemeColors } from "../services/themeColorService";
+import { useAuth } from "./AuthContext";
+import { useTheme } from "./ThemeContext";
 
 // Inline types to avoid resolution issues
 export type SeasonalTheme =
