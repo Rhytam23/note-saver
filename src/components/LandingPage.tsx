@@ -7,11 +7,13 @@ import KeyFeatures from './KeyFeatures';
 import WhyChooseUs from './WhyChooseUs';
 import Testimonials from './Testimonials';
 import FeatureHighlights from './FeatureHighlights';
+import Footer from './Footer';
 
 interface LandingPageProps {
   onGetStarted: () => void;
   theme: Theme;
   toggleTheme: () => void;
+  setView: (view: 'landing' | 'auth' | 'app' | 'privacy' | 'terms') => void;
 }
 
 const containerVariants: any = {
@@ -38,7 +40,7 @@ const itemVariants: any = {
   },
 };
 
-const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, theme, toggleTheme }) => {
+const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, theme, toggleTheme, setView }) => {
   const { colors, theme: seasonalTheme } = useSeason();
 
   return (
@@ -130,6 +132,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, theme, toggleTh
         <FeatureHighlights />
         <WhyChooseUs />
         <Testimonials />
+        <Footer onPrivacyClick={() => setView('privacy')} onTermsClick={() => setView('terms')} />
       </div>
 
     </motion.div>
