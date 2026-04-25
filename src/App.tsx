@@ -25,6 +25,8 @@ const AuthScreen = React.lazy(() => import('./components/AuthScreen.tsx'));
 const ProfileModal = React.lazy(() => import('./components/ProfileModal.tsx'));
 const TutorialModal = React.lazy(() => import('./components/TutorialModal.tsx'));
 const WelcomeIntroAnimation = React.lazy(() => import('./components/WelcomeIntroAnimation.tsx'));
+const PrivacyPolicy = React.lazy(() => import('./components/PrivacyPolicy.tsx'));
+const TermsOfService = React.lazy(() => import('./components/TermsOfService.tsx'));
 
 // Lazy Load Seasonal Intro Animations
 const IndependenceDayIntro = React.lazy(() => import('./components/IndependenceDayIntro.tsx'));
@@ -46,7 +48,7 @@ const App: React.FC = () => {
   const { notes, addNote, updateNote, deleteNote, customTags, addOrUpdateCustomTag, deleteCustomTag } = useNotes(user?.id);
   const { theme: seasonalTheme, colors } = useSeason();
 
-  const [view, setView] = useState<'landing' | 'auth' | 'app'>('landing');
+  const [view, setView] = useState<'landing' | 'auth' | 'app' | 'privacy' | 'terms'>('landing');
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTag, setActiveTag] = useState<string | null>(null);
@@ -373,8 +375,10 @@ const App: React.FC = () => {
         </Suspense>
         <Suspense fallback={<SeasonalLoading />}>
           <AnimatePresence mode="wait">
-            {view === 'landing' && <LandingPage key="landing" onGetStarted={() => setView('auth')} theme={theme} toggleTheme={toggleTheme} />}
+            {view === 'landing' && <LandingPage key="landing" onGetStarted={() => setView('auth')} theme={theme} toggleTheme={toggleTheme} setView={setView} />}
             {view === 'auth' && <AuthScreen key="auth" onBackToHome={() => setView('landing')} />}
+            {view === 'privacy' && <PrivacyPolicy key="privacy" onBack={() => setView('landing')} />}
+            {view === 'terms' && <TermsOfService key="terms" onBack={() => setView('landing')} />}
           </AnimatePresence>
         </Suspense>
 
@@ -421,7 +425,7 @@ const App: React.FC = () => {
                   onTogglePin={handleTogglePin}
                 />
               </main>
-              <Footer />
+              <Footer onPrivacyClick={() => setView('privacy')} onTermsClick={() => setView('terms')} />
               <FloatingActionButton onClick={handleAddNewNote} />
               <AnimatePresence>
                 {selectedNoteId && (
@@ -458,7 +462,7 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {view === 'landing' && <Footer />}
+
       </div>
     </ErrorBoundary>
   );
