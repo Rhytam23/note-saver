@@ -13,6 +13,22 @@ const faqs = [
         answer: "Note Saver is an intelligent, seasonally-aware note-taking application designed to help you organize your thoughts with the power of Gemini AI. It changes its look and feel based on the current season or festival."
     },
     {
+        question: "How do I create my first note?",
+        answer: "Simply sign in with your Google account, and you'll be taken to your dashboard. Click the '+' floating button at the bottom right to open the editor and start writing!"
+    },
+    {
+        question: "How do I use the AI features?",
+        answer: "In the note editor, type a forward slash (/) to open the AI command menu. From there, you can ask the AI to summarize, improve your writing, or generate ideas. You can also highlight any text to see AI formatting options."
+    },
+    {
+        question: "What are 'Seasonal Themes'?",
+        answer: "Note Saver automatically detects the time of year and applies a unique theme. For example, in October you might see a Navratri theme, and in December, a Christmas theme. You can also manually switch between light and dark modes using the sun/moon icon in the header."
+    },
+    {
+        question: "How do I organize my notes?",
+        answer: "You can add tags to your notes by clicking the 'Tags' button in the editor. You can also set priorities (High, Medium, Low) and 'Pin' important notes to the top of your list for quick access."
+    },
+    {
         question: "Is my data secure?",
         answer: "Yes! Your notes are stored securely in your private Supabase database. We use Google OAuth for secure login, ensuring only you can access your content."
     },
