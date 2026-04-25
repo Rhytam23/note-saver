@@ -1,5 +1,5 @@
 import React, { createContext, useContext } from 'react';
-import { useAuth as useAuthHook } from '../hooks/useAuth.ts';
+import { useAuth as useAuthHook } from '../hooks/useAuth';
 
 // Inline types
 interface User {
