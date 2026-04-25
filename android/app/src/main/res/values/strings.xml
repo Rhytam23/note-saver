@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">NoteNirman</string>
+    <string name="title_activity_main">NoteNirman</string>
+    <string name="package_name">com.notenirman.app</string>
+    <string name="custom_url_scheme">com.notenirman.app</string>
+</resources>

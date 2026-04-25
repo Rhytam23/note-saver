@@ -21,7 +21,7 @@ const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({ onClick }) 
       whileHover={{ scale: 1.1, y: -5 }}
       whileTap={{ scale: 0.95 }}
       onClick={onClick}
-      className="fixed bottom-8 right-8 bg-gradient-to-r from-accent to-accent-dark text-white w-16 h-16 rounded-full shadow-lg flex items-center justify-center z-30 transition-shadow duration-300 hover:shadow-glow-accent"
+      className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 bg-accent text-white w-14 h-14 sm:w-16 sm:h-16 rounded-full shadow-lg flex items-center justify-center z-30 transition-shadow duration-300 hover:shadow-glow-accent safe-bottom"
       aria-label="Add new note"
     >
       <PlusIcon className="h-8 w-8" />

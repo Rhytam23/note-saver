@@ -52,13 +52,9 @@ I built NoteNirman to explore how software can feel seasonal and personal, not j
 
 ### Prerequisites
 *   **Node.js** (v18+)
+*   **npm** or **yarn**
 *   **Supabase Account** (Auth & Database)
 *   **Google Cloud Console Project** (OAuth Client ID)
-=======
-*   **npm** or **yarn**
-*   **Supabase Account** (for Auth & Database)
-*   **Google Cloud Console Project** (for OAuth Client ID)
->>>>>>> 25193f3 (Update README with detailed project documentation)
 
 ### Installation
 

@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useCallback, Suspense } from 'react';
 import { SpeedInsights } from "@vercel/speed-insights/react";
+
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from './contexts/AuthContext.tsx';
 import { useTheme } from './contexts/ThemeContext.tsx';
@@ -49,6 +50,7 @@ const App: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [activePriority, setActivePriority] = useState<PriorityFilter>(null);
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -411,6 +413,8 @@ const App: React.FC = () => {
                 searchTerm={searchTerm}
                 setSearchTerm={setSearchTerm}
                 onMenuClick={() => setMobileSidebarOpen(true)}
+                isSearchVisible={isSearchVisible}
+                setIsSearchVisible={setIsSearchVisible}
               />
               <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
                 <NoteList

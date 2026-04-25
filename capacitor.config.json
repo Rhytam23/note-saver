@@ -1,0 +1,6 @@
+{
+  "appId": "com.notenirman.app",
+  "appName": "NoteNirman Mobile",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}

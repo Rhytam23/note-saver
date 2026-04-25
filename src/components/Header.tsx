@@ -10,6 +10,8 @@ interface HeaderProps {
   searchTerm: string;
   setSearchTerm: (term: string) => void;
   onMenuClick: () => void;
+  isSearchVisible: boolean;
+  setIsSearchVisible: (visible: boolean) => void;
 }
 
 const themeIconMap: Record<SeasonalTheme, { icon: string, animation: string }> = {
@@ -25,8 +27,6 @@ const themeIconMap: Record<SeasonalTheme, { icon: string, animation: string }> =
   navratri: { icon: '💃', animation: 'animate-[icon-dance-pulse_3s_ease-in-out_infinite]' },
   christmas: { icon: '🌟', animation: 'animate-[icon-star-twinkle_3s_ease-in-out_infinite]' },
   new_year: { icon: '🎆', animation: 'animate-[icon-firework-burst_2s_ease-in-out_infinite]' },
-  eid: { icon: '🌙', animation: 'animate-[icon-moon-glow_3s_ease-in-out_infinite]' },
-  lunar_new_year: { icon: '🐉', animation: 'animate-[icon-dragon-fade_4s_ease-in-out_infinite]' },
   independence_day_in: { icon: '🇮🇳', animation: 'animate-[icon-flag-wave_2s_ease-in-out_infinite]' },
 };
 
@@ -62,7 +62,7 @@ const ThemeIcon: React.FC = () => {
 };
 
 
-const Header: React.FC<HeaderProps> = ({ theme, toggleTheme, searchTerm, setSearchTerm, onMenuClick }) => {
+const Header: React.FC<HeaderProps> = ({ theme, toggleTheme, searchTerm, setSearchTerm, onMenuClick, isSearchVisible, setIsSearchVisible }) => {
   const { colors, theme: seasonalTheme } = useSeason();
   const isIndependenceDay = seasonalTheme === 'independence_day_in';
 
@@ -72,61 +72,92 @@ const Header: React.FC<HeaderProps> = ({ theme, toggleTheme, searchTerm, setSear
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
       className={`flex-shrink-0 backdrop-blur-sm border-b p-4 flex items-center justify-between shadow-sm sticky top-0 z-20 ${colors.bgOpacity80} ${colors.border}`}>
-      <div className="flex items-center space-x-3">
-        <button onClick={onMenuClick} className={`p-2 rounded-full md:hidden ${colors.hover}`}>
-          <MenuIcon className="h-6 w-6" />
-        </button>
-        <ThemeIcon />
-        <div className="flex flex-col">
-          <h1 className={`text-xl md:text-2xl font-mono font-bold ${colors.primaryText}`}>
-            Note Saver
-          </h1>
-          {isIndependenceDay && (
-            <motion.p
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className={`text-xs font-semibold ${colors.secondaryText}`}
+      
+      {!isSearchVisible ? (
+        <>
+          <div className="flex items-center space-x-3">
+            <button onClick={onMenuClick} className={`p-2 rounded-full md:hidden ${colors.hover}`}>
+              <MenuIcon className="h-6 w-6" />
+            </button>
+            <ThemeIcon />
+            <div className="flex flex-col">
+              <h1 className={`text-lg md:text-2xl font-mono font-bold leading-tight ${colors.primaryText}`}>
+                Note Saver
+              </h1>
+              {isIndependenceDay && (
+                <motion.p
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="text-[10px] font-semibold opacity-80"
+                >
+                  India 🇮🇳
+                </motion.p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <button 
+              onClick={() => setIsSearchVisible(true)}
+              className={`p-2 rounded-full sm:hidden ${colors.hover}`}
+              aria-label="Open search"
             >
-              Proudly Made in India 🇮🇳
-            </motion.p>
-          )}
-          {seasonalTheme === 'christmas' && (
-            <motion.p
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className={`text-xs font-semibold ${colors.secondaryText}`}
+              <SearchIcon className={`h-6 w-6 ${colors.primaryText}`} />
+            </button>
+            
+            <div id="tour-search-bar" className="relative hidden sm:block">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+                <SearchIcon className={`h-5 w-5 ${colors.secondaryText}`} />
+              </span>
+              <input
+                type="text"
+                placeholder="Search notes..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className={`w-48 md:w-64 pl-10 pr-4 py-2 rounded-full border focus:ring-2 focus:ring-accent focus:outline-none transition-all duration-300 dark:shadow-neumorphic-inset text-sm text-left ${colors.surface} ${colors.border} ${colors.primaryText}`}
+              />
+            </div>
+
+            <button
+              onClick={toggleTheme}
+              className={`p-2 rounded-full ${colors.hover} transition-colors duration-200`}
+              aria-label="Toggle theme"
             >
-              Wishing you a magical and festive season! 🎄
-            </motion.p>
-          )}
-        </div>
-      </div>
-      <div className="flex items-center space-x-4">
-        <div id="tour-search-bar" className="relative hidden sm:block">
-          <span className="absolute inset-y-0 left-0 flex items-center pl-3">
-            <SearchIcon className={`h-5 w-5 ${colors.secondaryText}`} />
-          </span>
-          <input
-            type="text"
-            placeholder="Search notes..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className={`w-48 md:w-64 pl-10 pr-4 py-2 rounded-full border focus:ring-2 focus:ring-accent focus:outline-none transition-all duration-300 dark:shadow-neumorphic-inset text-sm text-left ${colors.surface} ${colors.border} ${colors.primaryText}`}
-          />
-        </div>
-        <button
-          onClick={toggleTheme}
-          className={`p-2 rounded-full ${colors.hover} transition-colors duration-200`}
-          aria-label="Toggle theme"
+              {theme === 'light' ?
+                <MoonIcon className={`h-6 w-6 ${colors.primaryText}`} /> :
+                <SunIcon className="h-6 w-6 text-accent" />
+              }
+            </button>
+          </div>
+        </>
+      ) : (
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="flex-1 flex items-center space-x-2"
         >
-          {theme === 'light' ?
-            <MoonIcon className={`h-6 w-6 ${colors.primaryText}`} /> :
-            <SunIcon className="h-6 w-6 text-accent" />
-          }
-        </button>
-      </div>
+          <div className="relative flex-1">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+              <SearchIcon className={`h-5 w-5 ${colors.secondaryText}`} />
+            </span>
+            <input
+              autoFocus
+              type="text"
+              placeholder="Search notes..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className={`w-full pl-10 pr-4 py-2 rounded-full border focus:ring-2 focus:ring-accent focus:outline-none transition-all duration-300 text-sm text-left ${colors.surface} ${colors.border} ${colors.primaryText}`}
+            />
+          </div>
+          <button 
+            onClick={() => setIsSearchVisible(false)}
+            className={`px-3 py-2 text-sm font-medium ${colors.primaryText}`}
+          >
+            Cancel
+          </button>
+        </motion.div>
+      )}
     </motion.header>
   );
 };
