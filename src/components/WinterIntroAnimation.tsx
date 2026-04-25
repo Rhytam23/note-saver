@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -72,7 +72,7 @@ const WinterIntroAnimation: React.FC<WinterIntroAnimationProps> = ({ onAnimation
                 className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none"
             >
                 <div className="text-[12rem] md:text-[18rem] relative z-10 drop-shadow-lg -translate-y-[10%]">
-                    â˜ƒï¸
+                    ☃️
                 </div>
             </motion.div>
 
@@ -87,7 +87,7 @@ const WinterIntroAnimation: React.FC<WinterIntroAnimationProps> = ({ onAnimation
                     Note Saver
                 </h1>
                 <p className="text-md md:text-lg font-semibold mt-2 opacity-90">
-                    Winter chill, fresh thoughts â„ï¸
+                    Winter chill, fresh thoughts ❄️
                 </p>
             </motion.div>
         </motion.div>

@@ -1,4 +1,4 @@
-﻿import React, { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 interface SummerIntroAnimationProps {
@@ -47,7 +47,7 @@ const SummerIntroAnimation: React.FC<SummerIntroAnimationProps> = ({ onAnimation
                     animate={{ opacity: 1 }}
                     transition={{ delay: 3.5, duration: 1.5 }}
                     className={`text-md md:text-lg font-semibold mt-2 text-white/90`}>
-                    Capture your ideas under the summer sky â˜€ï¸
+                    Capture your ideas under the summer sky ☀️
                 </motion.p>
             </motion.div>
         </motion.div>
