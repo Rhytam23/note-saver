@@ -406,47 +406,17 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onClose, allTags,
                     >
                       <StrikeIcon className="h-4 w-4" />
                     </button>
+                    <div className={`w-px h-4 mx-1 ${colors.border}`} />
+                    <button
+                      onClick={() => editor.chain().focus().toggleTaskList().run()}
+                      className={`p-1.5 rounded hover:bg-black/10 dark:hover:bg-white/10 ${editor.isActive('taskList') ? 'text-accent' : colors.primaryText}`}
+                    >
+                      <ListCheckIcon className="h-4 w-4" />
+                    </button>
                   </BubbleMenu>
                 )}
 
-                <div className={`flex items-center gap-2 mb-2 p-1 rounded-lg border w-fit ${colors.surface} ${colors.border}`}>
-                  <button
-                    onClick={() => editor?.chain().focus().toggleBold().run()}
-                    className={`p-2 rounded hover:bg-black/10 dark:hover:bg-white/10 ${editor?.isActive('bold') ? 'text-accent' : colors.primaryText}`}
-                    title="Bold"
-                  >
-                    <BoldIcon className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => editor?.chain().focus().toggleItalic().run()}
-                    className={`p-2 rounded hover:bg-black/10 dark:hover:bg-white/10 ${editor?.isActive('italic') ? 'text-accent' : colors.primaryText}`}
-                    title="Italic"
-                  >
-                    <ItalicIcon className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => editor?.chain().focus().toggleUnderline().run()}
-                    className={`p-2 rounded hover:bg-black/10 dark:hover:bg-white/10 ${editor?.isActive('underline') ? 'text-accent' : colors.primaryText}`}
-                    title="Underline"
-                  >
-                    <UnderlineIcon className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => editor?.chain().focus().toggleStrike().run()}
-                    className={`p-2 rounded hover:bg-black/10 dark:hover:bg-white/10 ${editor?.isActive('strike') ? 'text-accent' : colors.primaryText}`}
-                    title="Strikethrough"
-                  >
-                    <StrikeIcon className="h-4 w-4" />
-                  </button>
-                  <div className={`w-px h-4 mx-1 ${colors.border}`} />
-                  <button
-                    onClick={() => editor?.chain().focus().toggleTaskList().run()}
-                    className={`p-2 rounded hover:bg-black/10 dark:hover:bg-white/10 ${editor?.isActive('taskList') ? 'text-accent' : colors.primaryText}`}
-                    title="Checklist"
-                  >
-                    <ListCheckIcon className="h-4 w-4" />
-                  </button>
-                </div>
+
 
                 <EditorContent editor={editor} className="flex-grow w-full h-full" />
                 {isListening && (
