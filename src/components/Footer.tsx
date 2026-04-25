@@ -62,7 +62,6 @@ const Footer: React.FC<FooterProps> = ({ variant = 'simple', onPrivacyClick, onT
         {/* Column 1: Brand */}
         <div className="space-y-4">
           <div className="flex items-center space-x-2">
-            <span className="text-3xl">📄</span>
             <h2 className={`text-2xl font-bold font-mono ${colors.primaryText}`}>Notenirman</h2>
           </div>
           <p className={`text-sm ${colors.secondaryText} uppercase tracking-widest`}>Crafted for Thoughts</p>
