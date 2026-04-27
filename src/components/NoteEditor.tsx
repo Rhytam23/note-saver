@@ -204,6 +204,27 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onClose, allTags,
     }, 500);
   }, [editedNote, onSave]);
 
+  // Auto-save effect
+  useEffect(() => {
+    if (!editedNote || !note) return;
+    
+    // Check if there are actual changes
+    const hasChanges = 
+      editedNote.title !== note.title ||
+      editedNote.content !== note.content ||
+      editedNote.coverImage !== note.coverImage ||
+      editedNote.priority !== note.priority ||
+      JSON.stringify(editedNote.tags) !== JSON.stringify(note.tags);
+
+    if (hasChanges) {
+      const timeoutId = setTimeout(() => {
+        handleSave();
+      }, 1000); // 1-second debounce for auto-save
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [editedNote, note, handleSave]);
+
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEditedNote(prev => prev ? { ...prev, title: e.target.value } : null);
   };

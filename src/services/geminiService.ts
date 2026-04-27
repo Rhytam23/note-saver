@@ -21,7 +21,7 @@ const generateContentWithRetry = async (prompt: string, systemInstruction?: stri
     }
 
     const finalPrompt = systemInstruction ? `${systemInstruction}\n\n${prompt}` : prompt;
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     
     const result = await model.generateContent(finalPrompt);
     const response = await result.response;
