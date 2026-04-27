@@ -4,7 +4,7 @@ import { supabase } from './supabase';
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 let genAI: GoogleGenAI | null = null;
 if (apiKey) {
-  genAI = new GoogleGenAI({ apiKey });
+  genAI = new GoogleGenAI({ apiKey, apiVersion: 'v1' });
 }
 
 const generateContentWithRetry = async (prompt: string, systemInstruction?: string): Promise<string> => {
@@ -23,7 +23,7 @@ const generateContentWithRetry = async (prompt: string, systemInstruction?: stri
     const finalPrompt = systemInstruction ? `${systemInstruction}\n\n${prompt}` : prompt;
     
     const response = await genAI.models.generateContent({
-      model: 'gemini-1.5-flash-latest',
+      model: 'gemini-1.5-flash',
       contents: [{ role: 'user', parts: [{ text: finalPrompt }] }],
     });
 
