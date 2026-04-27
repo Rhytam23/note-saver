@@ -381,7 +381,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onClose, allTags,
 
               <div className="flex-1 min-h-0 flex flex-col relative overflow-y-auto custom-editor">
                 {editor && (
-                  <BubbleMenu editor={editor} tippyOptions={{ duration: 100 }} className={`flex items-center gap-1 p-1 rounded-lg border shadow-xl backdrop-blur-md ${colors.surface} ${colors.border}`}>
+                  <BubbleMenu editor={editor} className={`flex items-center gap-1 p-1 rounded-lg border shadow-xl backdrop-blur-md ${colors.surface} ${colors.border}`}>
                     <button
                       onClick={() => editor.chain().focus().toggleBold().run()}
                       className={`p-1.5 rounded hover:bg-black/10 dark:hover:bg-white/10 ${editor.isActive('bold') ? 'text-accent' : colors.primaryText}`}

@@ -1,4 +1,11 @@
-﻿import { supabase } from './supabase';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { supabase } from './supabase';
+
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+let genAI: GoogleGenerativeAI | null = null;
+if (apiKey) {
+  genAI = new GoogleGenerativeAI(apiKey);
+}
 
 const generateContentWithRetry = async (prompt: string, systemInstruction?: string): Promise<string> => {
   try {
@@ -8,23 +15,21 @@ const generateContentWithRetry = async (prompt: string, systemInstruction?: stri
       return "You must be logged in to use AI features.";
     }
 
-    // Call the Supabase Edge Function proxy
-    const { data, error } = await supabase.functions.invoke('gemini-proxy', {
-      body: { prompt, systemInstruction }
-    });
-
-    if (error) {
-      console.error("Edge Function Error:", error);
-      return "Sorry, there was an error communicating with the AI. Please try again later.";
+    if (!genAI) {
+      console.warn("Gemini API key is not configured.");
+      return "AI features are currently unavailable. Please check configuration.";
     }
 
-    // Adapt this based on the exact shape returned by your edge function.
-    // The Deno proxy returns: { candidates: [ { content: { parts: [ { text: "..." } ] } } ] }
-    return data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "Sorry, the AI did not provide a response.";
+    const finalPrompt = systemInstruction ? `${systemInstruction}\n\n${prompt}` : prompt;
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    
+    const result = await model.generateContent(finalPrompt);
+    const response = await result.response;
+    return response.text() || "Sorry, the AI did not provide a response.";
 
   } catch (error) {
-    console.error("Gemini Proxy Error:", error);
-    return "Sorry, there was an error communicating with the AI proxy. Please try again later.";
+    console.error("Gemini API Error:", error);
+    return "Sorry, there was an error communicating with the AI. Please try again later.";
   }
 }
 
