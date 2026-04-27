@@ -48,12 +48,19 @@ const generateContentWithRetry = async (prompt: string, systemInstruction?: stri
       return "You must be logged in to use AI features.";
     }
 
+    if (!apiKey || apiKey === 'your_gemini_api_key') {
+      console.error("Gemini API Key is missing or using placeholder in .env");
+      return "Error: Gemini API key is not configured. Please add your valid API key to the .env file as VITE_GEMINI_API_KEY and restart your development server.";
+    }
+
     if (!genAI) {
-      console.warn("Gemini API key is not configured.");
-      return "AI features are currently unavailable. Please check configuration.";
+      console.warn("Gemini API client not initialized.");
+      return "AI features are currently unavailable. Please check your configuration.";
     }
 
     const modelName = await getActiveModel();
+    console.log(`Attempting request with model: ${modelName}`);
+    
     const finalPrompt = systemInstruction ? `${systemInstruction}\n\n${prompt}` : prompt;
     
     const response = await genAI.models.generateContent({
@@ -61,10 +68,24 @@ const generateContentWithRetry = async (prompt: string, systemInstruction?: stri
       contents: [{ role: 'user', parts: [{ text: finalPrompt }] }],
     });
 
-    return response.text || "Sorry, the AI did not provide a response.";
+    if (!response.text) {
+      console.warn("AI returned an empty response object:", response);
+      return "Sorry, the AI did not provide a response.";
+    }
+
+    return response.text;
 
   } catch (error: any) {
-    console.error("Gemini API Error:", error);
+    console.error("Gemini API Error Details:", error);
+    
+    // Check for specific error types to provide better user feedback
+    if (error.message?.includes('429')) {
+      return "Error: You've hit the Gemini API rate limit for this model. Please wait a moment or try again later.";
+    }
+    if (error.message?.includes('404')) {
+      return `Error: The AI model '${cachedModelName || 'gemini-1.5-flash'}' was not found. Try restarting your server to refresh model discovery.`;
+    }
+    
     return `Error: ${error.message || "Unknown error communicating with the AI"}`;
   }
 }
