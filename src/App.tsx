@@ -231,7 +231,6 @@ const App: React.FC = () => {
     } else {
       addNote(noteToSave);
     }
-    setSelectedNoteId(null);
   };
 
   const handleDeleteNote = (id: string) => {
