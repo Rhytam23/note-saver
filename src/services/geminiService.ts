@@ -7,6 +7,39 @@ if (apiKey) {
   genAI = new GoogleGenAI({ apiKey, apiVersion: 'v1' });
 }
 
+let cachedModelName: string | null = null;
+
+/**
+ * Automatically discovers the best available Gemini model for the current API key.
+ * This prevents 404 errors when specific models are deprecated or restricted.
+ */
+const getActiveModel = async (): Promise<string> => {
+  if (cachedModelName) return cachedModelName;
+  if (!genAI) return 'gemini-1.5-flash';
+
+  try {
+    const response = await (genAI as any).models.list();
+    const models = response.models || response;
+    
+    // Prefer Flash models for speed, then Pro models.
+    const bestModel = models.find((m: any) => 
+      m.supportedMethods?.includes('generateContent') && 
+      (m.name.includes('flash') || m.name.includes('pro'))
+    );
+
+    if (bestModel) {
+      // The name might come back as "models/gemini-1.5-flash", we just need the ID if it has a prefix
+      cachedModelName = bestModel.name.startsWith('models/') ? bestModel.name.split('/')[1] : bestModel.name;
+      console.log(`Auto-detected model: ${cachedModelName}`);
+      return cachedModelName!;
+    }
+  } catch (err) {
+    console.error("Model discovery failed, falling back to gemini-1.5-flash", err);
+  }
+  
+  return 'gemini-1.5-flash';
+};
+
 const generateContentWithRetry = async (prompt: string, systemInstruction?: string): Promise<string> => {
   try {
     const { data: { session } } = await supabase.auth.getSession();
@@ -20,10 +53,11 @@ const generateContentWithRetry = async (prompt: string, systemInstruction?: stri
       return "AI features are currently unavailable. Please check configuration.";
     }
 
+    const modelName = await getActiveModel();
     const finalPrompt = systemInstruction ? `${systemInstruction}\n\n${prompt}` : prompt;
     
     const response = await genAI.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: modelName,
       contents: [{ role: 'user', parts: [{ text: finalPrompt }] }],
     });
 
