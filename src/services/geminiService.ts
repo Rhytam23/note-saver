@@ -27,9 +27,9 @@ const generateContentWithRetry = async (prompt: string, systemInstruction?: stri
     const response = await result.response;
     return response.text() || "Sorry, the AI did not provide a response.";
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Gemini API Error:", error);
-    return "Sorry, there was an error communicating with the AI. Please try again later.";
+    return `Error: ${error.message || "Unknown error communicating with the AI"}`;
   }
 }
 
