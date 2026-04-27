@@ -1,10 +1,10 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 import { supabase } from './supabase';
 
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-let genAI: GoogleGenerativeAI | null = null;
+let genAI: GoogleGenAI | null = null;
 if (apiKey) {
-  genAI = new GoogleGenerativeAI(apiKey);
+  genAI = new GoogleGenAI({ apiKey });
 }
 
 const generateContentWithRetry = async (prompt: string, systemInstruction?: string): Promise<string> => {
@@ -21,11 +21,13 @@ const generateContentWithRetry = async (prompt: string, systemInstruction?: stri
     }
 
     const finalPrompt = systemInstruction ? `${systemInstruction}\n\n${prompt}` : prompt;
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
     
-    const result = await model.generateContent(finalPrompt);
-    const response = await result.response;
-    return response.text() || "Sorry, the AI did not provide a response.";
+    const response = await genAI.models.generateContent({
+      model: 'gemini-2.0-flash',
+      contents: [{ role: 'user', parts: [{ text: finalPrompt }] }],
+    });
+
+    return response.text || "Sorry, the AI did not provide a response.";
 
   } catch (error: any) {
     console.error("Gemini API Error:", error);
