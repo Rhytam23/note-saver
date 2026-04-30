@@ -38,6 +38,20 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ noteContent, onApply }) => {
     await runAction(tab);
   };
 
+  const formatAiResponse = (text: string) => {
+    if (!text) return '';
+    return text
+      // Convert bold Markdown
+      .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+      .replace(/__(.*?)__/g, '<b>$1</b>')
+      // Convert bullet points if they aren't already HTML
+      .replace(/^\* (.*$)/gm, '<li>$1</li>')
+      // Wrap bullet points in <ul> if they are loose
+      .replace(/(<li>.*<\/li>)/g, '<ul>$1</ul>')
+      // Remove double <ul> if they got nested
+      .replace(/<\/ul><ul>/g, '');
+  };
+
   const runAction = async (tab: AiTab) => {
     setIsLoading(true);
     setError(null);
@@ -49,7 +63,10 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ noteContent, onApply }) => {
         case 'ideas': response = await generateIdeas(noteContent); break;
         case 'detect': response = await detectAiContent(noteContent); break;
       }
-      setResults(prev => ({ ...prev, [tab]: response }));
+      
+      // Apply the fallback formatter to handle stray Markdown
+      const formattedResponse = formatAiResponse(response);
+      setResults(prev => ({ ...prev, [tab]: formattedResponse }));
     } catch (err: any) {
       setError(err.message || "An AI error occurred.");
     } finally {
