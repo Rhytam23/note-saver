@@ -1,4 +1,4 @@
-﻿import { Node, mergeAttributes } from '@tiptap/core';
+import { Node, mergeAttributes } from '@tiptap/core';
 
 export default Node.create({
   name: 'callout',
@@ -7,7 +7,7 @@ export default Node.create({
   addAttributes() {
     return {
       emoji: {
-        default: 'ðŸ’¡',
+        default: '💡',
       },
     };
   },
