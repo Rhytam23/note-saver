@@ -21,11 +21,14 @@ const generateContentWithRetry = async (prompt: string, systemInstruction?: stri
       return "AI features are currently unavailable. Please check your configuration.";
     }
 
-    // Use gemini-1.5-flash which is fast and widely available
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash",
-      systemInstruction: systemInstruction 
-    });
+    // Use gemini-1.5-flash-latest on the stable v1 endpoint
+    const model = genAI.getGenerativeModel(
+      { 
+        model: "gemini-1.5-flash-latest",
+        systemInstruction: systemInstruction 
+      },
+      { apiVersion: 'v1' }
+    );
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
