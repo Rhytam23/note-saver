@@ -70,3 +70,19 @@ export const generateIdeas = async (text: string): Promise<string> => {
   const prompt = `Based on the following text, generate a list of 3-5 creative ideas, next steps, or related concepts. Use <ul> and <li> tags for the list. Use <b> for emphasis. Do not use Markdown like * or **.\n\n---\n\n${text}`;
   return generateContentWithRetry(prompt, "You are a creative assistant that brainstorms ideas and returns them in a structured HTML format.");
 };
+
+/**
+ * Detects AI-generated patterns in the text.
+ */
+export const detectAiContent = async (text: string): Promise<string> => {
+  const prompt = `Analyze the following text for AI-generated patterns. 
+  1. Provide a "Likelihood Score" (0-100%).
+  2. Identify specific linguistic markers (e.g., perplexity, burstiness, transition patterns).
+  3. Format the output in clean HTML. 
+  Use a <h2> for the score and a <ul> for the findings.
+  
+  Text to analyze:
+  \n\n---\n\n${text}`;
+  
+  return generateContentWithRetry(prompt, "You are a linguistic forensic expert. Analyze text for AI hallmarks and return a structured HTML report. Be objective and precise.");
+};
