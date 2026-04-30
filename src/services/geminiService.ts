@@ -51,22 +51,22 @@ const generateContentWithRetry = async (prompt: string, systemInstruction?: stri
  * Summarizes the given text using the Gemini 2.5 API.
  */
 export const summarizeText = async (text: string): Promise<string> => {
-  const prompt = `Please provide a concise summary of the following text:\n\n---\n\n${text}`;
-  return generateContentWithRetry(prompt);
+  const prompt = `Please provide a concise summary of the following text. Use HTML tags for formatting (e.g., <b> for bold, <ul><li> for lists) if appropriate. Do not use Markdown like **.\n\n---\n\n${text}`;
+  return generateContentWithRetry(prompt, "You are a helpful assistant that provides summaries in clean HTML format.");
 };
 
 /**
  * Proofreads and corrects the given text using Gemini 2.5.
  */
 export const proofreadText = async (text: string): Promise<string> => {
-  const prompt = `Please proofread and correct any grammatical errors, spelling mistakes, or typos in the following text. Only return the corrected text.\n\n---\n\n${text}`;
-  return generateContentWithRetry(prompt, "You are an expert proofreader. Your task is to correct text while preserving the original tone and meaning.");
+  const prompt = `Please proofread and correct any grammatical errors, spelling mistakes, or typos in the following text. Use HTML tags like <b> or <i> only if they were present or needed for clarity. Only return the corrected text.\n\n---\n\n${text}`;
+  return generateContentWithRetry(prompt, "You are an expert proofreader. Your task is to correct text while preserving the original tone and meaning. Return the result in clean HTML format.");
 };
 
 /**
  * Generates creative ideas or next steps using Gemini 2.5.
  */
 export const generateIdeas = async (text: string): Promise<string> => {
-  const prompt = `Based on the following text, generate a short, bulleted list of 3-5 creative ideas, next steps, or related concepts. \n\n---\n\n${text}`;
-  return generateContentWithRetry(prompt, "You are a creative assistant designed to brainstorm and expand on ideas.");
+  const prompt = `Based on the following text, generate a list of 3-5 creative ideas, next steps, or related concepts. Use <ul> and <li> tags for the list. Use <b> for emphasis. Do not use Markdown like * or **.\n\n---\n\n${text}`;
+  return generateContentWithRetry(prompt, "You are a creative assistant that brainstorms ideas and returns them in a structured HTML format.");
 };

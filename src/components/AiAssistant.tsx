@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { summarizeText, proofreadText, generateIdeas } from '../services/geminiService';
 import { DocumentTextIcon, CheckBadgeIcon, LightBulbIcon, SpinnerIcon } from './Icons';
 import { useSeason } from '../contexts/SeasonalContext';
+import DOMPurify from 'dompurify';
 
 interface AiAssistantProps {
   noteContent: string;
@@ -82,9 +83,10 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ noteContent, onApply }) => {
 
       {result && (
         <div className="mt-3 space-y-2">
-          <div className={`text-xs p-2 rounded-md border max-h-40 overflow-y-auto ${colors.border} ${colors.surface} ${colors.primaryText}`}>
-            <p className="whitespace-pre-wrap">{result}</p>
-          </div>
+          <div 
+            className={`text-xs p-3 rounded-md border max-h-48 overflow-y-auto ${colors.border} ${colors.surface} ${colors.primaryText} prose-sm prose-invert`}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(result) }}
+          />
           <div className="flex gap-2">
             {lastAction === 'proofread' ? (
               <button
