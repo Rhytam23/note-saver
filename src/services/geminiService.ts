@@ -1,9 +1,9 @@
-import { createGenerativeAI } from '@google/genai';
+import { GoogleGenAI } from '@google/genai';
 import { supabase } from './supabase';
 
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 // Initialize the modern Unified SDK (v1.0+)
-const client = apiKey ? createGenerativeAI({ apiKey }) : null;
+const client = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
 const generateContentWithRetry = async (prompt: string, systemInstruction?: string): Promise<string> => {
   try {
