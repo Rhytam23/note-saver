@@ -378,7 +378,7 @@ const App: React.FC = () => {
                 transition={{ type: 'spring', stiffness: 200, damping: 20 }}
                 className={`fixed top-4 left-1/2 -translate-x-1/2 z-[100] p-3 rounded-full shadow-lg text-sm font-semibold border backdrop-blur-md ${colors.surface} ${colors.border} ${colors.primaryText}`}
               >
-                ðŸŒ¼ Celebrating Navaratri â€” the triumph of light and devotion.
+                🌸 Celebrating Navaratri — the triumph of light and devotion.
               </motion.div>
             )}
           </AnimatePresence>

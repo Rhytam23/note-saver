@@ -9,7 +9,7 @@ import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
 import Strike from '@tiptap/extension-strike';
 import type { Note, Tag, NotePriority } from "../types";
-import { CloseIcon, ChevronDownIcon, SpinnerIcon, ImageIcon, MicrophoneIcon, StopIcon, BoldIcon, ItalicIcon, UnderlineIcon, StrikeIcon, ListCheckIcon } from "./Icons";
+import { CloseIcon, ChevronDownIcon, SpinnerIcon, ImageIcon, MicrophoneIcon, StopIcon, BoldIcon, ItalicIcon, UnderlineIcon, StrikeIcon, ListCheckIcon, UndoIcon, RedoIcon, LightBulbIcon } from "./Icons";
 import AiAssistant from "./AiAssistant";
 import CoverImagePicker from "./CoverImagePicker";
 import SlashMenu from "./SlashMenu";
@@ -397,8 +397,58 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onClose, allTags,
                 value={editedNote.title}
                 onChange={handleTitleChange}
                 placeholder="Heading"
-                className={`w-full bg-transparent text-2xl md:text-3xl font-bold font-serif focus:outline-none mb-4 text-left ${colors.primaryText}`}
+                className={`w-full bg-transparent text-2xl md:text-3xl font-bold font-serif focus:outline-none mb-2 text-left ${colors.primaryText}`}
               />
+
+              {/* Editor Toolbar */}
+              <div className={`flex items-center gap-1 mb-4 pb-2 border-b ${colors.border}`}>
+                <button
+                  onClick={() => editor?.chain().focus().undo().run()}
+                  disabled={!editor?.can().undo()}
+                  className={`p-2 rounded-lg transition-colors ${colors.hover} disabled:opacity-30`}
+                  title="Undo (Ctrl+Z)"
+                >
+                  <UndoIcon className="h-5 w-5" />
+                </button>
+                <button
+                  onClick={() => editor?.chain().focus().redo().run()}
+                  disabled={!editor?.can().redo()}
+                  className={`p-2 rounded-lg transition-colors ${colors.hover} disabled:opacity-30`}
+                  title="Redo (Ctrl+Shift+Z)"
+                >
+                  <RedoIcon className="h-5 w-5" />
+                </button>
+                <div className={`w-px h-6 mx-1 ${colors.border}`} />
+                <button
+                  onClick={() => editor?.chain().focus().insertContent({ type: 'callout', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Important info here...' }] }] }).run()}
+                  className={`p-2 rounded-lg transition-colors ${colors.hover}`}
+                  title="Insert Callout"
+                >
+                  <LightBulbIcon className="h-5 w-5" />
+                </button>
+                <div className={`w-px h-6 mx-1 ${colors.border}`} />
+                <button
+                  onClick={() => editor?.chain().focus().toggleBold().run()}
+                  className={`p-2 rounded-lg transition-colors ${editor?.isActive('bold') ? 'bg-accent/20 text-accent' : colors.hover}`}
+                  title="Bold"
+                >
+                  <BoldIcon className="h-5 w-5" />
+                </button>
+                <button
+                  onClick={() => editor?.chain().focus().toggleItalic().run()}
+                  className={`p-2 rounded-lg transition-colors ${editor?.isActive('italic') ? 'bg-accent/20 text-accent' : colors.hover}`}
+                  title="Italic"
+                >
+                  <ItalicIcon className="h-5 w-5" />
+                </button>
+                <button
+                  onClick={() => editor?.chain().focus().toggleTaskList().run()}
+                  className={`p-2 rounded-lg transition-colors ${editor?.isActive('taskList') ? 'bg-accent/20 text-accent' : colors.hover}`}
+                  title="Task List"
+                >
+                  <ListCheckIcon className="h-5 w-5" />
+                </button>
+              </div>
 
               <div className="flex-1 min-h-0 flex flex-col relative overflow-y-auto custom-editor">
                 {editor && (
@@ -442,7 +492,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onClose, allTags,
                 <EditorContent editor={editor} className="flex-grow w-full h-full" />
                 {isListening && (
                   <div className="absolute bottom-4 left-4 bg-accent/20 backdrop-blur-md px-3 py-1 rounded-full text-sm border border-accent/30 animate-pulse">
-                    ðŸŽ¤ {transcript}...
+                    🎤 {transcript}...
                   </div>
                 )}
                 <AnimatePresence>
