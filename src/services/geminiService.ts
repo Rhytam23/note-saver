@@ -1,8 +1,9 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { createGenerativeAI } from '@google/genai';
 import { supabase } from './supabase';
 
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
+// Initialize the modern Unified SDK (v1.0+)
+const client = apiKey ? createGenerativeAI({ apiKey }) : null;
 
 const generateContentWithRetry = async (prompt: string, systemInstruction?: string): Promise<string> => {
   try {
@@ -13,26 +14,21 @@ const generateContentWithRetry = async (prompt: string, systemInstruction?: stri
     }
 
     if (!apiKey || apiKey === 'your_gemini_api_key' || apiKey.includes('YOUR_')) {
-      console.error("Gemini API Key is missing or using placeholder in .env");
-      return "Error: Gemini API key is not configured. Please add your valid API key to the .env file as VITE_GEMINI_API_KEY.";
+      return "Error: Gemini API key is not configured. Please add VITE_GEMINI_API_KEY to your .env file.";
     }
 
-    if (!genAI) {
+    if (!client) {
       return "AI features are currently unavailable. Please check your configuration.";
     }
 
-    // Use gemini-1.5-flash-latest on the stable v1 endpoint
-    const model = genAI.getGenerativeModel(
-      { 
-        model: "gemini-1.5-flash-latest",
-        systemInstruction: systemInstruction 
-      },
-      { apiVersion: 'v1' }
-    );
+    // Use the 2026 standard model: gemini-2.5-flash
+    const response = await client.models.generateContent({
+      model: 'gemini-2.5-flash',
+      systemInstruction: systemInstruction ? { role: 'system', parts: [{ text: systemInstruction }] } : undefined,
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    });
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+    const text = response.text;
 
     if (!text) {
       return "Sorry, the AI did not provide a response.";
@@ -41,26 +37,18 @@ const generateContentWithRetry = async (prompt: string, systemInstruction?: stri
     return text;
 
   } catch (error: any) {
-    console.error("Gemini API Error Details:", error);
+    console.error("Gemini 2.5 API Error:", error);
     
-    // Handle specific error codes
     const errorMessage = error.message || "";
-    if (errorMessage.includes('429')) {
-      return "Error: Rate limit exceeded. Please wait a moment.";
-    }
-    if (errorMessage.includes('403')) {
-      return "Error: API Key permission denied. Ensure Gemini API is enabled in Google AI Studio.";
-    }
-    if (errorMessage.includes('API_KEY_INVALID')) {
-      return "Error: The provided API Key is invalid.";
-    }
+    if (errorMessage.includes('429')) return "Error: Rate limit exceeded.";
+    if (errorMessage.includes('403')) return "Error: API Key permission denied.";
     
     return `Error: ${errorMessage || "Connection failed"}`;
   }
 }
 
 /**
- * Summarizes the given text using the Gemini API.
+ * Summarizes the given text using the Gemini 2.5 API.
  */
 export const summarizeText = async (text: string): Promise<string> => {
   const prompt = `Please provide a concise summary of the following text:\n\n---\n\n${text}`;
@@ -68,15 +56,15 @@ export const summarizeText = async (text: string): Promise<string> => {
 };
 
 /**
- * Proofreads and corrects the given text.
+ * Proofreads and corrects the given text using Gemini 2.5.
  */
 export const proofreadText = async (text: string): Promise<string> => {
-  const prompt = `Please proofread and correct any grammatical errors, spelling mistakes, or typos in the following text. Only return the corrected text, without any introductory phrases like "Here is the corrected text:".\n\n---\n\n${text}`;
+  const prompt = `Please proofread and correct any grammatical errors, spelling mistakes, or typos in the following text. Only return the corrected text.\n\n---\n\n${text}`;
   return generateContentWithRetry(prompt, "You are an expert proofreader. Your task is to correct text while preserving the original tone and meaning.");
 };
 
 /**
- * Generates creative ideas or next steps.
+ * Generates creative ideas or next steps using Gemini 2.5.
  */
 export const generateIdeas = async (text: string): Promise<string> => {
   const prompt = `Based on the following text, generate a short, bulleted list of 3-5 creative ideas, next steps, or related concepts. \n\n---\n\n${text}`;

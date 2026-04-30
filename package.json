@@ -13,7 +13,6 @@
     "@capacitor/core": "^8.3.0",
     "@emotion/is-prop-valid": "^1.4.0",
     "@google/genai": "^1.25.0",
-    "@google/generative-ai": "^0.24.1",
     "@react-oauth/google": "^0.13.4",
     "@supabase/supabase-js": "^2.89.0",
     "@tiptap/extension-placeholder": "^3.14.0",
