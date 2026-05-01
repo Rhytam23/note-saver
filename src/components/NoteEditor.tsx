@@ -295,7 +295,8 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onClose, allTags,
       case 'ordered': editor.chain().focus().toggleOrderedList().run(); break;
       case 'quote': editor.chain().focus().toggleBlockquote().run(); break;
       case 'code': editor.chain().focus().toggleCodeBlock().run(); break;
-      case 'callout': editor.chain().focus().insertContent({ type: 'callout', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Important info here...' }] }] }).run(); break;
+      case 'divider': editor.chain().focus().setHorizontalRule().run(); break;
+      case 'callout': editor.chain().focus().insertContent({ type: 'callout', attrs: { emoji: '💡' }, content: [{ type: 'paragraph', content: [{ type: 'text', text: ' ' }] }] }).run(); break;
       case 'ai':
         // Trigger AI Assistant (could be a focus or a specific mode)
         const aiButton = document.getElementById('ai-assistant-trigger');

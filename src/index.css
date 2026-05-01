@@ -892,3 +892,77 @@ html.light .quill-editor-custom .ql-toolbar {
 .pt-safe {
     padding-top: env(safe-area-inset-top);
 }
+
+/* Notion-style Editor Features */
+.ProseMirror {
+    padding-bottom: 200px;
+}
+
+.ProseMirror hr {
+    border: none;
+    border-top: 1px solid var(--divider);
+    margin: 2em 0;
+}
+
+html:not(.dark) .ProseMirror hr {
+    border-top: 1px solid var(--divider-light);
+}
+
+.callout {
+    display: flex;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+html:not(.dark) .callout {
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.callout-icon {
+    margin-right: 0.75rem;
+    user-select: none;
+}
+
+.callout-content {
+    flex: 1;
+}
+
+.callout-content p {
+    margin: 0 !important;
+}
+
+/* Task List Styling */
+ul[data-type="taskList"] {
+    list-style: none;
+    padding: 0;
+}
+
+ul[data-type="taskList"] li {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+}
+
+ul[data-type="taskList"] label {
+    margin-right: 0.75rem;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+ul[data-type="taskList"] input[type="checkbox"] {
+    cursor: pointer;
+    width: 1.2rem;
+    height: 1.2rem;
+    accent-color: var(--accent);
+}
+
+ul[data-type="taskList"] li[data-checked="true"] > div {
+    text-decoration: line-through;
+    opacity: 0.6;
+}

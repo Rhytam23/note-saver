@@ -5,7 +5,7 @@ import {
     H1Icon, H2Icon, H3Icon,
     ListBulletIcon, ListOrderedIcon,
     BlockquoteIcon, CodeBracketIcon,
-    SparklesIcon, LightBulbIcon
+    SparklesIcon, LightBulbIcon, MinusIcon
 } from './Icons.tsx';
 
 interface SlashCommand {
@@ -31,6 +31,7 @@ const COMMANDS: SlashCommand[] = [
     { id: 'ordered', label: 'Numbered List', subLabel: 'Create a list with numbering', icon: <ListOrderedIcon className="h-4 w-4" />, action: 'format-ordered' },
     { id: 'quote', label: 'Quote', subLabel: 'Capture a quote', icon: <BlockquoteIcon className="h-4 w-4" />, action: 'format-quote' },
     { id: 'code', label: 'Code Block', subLabel: 'Capture a code snippet', icon: <CodeBracketIcon className="h-4 w-4" />, action: 'format-code' },
+    { id: 'divider', label: 'Divider', subLabel: 'Horizontal line', icon: <MinusIcon className="h-4 w-4" />, action: 'format-divider' },
     { id: 'callout', label: 'Callout', subLabel: 'Highlighted tip or info', icon: <LightBulbIcon className="h-4 w-4" />, action: 'format-callout' },
     { id: 'ai', label: 'Ask AI', subLabel: 'Generate content with AI', icon: <SparklesIcon className="h-4 w-4" />, action: 'trigger-ai' },
 ];
