@@ -1,4 +1,4 @@
-﻿
+
 import { useState, useEffect, useCallback } from 'react';
 import type { Note, Tag } from "../types";
 import { supabase } from "../services/supabase";
@@ -51,16 +51,14 @@ export function useNotes(userId: string | undefined) {
         // 1. Fetch Notes
         const { data: notesData, error: notesError } = await supabase
           .from('notes')
-          .select('*')
-          .eq('user_id', userId);
+          .select('*');
 
         if (notesError) throw notesError;
 
         // 2. Fetch Tags
         const { data: tagsData, error: tagsError } = await supabase
           .from('tags')
-          .select('*')
-          .eq('user_id', userId);
+          .select('*');
 
         if (tagsError) throw tagsError;
 
@@ -136,13 +134,13 @@ export function useNotes(userId: string | undefined) {
     if (!userId) return;
     try {
       if (action === 'DELETE') {
-        await supabase.from('notes').delete().eq('id', note.id).eq('user_id', userId);
+        await supabase.from('notes').delete().eq('id', note.id);
       } else if (action === 'INSERT') {
         const dbRow = noteToDb(note, userId);
         await supabase.from('notes').insert(dbRow);
       } else {
         const dbRow = noteToDb(note, userId);
-        await supabase.from('notes').update({ ...dbRow, updated_at: new Date().toISOString() }).eq('id', note.id).eq('user_id', userId);
+        await supabase.from('notes').update({ ...dbRow, updated_at: new Date().toISOString() }).eq('id', note.id);
       }
     } catch (err) {
       console.error('Failed to sync note:', err);
@@ -153,7 +151,7 @@ export function useNotes(userId: string | undefined) {
     if (!userId) return;
     try {
       if (action === 'DELETE') {
-        await supabase.from('tags').delete().eq('name', tag.name).eq('user_id', userId);
+        await supabase.from('tags').delete().eq('name', tag.name);
       } else if (action === 'INSERT') {
         await supabase.from('tags').insert({ ...tag, user_id: userId });
       } else {

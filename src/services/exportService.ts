@@ -8,7 +8,7 @@ import DOMPurify from 'dompurify';
 export const stripHtml = (html: string): string => {
     // Create a temporary element to parse the HTML
     const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = html;
+    tempDiv.innerHTML = DOMPurify.sanitize(html);
     
     // Add line breaks for block elements to preserve structure
     tempDiv.querySelectorAll('p, blockquote').forEach(el => {
