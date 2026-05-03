@@ -27,3 +27,10 @@ Thumbs.db
 *.sw?
 
 .vercel
+
+# Agents & AI Skills
+.agents/
+.claude/
+.junie/
+skills/
+skills-lock.json
