@@ -1,4 +1,4 @@
-﻿import type { SeasonalTheme, UserLocation } from "../types";
+import type { SeasonalTheme, UserLocation } from "../types";
 
 type Festival = {
     theme: SeasonalTheme;
@@ -58,7 +58,7 @@ const getSeasonalTheme = (date: Date, latitude: number, country: string): Season
 
     if (isNorthernHemisphere) {
         if (month >= 2 && month <= 4) return 'spring';   // Mar-May
-        if (month >= 3 && month <= 5) return 'summer';   // Apr-Jun
+        if (month >= 5 && month <= 7) return 'summer';   // Jun-Aug
         if (month >= 8 && month <= 10) return 'autumn'; // Sep-Nov
         return 'winter'; // Dec-Feb
     } else { // Southern Hemisphere
