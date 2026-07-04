@@ -1,4 +1,4 @@
-﻿import type { UserLocation } from '../types';
+import type { UserLocation } from '../types';
 
 export const DEFAULT_LOCATION: UserLocation = { country: 'US', latitude: 39.8283 };
 
@@ -8,6 +8,13 @@ interface IpService {
 }
 
 const ipServices: IpService[] = [
+  {
+    url: 'https://ipwho.is/',
+    parser: (data: any) => {
+      if (!data.success) throw new Error(`ipwhois error: ${data.message}`);
+      return { country: data.country_code, latitude: data.latitude };
+    },
+  },
   {
     url: 'https://get.geojs.io/v1/ip/geo.json',
     parser: (data: any) => {
@@ -24,22 +31,7 @@ const ipServices: IpService[] = [
       if (!data.country_code || typeof data.latitude !== 'number') throw new Error('Invalid data from ipapi.co');
       return { country: data.country_code, latitude: data.latitude };
     },
-  },
-  {
-    url: 'https://freegeoip.app/json/',
-    parser: (data: any) => {
-      if (!data.country_code || typeof data.latitude !== 'number') throw new Error('Invalid data from freegeoip.app');
-      return { country: data.country_code, latitude: data.latitude };
-    },
-  },
-  {
-    url: 'https://ip-api.com/json',
-    parser: (data: any) => {
-      if (data.status !== 'success') throw new Error(`ip-api.com error: ${data.message}`);
-      if (!data.countryCode || typeof data.lat !== 'number') throw new Error('Invalid data from ip-api.com');
-      return { country: data.countryCode, latitude: data.lat };
-    },
-  },
+  }
 ];
 
 
