@@ -35,7 +35,18 @@ const ipServices: IpService[] = [
 ];
 
 
-const getLocationFromIp = async (): Promise<UserLocation> => {
+const getLocationFallback = async (): Promise<UserLocation> => {
+  // 1. Best Mode: Instantaneous, adblocker-proof timezone check
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (tz && (tz === 'Asia/Kolkata' || tz === 'Asia/Calcutta')) {
+      return { country: 'IN', latitude: 20.5937 };
+    }
+  } catch (e) {
+    // Ignore timezone errors
+  }
+
+  // 2. Fallback to IP services if timezone isn't explicitly Indian
   for (const service of ipServices) {
     try {
       const response = await fetch(service.url, {
@@ -45,8 +56,7 @@ const getLocationFromIp = async (): Promise<UserLocation> => {
         throw new Error(`Request to ${service.url} failed with status ${response.status}`);
       }
       const data = await response.json();
-      const location = service.parser(data);
-      return location;
+      return service.parser(data);
     } catch (error) {
       // Continue to next service
     }
@@ -62,7 +72,7 @@ const getLocationFromIp = async (): Promise<UserLocation> => {
  */
 export const getUserLocation = async (): Promise<UserLocation> => {
   if (!navigator.geolocation) {
-    return getLocationFromIp();
+    return getLocationFallback();
   }
 
   try {
@@ -75,14 +85,14 @@ export const getUserLocation = async (): Promise<UserLocation> => {
     });
 
     // Geolocation was successful, so we have accurate coordinates.
-    // We still need the country code from an IP lookup.
-    const ipLocation = await getLocationFromIp();
+    // We still need the country code from an IP lookup (or timezone).
+    const fallbackLocation = await getLocationFallback();
     return {
-      country: ipLocation.country,
+      country: fallbackLocation.country,
       latitude: position.coords.latitude, // Use the more accurate latitude from the browser.
     };
   } catch (error: any) {
-    // Fallback to IP-based lookup for both country and latitude.
-    return getLocationFromIp();
+    // Fallback to Timezone/IP-based lookup for both country and latitude.
+    return getLocationFallback();
   }
 };
