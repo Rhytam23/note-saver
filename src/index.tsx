@@ -7,28 +7,28 @@ import { SeasonalProvider } from "./contexts/SeasonalContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { Analytics } from "@vercel/analytics/react";
-
-
-
 import { RouterProvider } from "./contexts/RouterContext";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
-const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'dummy-google-client-id';
 
 root.render(
-  <GoogleOAuthProvider clientId={clientId}>
-    <AuthProvider>
-      <ThemeProvider>
-        <SeasonalProvider>
-          <RouterProvider>
-            <App />
-            <Analytics />
-          </RouterProvider>
-        </SeasonalProvider>
-      </ThemeProvider>
-    </AuthProvider>
-  </GoogleOAuthProvider>
+  <ErrorBoundary>
+    <GoogleOAuthProvider clientId={clientId}>
+      <AuthProvider>
+        <ThemeProvider>
+          <SeasonalProvider>
+            <RouterProvider>
+              <App />
+              <Analytics />
+            </RouterProvider>
+          </SeasonalProvider>
+        </ThemeProvider>
+      </AuthProvider>
+    </GoogleOAuthProvider>
+  </ErrorBoundary>
 );

@@ -7,8 +7,6 @@ interface RouterContextType {
   query: Record<string, string>;
 }
 
-const RouterContext = createContext<RouterContextType | undefined>(undefined);
-
 const normalizePath = (pathname: string): string => {
   if (!pathname || pathname === '') return '/';
   if (pathname.length > 1 && pathname.endsWith('/')) {
@@ -18,6 +16,7 @@ const normalizePath = (pathname: string): string => {
 };
 
 const getQueryParams = (): Record<string, string> => {
+  if (typeof window === 'undefined') return {};
   const params = new URLSearchParams(window.location.search);
   const result: Record<string, string> = {};
   params.forEach((value, key) => {
@@ -26,16 +25,38 @@ const getQueryParams = (): Record<string, string> => {
   return result;
 };
 
+const defaultRouterState: RouterContextType = {
+  path: typeof window !== 'undefined' ? normalizePath(window.location.pathname) : '/',
+  pushPath: (newPath: string) => {
+    if (typeof window !== 'undefined') {
+      window.history.pushState({}, '', newPath);
+      window.dispatchEvent(new Event('popstate'));
+    }
+  },
+  replacePath: (newPath: string) => {
+    if (typeof window !== 'undefined') {
+      window.history.replaceState({}, '', newPath);
+      window.dispatchEvent(new Event('popstate'));
+    }
+  },
+  query: typeof window !== 'undefined' ? getQueryParams() : {},
+};
+
+const RouterContext = createContext<RouterContextType>(defaultRouterState);
+
 export const RouterProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [path, setPath] = useState<string>(() => normalizePath(window.location.pathname));
+  const [path, setPath] = useState<string>(() => (typeof window !== 'undefined' ? normalizePath(window.location.pathname) : '/'));
   const [query, setQuery] = useState<Record<string, string>>(() => getQueryParams());
 
   const handleUrlChange = useCallback(() => {
-    setPath(normalizePath(window.location.pathname));
-    setQuery(getQueryParams());
+    if (typeof window !== 'undefined') {
+      setPath(normalizePath(window.location.pathname));
+      setQuery(getQueryParams());
+    }
   }, []);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
     window.addEventListener('popstate', handleUrlChange);
     return () => {
       window.removeEventListener('popstate', handleUrlChange);
@@ -43,6 +64,7 @@ export const RouterProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, [handleUrlChange]);
 
   const pushPath = useCallback((newPath: string) => {
+    if (typeof window === 'undefined') return;
     const normalized = normalizePath(newPath);
     if (window.location.pathname !== normalized) {
       window.history.pushState({}, '', newPath);
@@ -52,6 +74,7 @@ export const RouterProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, []);
 
   const replacePath = useCallback((newPath: string) => {
+    if (typeof window === 'undefined') return;
     const normalized = normalizePath(newPath);
     window.history.replaceState({}, '', newPath);
     setPath(normalized);
@@ -67,8 +90,5 @@ export const RouterProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
 export const useRouter = (): RouterContextType => {
   const context = useContext(RouterContext);
-  if (!context) {
-    throw new Error('useRouter must be used within a RouterProvider');
-  }
-  return context;
+  return context || defaultRouterState;
 };

@@ -19,24 +19,24 @@ import Footer from "./components/Footer";
 import SeasonalAnimations from "./components/SeasonalAnimations";
 import SeasonalLoading from "./components/SeasonalLoading";
 
-// Lazy Load Major Views & Modals
-const LandingPage = React.lazy(() => import('./components/LandingPage'));
-const AuthScreen = React.lazy(() => import('./components/AuthScreen'));
+// Direct Core Page Imports (Prevents Dynamic Module Import Failures & Production White Screens)
+import LandingPage from './components/LandingPage';
+import AuthScreen from './components/AuthScreen';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import TermsOfService from './components/TermsOfService';
+import FAQ from './components/FAQ';
+import NotFound from './components/NotFound';
+import AccessDenied from './components/AccessDenied';
+import CookiePreferences from './components/CookiePreferences';
+import Support from './components/Support';
+import PasswordReset from './components/PasswordReset';
+import EmailVerification from './components/EmailVerification';
+import Maintenance from './components/Maintenance';
+
+// Lazy Load Heavy Modals
 const ProfileModal = React.lazy(() => import('./components/ProfileModal'));
 const TutorialModal = React.lazy(() => import('./components/TutorialModal'));
 const WelcomeIntroAnimation = React.lazy(() => import('./components/WelcomeIntroAnimation'));
-const PrivacyPolicy = React.lazy(() => import('./components/PrivacyPolicy'));
-const TermsOfService = React.lazy(() => import('./components/TermsOfService'));
-const FAQ = React.lazy(() => import('./components/FAQ'));
-
-// Lazy Load New Required Pages
-const NotFound = React.lazy(() => import('./components/NotFound'));
-const AccessDenied = React.lazy(() => import('./components/AccessDenied'));
-const CookiePreferences = React.lazy(() => import('./components/CookiePreferences'));
-const Support = React.lazy(() => import('./components/Support'));
-const PasswordReset = React.lazy(() => import('./components/PasswordReset'));
-const EmailVerification = React.lazy(() => import('./components/EmailVerification'));
-const Maintenance = React.lazy(() => import('./components/Maintenance'));
 
 // Lazy Load Seasonal Intro Animations
 const IndependenceDayIntro = React.lazy(() => import('./components/IndependenceDayIntro'));
@@ -509,11 +509,7 @@ const App: React.FC = () => {
           </AnimatePresence>
         </Suspense>
 
-        <Suspense fallback={<SeasonalLoading />}>
-          <AnimatePresence mode="wait">
-            {renderContent()}
-          </AnimatePresence>
-        </Suspense>
+        {renderContent()}
       </div>
     </ErrorBoundary>
   );
