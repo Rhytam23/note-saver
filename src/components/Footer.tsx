@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import { GitHubIcon, BuyMeACoffeeIcon, PayPalIcon, InstagramIcon, MailIcon, DiyaIcon } from './Icons';
 import { useSeason } from '../contexts/SeasonalContext';
 
+import { useRouter } from '../contexts/RouterContext';
+
 interface FooterProps {
     variant?: 'simple' | 'detailed';
     onPrivacyClick?: () => void;
@@ -20,6 +22,7 @@ const socialLinks = [
 
 const Footer: React.FC<FooterProps> = ({ variant = 'simple', onPrivacyClick, onTermsClick, onFAQClick }) => {
   const { colors, theme } = useSeason();
+  const { pushPath } = useRouter();
   const isSummer = theme === 'summer';
   const isNavratri = theme === 'navratri';
 
@@ -83,13 +86,21 @@ const Footer: React.FC<FooterProps> = ({ variant = 'simple', onPrivacyClick, onT
         <div className="space-y-4">
             <h3 className={`font-bold text-sm uppercase tracking-wider ${colors.primaryText}`}>Support</h3>
             <ul className={`space-y-2 text-sm ${colors.secondaryText}`}>
-                <li><a href="mailto:rhytambiswas@gmail.com" className="hover:text-accent">Contact Us</a></li>
-                <li><a 
-                    href="/?view=faq" 
-                    onClick={(e) => { e.preventDefault(); onFAQClick?.(); }}
+                <li><a
+                    href="/support"
+                    onClick={(e) => { e.preventDefault(); pushPath('/support'); }}
+                    className="hover:text-accent"
+                >Support Center</a></li>
+                <li><a
+                    href="/support"
+                    onClick={(e) => { e.preventDefault(); onFAQClick ? onFAQClick() : pushPath('/support'); }}
                     className="hover:text-accent"
                 >FAQs</a></li>
-                <li><a href="#" className="hover:text-accent">Feedback</a></li>
+                <li><a
+                    href="/cookies"
+                    onClick={(e) => { e.preventDefault(); pushPath('/cookies'); }}
+                    className="hover:text-accent"
+                >Cookie Preferences</a></li>
             </ul>
         </div>
 
@@ -97,17 +108,21 @@ const Footer: React.FC<FooterProps> = ({ variant = 'simple', onPrivacyClick, onT
         <div className="space-y-4">
             <h3 className={`font-bold text-sm uppercase tracking-wider ${colors.primaryText}`}>Legal</h3>
             <ul className={`space-y-2 text-sm ${colors.secondaryText}`}>
-                <li><a 
-                    href="/?view=privacy" 
-                    onClick={(e) => { e.preventDefault(); onPrivacyClick?.(); }}
+                <li><a
+                    href="/privacy"
+                    onClick={(e) => { e.preventDefault(); onPrivacyClick ? onPrivacyClick() : pushPath('/privacy'); }}
                     className="hover:text-accent"
                 >Privacy Policy</a></li>
-                <li><a 
-                    href="/?view=terms" 
-                    onClick={(e) => { e.preventDefault(); onTermsClick?.(); }}
+                <li><a
+                    href="/terms"
+                    onClick={(e) => { e.preventDefault(); onTermsClick ? onTermsClick() : pushPath('/terms'); }}
                     className="hover:text-accent"
                 >Terms of Service</a></li>
-                <li><a href="#" className="hover:text-accent">Data Security</a></li>
+                <li><a
+                    href="/cookies"
+                    onClick={(e) => { e.preventDefault(); pushPath('/cookies'); }}
+                    className="hover:text-accent"
+                >Cookie Preferences</a></li>
             </ul>
         </div>
 

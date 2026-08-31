@@ -3,6 +3,7 @@ import type { Theme, SeasonalTheme } from "../types";
 import { SunIcon, MoonIcon, SearchIcon, MenuIcon, SantaSleighIcon } from "./Icons";
 import { motion } from 'framer-motion';
 import { useSeason } from "../contexts/SeasonalContext";
+import { useRouter } from '../contexts/RouterContext';
 
 interface HeaderProps {
   theme: Theme;
@@ -64,6 +65,7 @@ const ThemeIcon: React.FC = () => {
 
 const Header: React.FC<HeaderProps> = ({ theme, toggleTheme, searchTerm, setSearchTerm, onMenuClick, isSearchVisible, setIsSearchVisible }) => {
   const { colors, theme: seasonalTheme } = useSeason();
+  const { pushPath } = useRouter();
   const isIndependenceDay = seasonalTheme === 'independence_day_in';
 
   return (
@@ -75,8 +77,8 @@ const Header: React.FC<HeaderProps> = ({ theme, toggleTheme, searchTerm, setSear
       
       {!isSearchVisible ? (
         <>
-          <div className="flex items-center space-x-3">
-            <button onClick={onMenuClick} className={`p-2 rounded-full md:hidden ${colors.hover}`}>
+          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => pushPath('/')}>
+            <button onClick={(e) => { e.stopPropagation(); onMenuClick(); }} className={`p-2 rounded-full md:hidden ${colors.hover}`}>
               <MenuIcon className="h-6 w-6" />
             </button>
             <ThemeIcon />

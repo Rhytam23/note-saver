@@ -14,6 +14,7 @@ interface LandingPageProps {
   theme: Theme;
   toggleTheme: () => void;
   setView: (view: 'landing' | 'auth' | 'app' | 'privacy' | 'terms' | 'faq') => void;
+  onQuickAccess?: () => void;
 }
 
 const containerVariants: any = {
@@ -40,8 +41,16 @@ const itemVariants: any = {
   },
 };
 
-const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, theme, toggleTheme, setView }) => {
+const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, theme, toggleTheme, setView, onQuickAccess }) => {
   const { colors, theme: seasonalTheme } = useSeason();
+
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.closest('button, a, input, select, textarea')) {
+      return;
+    }
+    onQuickAccess?.();
+  };
 
   return (
     <motion.div
@@ -49,8 +58,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, theme, toggleTh
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.8 }}
-      className="flex-1 flex flex-col w-full"
+      transition={{ duration: 0.5 }}
+      onDoubleClick={handleDoubleClick}
+      className="flex-1 flex flex-col w-full cursor-default select-none"
     >
       <header className={`absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-20`}>
         <div className="flex items-center space-x-2">

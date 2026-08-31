@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useSeason } from '../contexts/SeasonalContext';
 
 interface WelcomeIntroAnimationProps {
@@ -10,9 +10,17 @@ const WelcomeIntroAnimation: React.FC<WelcomeIntroAnimationProps> = ({ onAnimati
     const { colors } = useSeason();
 
     useEffect(() => {
+        // Check for reduced motion preference
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (prefersReducedMotion) {
+            onAnimationComplete();
+            return;
+        }
+
+        // Fast, 2.5 second intro animation
         const timer = setTimeout(() => {
             onAnimationComplete();
-        }, 4500); // Animation duration
+        }, 2500);
 
         return () => clearTimeout(timer);
     }, [onAnimationComplete]);
@@ -22,32 +30,34 @@ const WelcomeIntroAnimation: React.FC<WelcomeIntroAnimationProps> = ({ onAnimati
             key="welcome-intro"
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 1 }}
-            className={`fixed inset-0 z-50 flex flex-col items-center justify-center ${colors.bgSimple} overflow-hidden`}
+            transition={{ duration: 0.5 }}
+            onClick={onAnimationComplete}
+            title="Click or tap to skip"
+            className={`fixed inset-0 z-50 flex flex-col items-center justify-center ${colors.bgSimple} overflow-hidden cursor-pointer select-none`}
         >
-            <div className="relative">
+            <div className="relative pointer-events-none">
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                    initial={{ opacity: 0, scale: 0.8, y: 15 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
-                    transition={{ duration: 1, ease: "easeOut" }}
-                    className="flex items-center justify-center mb-6"
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                    className="flex items-center justify-center mb-4"
                 >
                     <span className="text-6xl md:text-8xl" role="img" aria-label="lamp">🪔</span>
                 </motion.div>
 
                 <div className={`text-4xl md:text-6xl font-serif font-bold text-center ${colors.primaryText}`}>
                     <motion.span
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 15 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.5, duration: 0.8 }}
-                        className="block mb-2"
+                        transition={{ delay: 0.2, duration: 0.5 }}
+                        className="block mb-2 text-2xl md:text-3xl font-mono text-secondary-text"
                     >
                         Welcome to
                     </motion.span>
                     <motion.span
-                        initial={{ opacity: 0, scale: 0.9 }}
+                        initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 1.5, duration: 0.8, type: "spring", stiffness: 100 }}
+                        transition={{ delay: 0.6, duration: 0.5, type: "spring", stiffness: 120 }}
                         className="block text-accent"
                     >
                         Notenirman
@@ -57,10 +67,14 @@ const WelcomeIntroAnimation: React.FC<WelcomeIntroAnimationProps> = ({ onAnimati
                 <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: "100%" }}
-                    transition={{ delay: 2.2, duration: 1.5, ease: "easeInOut" }}
-                    className="h-1 bg-accent mt-8 mx-auto rounded-full"
-                    style={{ maxWidth: '200px' }}
+                    transition={{ delay: 0.9, duration: 1.2, ease: "easeInOut" }}
+                    className="h-1 bg-accent mt-6 mx-auto rounded-full"
+                    style={{ maxWidth: '180px' }}
                 />
+
+                <p className="text-[10px] text-center text-secondary-text opacity-50 mt-4">
+                  Tap anywhere to skip
+                </p>
             </div>
         </motion.div>
     );
