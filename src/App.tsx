@@ -244,6 +244,19 @@ const App: React.FC = () => {
     setSearchTerm('');
   };
 
+  const handleQuickAccess = useCallback(() => {
+    localStorage.setItem('notenirman_landing_seen', 'true');
+    localStorage.setItem('hasSeenWelcome', 'true');
+    setShowWelcome(false);
+
+    if (user) {
+      pushPath('/notes');
+      handleAddNewNote();
+    } else {
+      pushPath('/login');
+    }
+  }, [user, pushPath, handleAddNewNote]);
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key === 'n') {
@@ -270,26 +283,13 @@ const App: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return <SeasonalLoading />;
-  }
-
   // Define Protected Routes
   const isProtectedRoute = ['/dashboard', '/notes', '/profile'].includes(path);
   const isAppRoute = (path === '/' && user) || (isProtectedRoute && user);
 
-  const handleQuickAccess = useCallback(() => {
-    localStorage.setItem('notenirman_landing_seen', 'true');
-    localStorage.setItem('hasSeenWelcome', 'true');
-    setShowWelcome(false);
-
-    if (user) {
-      pushPath('/notes');
-      handleAddNewNote();
-    } else {
-      pushPath('/login');
-    }
-  }, [user, pushPath, handleAddNewNote]);
+  if (loading) {
+    return <SeasonalLoading />;
+  }
 
   const renderContent = () => {
     // Protected route check for unauthenticated users
