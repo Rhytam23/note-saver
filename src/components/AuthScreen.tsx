@@ -5,8 +5,11 @@ import { useTheme } from '../contexts/ThemeContext';
 import { ChevronLeftIcon, GoogleIcon, EyeIcon, EyeOffIcon, CheckCircleIcon, XCircleIcon } from './Icons';
 import { useSeason } from '../contexts/SeasonalContext';
 
+import { useRouter } from '../contexts/RouterContext';
+
 interface AuthScreenProps {
   onBackToHome: () => void;
+  mode?: 'login' | 'register' | 'forgot-password';
 }
 
 const PasswordRequirement: React.FC<{ isValid: boolean; text: string }> = ({ isValid, text }) => (
@@ -16,10 +19,23 @@ const PasswordRequirement: React.FC<{ isValid: boolean; text: string }> = ({ isV
   </div>
 );
 
-const AuthScreen: React.FC<AuthScreenProps> = ({ onBackToHome }) => {
+const AuthScreen: React.FC<AuthScreenProps> = ({ onBackToHome, mode }) => {
   const { colors } = useSeason();
-  const [isLoginView, setIsLoginView] = useState(true);
-  const [isForgotPasswordView, setIsForgotPasswordView] = useState(false);
+  const { pushPath } = useRouter();
+  const [isLoginView, setIsLoginView] = useState(() => mode === 'register' ? false : true);
+  const [isForgotPasswordView, setIsForgotPasswordView] = useState(() => mode === 'forgot-password');
+
+  React.useEffect(() => {
+    if (mode === 'register') {
+      setIsLoginView(false);
+      setIsForgotPasswordView(false);
+    } else if (mode === 'forgot-password') {
+      setIsForgotPasswordView(true);
+    } else if (mode === 'login') {
+      setIsLoginView(true);
+      setIsForgotPasswordView(false);
+    }
+  }, [mode]);
   const [isVerificationSent, setIsVerificationSent] = useState(false);
   const [isResetLinkSent, setIsResetLinkSent] = useState(false);
   const [name, setName] = useState('');
@@ -253,6 +269,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onBackToHome }) => {
               <button
                 type="button"
                 onClick={() => {
+                  pushPath('/forgot-password');
                   setIsForgotPasswordView(true);
                   setError(null);
                 }}
@@ -275,6 +292,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onBackToHome }) => {
             <button
               type="button"
               onClick={() => {
+                pushPath('/login');
                 setIsForgotPasswordView(false);
                 setError(null);
               }}
@@ -305,7 +323,9 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onBackToHome }) => {
               <span className={colors.secondaryText}>{isLoginView ? "Don't have an account?" : "Already have an account?"}</span>
               <button
                 onClick={() => {
-                  setIsLoginView(!isLoginView);
+                  const nextLogin = !isLoginView;
+                  setIsLoginView(nextLogin);
+                  pushPath(nextLogin ? '/login' : '/register');
                   setError(null);
                 }}
                 className="ml-1 font-semibold text-link hover:underline"

@@ -10,6 +10,8 @@ import { Analytics } from "@vercel/analytics/react";
 
 
 
+import { RouterProvider } from "./contexts/RouterContext";
+
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
@@ -21,8 +23,10 @@ root.render(
     <AuthProvider>
       <ThemeProvider>
         <SeasonalProvider>
-          <App />
-          <Analytics />
+          <RouterProvider>
+            <App />
+            <Analytics />
+          </RouterProvider>
         </SeasonalProvider>
       </ThemeProvider>
     </AuthProvider>

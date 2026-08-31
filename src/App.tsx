@@ -1,12 +1,12 @@
 import React, { useState, useMemo, useEffect, useCallback, Suspense } from 'react';
 import { SpeedInsights } from "@vercel/speed-insights/react";
-
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from "./contexts/AuthContext";
 import { useTheme } from "./contexts/ThemeContext";
 import { useNotes } from "./hooks/useNotes";
 import type { Note, Tag, User, NotePriority, PriorityFilter } from "./types";
 import { useSeason } from "./contexts/SeasonalContext";
+import { useRouter } from "./contexts/RouterContext";
 import { v4 as uuidv4 } from 'uuid';
 
 import Header from "./components/Header";
@@ -20,45 +20,44 @@ import SeasonalAnimations from "./components/SeasonalAnimations";
 import SeasonalLoading from "./components/SeasonalLoading";
 
 // Lazy Load Major Views & Modals
-const LandingPage = React.lazy(() => import('./components/LandingPage.tsx'));
-const AuthScreen = React.lazy(() => import('./components/AuthScreen.tsx'));
-const ProfileModal = React.lazy(() => import('./components/ProfileModal.tsx'));
-const TutorialModal = React.lazy(() => import('./components/TutorialModal.tsx'));
-const WelcomeIntroAnimation = React.lazy(() => import('./components/WelcomeIntroAnimation.tsx'));
-const PrivacyPolicy = React.lazy(() => import('./components/PrivacyPolicy.tsx'));
-const TermsOfService = React.lazy(() => import('./components/TermsOfService.tsx'));
-const FAQ = React.lazy(() => import('./components/FAQ.tsx'));
+const LandingPage = React.lazy(() => import('./components/LandingPage'));
+const AuthScreen = React.lazy(() => import('./components/AuthScreen'));
+const ProfileModal = React.lazy(() => import('./components/ProfileModal'));
+const TutorialModal = React.lazy(() => import('./components/TutorialModal'));
+const WelcomeIntroAnimation = React.lazy(() => import('./components/WelcomeIntroAnimation'));
+const PrivacyPolicy = React.lazy(() => import('./components/PrivacyPolicy'));
+const TermsOfService = React.lazy(() => import('./components/TermsOfService'));
+const FAQ = React.lazy(() => import('./components/FAQ'));
+
+// Lazy Load New Required Pages
+const NotFound = React.lazy(() => import('./components/NotFound'));
+const AccessDenied = React.lazy(() => import('./components/AccessDenied'));
+const CookiePreferences = React.lazy(() => import('./components/CookiePreferences'));
+const Support = React.lazy(() => import('./components/Support'));
+const PasswordReset = React.lazy(() => import('./components/PasswordReset'));
+const EmailVerification = React.lazy(() => import('./components/EmailVerification'));
+const Maintenance = React.lazy(() => import('./components/Maintenance'));
 
 // Lazy Load Seasonal Intro Animations
-const IndependenceDayIntro = React.lazy(() => import('./components/IndependenceDayIntro.tsx'));
-const SummerIntroAnimation = React.lazy(() => import('./components/SummerIntroAnimation.tsx'));
-const WinterIntroAnimation = React.lazy(() => import('./components/WinterIntroAnimation.tsx'));
-const ChristmasIntroAnimation = React.lazy(() => import('./components/ChristmasIntroAnimation.tsx'));
-const MonsoonIntroAnimation = React.lazy(() => import('./components/MonsoonIntroAnimation.tsx'));
-const AutumnIntroAnimation = React.lazy(() => import('./components/AutumnIntroAnimation.tsx'));
-const SpringIntroAnimation = React.lazy(() => import('./components/SpringIntroAnimation.tsx'));
-const DiwaliIntroAnimation = React.lazy(() => import('./components/DiwaliIntroAnimation.tsx'));
-const HoliIntroAnimation = React.lazy(() => import('./components/HoliIntroAnimation.tsx'));
-const PongalIntroAnimation = React.lazy(() => import('./components/PongalIntroAnimation.tsx'));
-const NavratriIntroAnimation = React.lazy(() => import('./components/NavratriIntroAnimation.tsx'));
-const NewYearIntroAnimation = React.lazy(() => import('./components/NewYearIntroAnimation.tsx'));
+const IndependenceDayIntro = React.lazy(() => import('./components/IndependenceDayIntro'));
+const SummerIntroAnimation = React.lazy(() => import('./components/SummerIntroAnimation'));
+const WinterIntroAnimation = React.lazy(() => import('./components/WinterIntroAnimation'));
+const ChristmasIntroAnimation = React.lazy(() => import('./components/ChristmasIntroAnimation'));
+const MonsoonIntroAnimation = React.lazy(() => import('./components/MonsoonIntroAnimation'));
+const AutumnIntroAnimation = React.lazy(() => import('./components/AutumnIntroAnimation'));
+const SpringIntroAnimation = React.lazy(() => import('./components/SpringIntroAnimation'));
+const DiwaliIntroAnimation = React.lazy(() => import('./components/DiwaliIntroAnimation'));
+const HoliIntroAnimation = React.lazy(() => import('./components/HoliIntroAnimation'));
+const PongalIntroAnimation = React.lazy(() => import('./components/PongalIntroAnimation'));
+const NavratriIntroAnimation = React.lazy(() => import('./components/NavratriIntroAnimation'));
+const NewYearIntroAnimation = React.lazy(() => import('./components/NewYearIntroAnimation'));
 
 const App: React.FC = () => {
   const { user, loading, logout, updateUser, updatePassword } = useAuth() as any;
   const { theme, toggleTheme } = useTheme() as any;
   const { notes, addNote, updateNote, deleteNote, customTags, addOrUpdateCustomTag, deleteCustomTag } = useNotes(user?.id);
   const { theme: seasonalTheme, colors } = useSeason();
-
-  const [view, setView] = useState<'landing' | 'auth' | 'app' | 'privacy' | 'terms' | 'faq'>('landing');
-  
-  // Handle direct links to Privacy/Terms/FAQ for Google Verification
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const viewParam = params.get('view');
-    if (viewParam === 'privacy') setView('privacy');
-    if (viewParam === 'terms') setView('terms');
-    if (viewParam === 'faq') setView('faq');
-  }, []);
+  const { path, pushPath } = useRouter();
 
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -70,6 +69,13 @@ const App: React.FC = () => {
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [isProfileModalOpen, setProfileModalOpen] = useState(false);
   const [isTutorialOpen, setTutorialOpen] = useState(false);
+
+  // Sync profile route with modal
+  useEffect(() => {
+    if (path === '/profile' && user) {
+      setProfileModalOpen(true);
+    }
+  }, [path, user]);
 
   // Intro Animation States
   const [showIndependenceDayIntro, setShowIndependenceDayIntro] = useState(false);
@@ -86,22 +92,33 @@ const App: React.FC = () => {
   const [showNavratriIntro, setShowNavratriIntro] = useState(false);
   const [showNewYearIntro, setShowNewYearIntro] = useState(false);
 
-  // Welcome Animation State
+  // Welcome Animation State with notenirman_landing_seen persistence & reduced motion
   const [showWelcome, setShowWelcome] = useState(() => {
-    const hasSeenRequest = localStorage.getItem('hasSeenWelcome');
-    return !hasSeenRequest;
+    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return false;
+    }
+    const landingSeen = localStorage.getItem('notenirman_landing_seen') || localStorage.getItem('hasSeenWelcome');
+    return !landingSeen;
   });
 
   const handleWelcomeComplete = useCallback(() => {
     setShowWelcome(false);
+    localStorage.setItem('notenirman_landing_seen', 'true');
     localStorage.setItem('hasSeenWelcome', 'true');
   }, []);
 
+  // Enforce zero animation replay for authenticated users
   useEffect(() => {
-    // If showing welcome, skip other intros for this session to avoid clutter
+    if (user) {
+      setShowWelcome(false);
+      localStorage.setItem('notenirman_landing_seen', 'true');
+      localStorage.setItem('hasSeenWelcome', 'true');
+    }
+  }, [user]);
+
+  useEffect(() => {
     if (showWelcome) return;
 
-    // Reset all flags first
     setShowIndependenceDayIntro(false);
     setShowSummerIntro(false);
     setShowWinterIntro(false);
@@ -116,22 +133,8 @@ const App: React.FC = () => {
     setShowNewYearIntro(false);
     setShowNavratriBanner(false);
 
-    // Independence Day Intro
-    if (seasonalTheme === 'independence_day_in') {
-      setShowIndependenceDayIntro(true);
-    }
-
-    // ... rest of intro logic preserved but conditional on !showWelcome
-    // Since we returned early if showWelcome was true, we are good here.
-    // However, we need to make sure this effect re-runs when showWelcome changes to false.
-    // So we add showWelcome to dependency array implicitly or let it flow naturally.
-
-    // Navratri
-    if (seasonalTheme === 'navratri') {
-      setShowNavratriIntro(true);
-    }
-
-    // Season Intros
+    if (seasonalTheme === 'independence_day_in') setShowIndependenceDayIntro(true);
+    if (seasonalTheme === 'navratri') setShowNavratriIntro(true);
     if (seasonalTheme === 'summer') setShowSummerIntro(true);
     if (seasonalTheme === 'winter') setShowWinterIntro(true);
     if (seasonalTheme === 'christmas') setShowChristmasIntro(true);
@@ -142,16 +145,8 @@ const App: React.FC = () => {
     if (seasonalTheme === 'holi') setShowHoliIntro(true);
     if (seasonalTheme === 'pongal') setShowPongalIntro(true);
     if (seasonalTheme === 'new_year') setShowNewYearIntro(true);
-
   }, [seasonalTheme, showWelcome]);
 
-  // ... (rest of helper functions like allTags, filteredNotes, etc.) ...
-  // ... (handlers like handleAddNewNote, etc.) ...
-
-  // (Assuming identical implementation for helper functions and handlers as before)
-  // Re-implementing just the changed parts of the component related to state and effect
-
-  // Memoize filtered notes helpers
   const allTags = useMemo(() => {
     const tagSet = new Set<string>();
     notes.forEach(note => {
@@ -169,18 +164,15 @@ const App: React.FC = () => {
       const content = (note.content || '');
       const term = searchTerm.toLowerCase();
 
-      // Safe check for content
       let contentMatch = false;
       try {
         const plainText = stripHtml(content).toLowerCase();
         contentMatch = plainText.includes(term);
       } catch (e) {
-        // Fallback if HTML parsing fails
         contentMatch = content.toLowerCase().includes(term);
       }
 
       const searchMatch = title.includes(term) || contentMatch;
-
       const tagMatch = !activeTag || (note.tags && Array.isArray(note.tags) && note.tags.includes(activeTag));
       const priorityMatch = !activePriority || note.priority === activePriority;
       return searchMatch && tagMatch && priorityMatch;
@@ -217,7 +209,6 @@ const App: React.FC = () => {
     setSelectedNoteId(newNote.id);
   }, [activeTag, customTags, addNote]);
 
-
   const handleSaveNote = (noteToSave: Note) => {
     noteToSave.tags.forEach(tag => {
       if (!allTags.includes(tag)) {
@@ -253,46 +244,11 @@ const App: React.FC = () => {
     setSearchTerm('');
   };
 
-  // Force check session on mount to handle redirects reliably
-  useEffect(() => {
-    const initSession = async () => {
-      const { supabase } = await import('./services/supabase');
-      const { data: { session } } = await supabase.auth.getSession();
-      console.log('[App] Manual session check:', session ? 'Found User' : 'No User');
-      if (session?.user) {
-        // If we have a user but view is not 'app', force it
-        if (view !== 'app') {
-          console.log('[App] forcing view to app from manual check');
-          setView('app');
-        }
-      }
-    };
-    initSession();
-  }, []);
-
-  useEffect(() => {
-    console.log('[App] Auth State Update:', { loading, user: !!user, view, currentView: view });
-    if (loading) return;
-
-    // If we have a user, ALWAYS ensure we are in app view
-    if (user) {
-      if (view !== 'app') {
-        console.log('[App] User found, switching to app (state-based)');
-        setView('app');
-      }
-    } else {
-      console.log('[App] No user found');
-      if (view === 'app') {
-        setView('landing');
-      }
-    }
-  }, [user, loading, view]);
-
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key === 'n') {
         event.preventDefault();
-        if (view === 'app') {
+        if (user && ['/', '/dashboard', '/notes', '/profile'].includes(path)) {
           handleAddNewNote();
         }
       }
@@ -302,7 +258,7 @@ const App: React.FC = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [view, handleAddNewNote]);
+  }, [path, user, handleAddNewNote]);
 
   const stripHtml = (html: string) => {
     if (!html || typeof html !== 'string') return "";
@@ -310,7 +266,6 @@ const App: React.FC = () => {
       const doc = new DOMParser().parseFromString(html, 'text/html');
       return doc.body.textContent || "";
     } catch (e) {
-      console.warn("Error parsing HTML for search:", e);
       return "";
     }
   };
@@ -318,6 +273,177 @@ const App: React.FC = () => {
   if (loading) {
     return <SeasonalLoading />;
   }
+
+  // Define Protected Routes
+  const isProtectedRoute = ['/dashboard', '/notes', '/profile'].includes(path);
+  const isAppRoute = (path === '/' && user) || (isProtectedRoute && user);
+
+  const handleQuickAccess = useCallback(() => {
+    localStorage.setItem('notenirman_landing_seen', 'true');
+    localStorage.setItem('hasSeenWelcome', 'true');
+    setShowWelcome(false);
+
+    if (user) {
+      pushPath('/notes');
+      handleAddNewNote();
+    } else {
+      pushPath('/login');
+    }
+  }, [user, pushPath, handleAddNewNote]);
+
+  const renderContent = () => {
+    // Protected route check for unauthenticated users
+    if (isProtectedRoute && !user) {
+      return <AccessDenied key="403" />;
+    }
+
+    // Main App View for Authenticated Users on App Routes
+    if (isAppRoute) {
+      return (
+        <div className="flex-1 flex w-full relative z-10">
+          <Sidebar
+            user={user}
+            tags={allTags}
+            customTags={customTags}
+            addOrUpdateCustomTag={addOrUpdateCustomTag}
+            activeTag={activeTag}
+            setActiveTag={setActiveTag}
+            activePriority={activePriority}
+            setActivePriority={setActivePriority}
+            onClearFilters={handleClearFilters}
+            isCollapsed={isSidebarCollapsed}
+            setIsCollapsed={setIsSidebarCollapsed}
+            isOpen={isMobileSidebarOpen}
+            setIsOpen={setMobileSidebarOpen}
+            onProfileClick={() => setProfileModalOpen(true)}
+            onAddTag={(tag) => addOrUpdateCustomTag({ name: tag })}
+            onDeleteCustomTag={deleteCustomTag}
+            onTutorialClick={() => setTutorialOpen(true)}
+          />
+          <div className="flex-1 flex flex-col min-w-0">
+            <Header
+              theme={theme}
+              toggleTheme={toggleTheme}
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              onMenuClick={() => setMobileSidebarOpen(true)}
+              isSearchVisible={isSearchVisible}
+              setIsSearchVisible={setIsSearchVisible}
+            />
+            <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+              <NoteList
+                pinnedNotes={pinnedNotes}
+                unpinnedNotes={unpinnedNotes}
+                customTags={customTags}
+                activeTag={activeTag}
+                activePriority={activePriority}
+                onSelectNote={handleSelectNote}
+                onDeleteNote={handleDeleteNote}
+                onTogglePin={handleTogglePin}
+              />
+            </main>
+            <Footer variant="simple" />
+            <FloatingActionButton onClick={handleAddNewNote} />
+            <AnimatePresence>
+              {selectedNoteId && (
+                <NoteEditor
+                  key={selectedNoteId}
+                  note={notes.find(n => n.id === selectedNoteId) || null}
+                  onSave={handleSaveNote}
+                  onClose={() => setSelectedNoteId(null)}
+                  allTags={allTags}
+                  customTags={customTags}
+                />
+              )}
+              {isProfileModalOpen && (
+                <Suspense fallback={null}>
+                  <ProfileModal
+                    user={user}
+                    onClose={() => {
+                      setProfileModalOpen(false);
+                      if (path === '/profile') pushPath('/dashboard');
+                    }}
+                    onLogout={() => {
+                      logout();
+                      setProfileModalOpen(false);
+                      pushPath('/login');
+                    }}
+                    onUpdateUser={updateUser}
+                    onUpdatePassword={updatePassword}
+                  />
+                </Suspense>
+              )}
+              {isTutorialOpen && (
+                <Suspense fallback={null}>
+                  <TutorialModal isOpen={isTutorialOpen} onClose={() => setTutorialOpen(false)} />
+                </Suspense>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      );
+    }
+
+    // Specific Route Switch
+    switch (path) {
+      case '/':
+        return (
+          <LandingPage
+            key="landing"
+            onGetStarted={() => pushPath('/login')}
+            theme={theme}
+            toggleTheme={toggleTheme}
+            onQuickAccess={handleQuickAccess}
+            setView={(v) => {
+              if (v === 'auth') pushPath('/login');
+              else if (v === 'privacy') pushPath('/privacy');
+              else if (v === 'terms') pushPath('/terms');
+              else if (v === 'faq') pushPath('/support');
+              else pushPath('/');
+            }}
+          />
+        );
+
+      case '/login':
+        return <AuthScreen key="login" mode="login" onBackToHome={() => pushPath('/')} />;
+
+      case '/register':
+        return <AuthScreen key="register" mode="register" onBackToHome={() => pushPath('/')} />;
+
+      case '/forgot-password':
+        return <AuthScreen key="forgot" mode="forgot-password" onBackToHome={() => pushPath('/login')} />;
+
+      case '/reset-password':
+        return <PasswordReset key="reset-password" />;
+
+      case '/verify-email':
+        return <EmailVerification key="verify-email" />;
+
+      case '/privacy':
+        return <PrivacyPolicy key="privacy" onBack={() => pushPath('/')} />;
+
+      case '/terms':
+        return <TermsOfService key="terms" onBack={() => pushPath('/')} />;
+
+      case '/cookies':
+        return <CookiePreferences key="cookies" />;
+
+      case '/support':
+        return <Support key="support" />;
+
+      case '/403':
+        return <AccessDenied key="403" />;
+
+      case '/maintenance':
+        return <Maintenance key="maintenance" />;
+
+      case '/404':
+        return <NotFound key="404" />;
+
+      default:
+        return <NotFound key="404-default" />;
+    }
+  };
 
   return (
     <ErrorBoundary>
@@ -364,7 +490,6 @@ const App: React.FC = () => {
             {showNavratriIntro && seasonalTheme === 'navratri' && (
               <NavratriIntroAnimation onAnimationComplete={() => setShowNavratriIntro(false)} />
             )}
-
             {showNewYearIntro && seasonalTheme === 'new_year' && (
               <NewYearIntroAnimation onAnimationComplete={() => setShowNewYearIntro(false)} />
             )}
@@ -383,97 +508,12 @@ const App: React.FC = () => {
             )}
           </AnimatePresence>
         </Suspense>
+
         <Suspense fallback={<SeasonalLoading />}>
           <AnimatePresence mode="wait">
-            {view === 'landing' && <LandingPage key="landing" onGetStarted={() => setView('auth')} theme={theme} toggleTheme={toggleTheme} setView={setView} />}
-            {view === 'auth' && <AuthScreen key="auth" onBackToHome={() => setView('landing')} />}
-            {view === 'privacy' && <PrivacyPolicy key="privacy" onBack={() => setView('landing')} />}
-            {view === 'terms' && <TermsOfService key="terms" onBack={() => setView('landing')} />}
-            {view === 'faq' && <FAQ key="faq" onBack={() => setView('landing')} />}
+            {renderContent()}
           </AnimatePresence>
         </Suspense>
-
-        {view === 'app' && user && (
-          <div className="flex-1 flex w-full relative z-10">
-            <Sidebar
-              user={user}
-              tags={allTags}
-              customTags={customTags}
-              addOrUpdateCustomTag={addOrUpdateCustomTag}
-              activeTag={activeTag}
-              setActiveTag={setActiveTag}
-              activePriority={activePriority}
-              setActivePriority={setActivePriority}
-              onClearFilters={handleClearFilters}
-              isCollapsed={isSidebarCollapsed}
-              setIsCollapsed={setIsSidebarCollapsed}
-              isOpen={isMobileSidebarOpen}
-              setIsOpen={setMobileSidebarOpen}
-              onProfileClick={() => setProfileModalOpen(true)}
-              onAddTag={(tag) => addOrUpdateCustomTag({ name: tag })}
-              onDeleteCustomTag={deleteCustomTag}
-              onTutorialClick={() => setTutorialOpen(true)}
-            />
-            <div className="flex-1 flex flex-col min-w-0">
-              <Header
-                theme={theme}
-                toggleTheme={toggleTheme}
-                searchTerm={searchTerm}
-                setSearchTerm={setSearchTerm}
-                onMenuClick={() => setMobileSidebarOpen(true)}
-                isSearchVisible={isSearchVisible}
-                setIsSearchVisible={setIsSearchVisible}
-              />
-              <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
-                <NoteList
-                  pinnedNotes={pinnedNotes}
-                  unpinnedNotes={unpinnedNotes}
-                  customTags={customTags}
-                  activeTag={activeTag}
-                  activePriority={activePriority}
-                  onSelectNote={handleSelectNote}
-                  onDeleteNote={handleDeleteNote}
-                  onTogglePin={handleTogglePin}
-                />
-              </main>
-              <Footer variant="simple" />
-              <FloatingActionButton onClick={handleAddNewNote} />
-              <AnimatePresence>
-                {selectedNoteId && (
-                  <NoteEditor
-                    key={selectedNoteId}
-                    note={notes.find(n => n.id === selectedNoteId) || null}
-                    onSave={handleSaveNote}
-                    onClose={() => setSelectedNoteId(null)}
-                    allTags={allTags}
-                    customTags={customTags}
-                  />
-                )}
-                {isProfileModalOpen && (
-                  <Suspense fallback={null}>
-                    <ProfileModal
-                      user={user}
-                      onClose={() => setProfileModalOpen(false)}
-                      onLogout={() => {
-                        logout();
-                        setProfileModalOpen(false);
-                      }}
-                      onUpdateUser={updateUser}
-                      onUpdatePassword={updatePassword}
-                    />
-                  </Suspense>
-                )}
-                {isTutorialOpen && (
-                  <Suspense fallback={null}>
-                    <TutorialModal isOpen={isTutorialOpen} onClose={() => setTutorialOpen(false)} />
-                  </Suspense>
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
-        )}
-
-
       </div>
     </ErrorBoundary>
   );

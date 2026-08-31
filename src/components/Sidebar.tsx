@@ -3,6 +3,7 @@ import { motion, AnimatePresence, Variants } from 'framer-motion';
 import type { User, Tag, PriorityFilter, NotePriority } from "../types";
 import { useSeason } from "../contexts/SeasonalContext";
 import { useClickOutside } from "../hooks/useClickOutside";
+import { useRouter } from '../contexts/RouterContext';
 import {
     TagIcon,
     NotesIcon,
@@ -148,6 +149,7 @@ const SidebarContent: React.FC<Omit<SidebarProps, 'isOpen' | 'setIsOpen'> & { se
         setTagToEdit,
     } = props;
     const { colors } = useSeason();
+    const { pushPath } = useRouter();
     const [isAddingTag, setIsAddingTag] = useState(false);
     const [newTagName, setNewTagName] = useState('');
 
@@ -181,7 +183,40 @@ const SidebarContent: React.FC<Omit<SidebarProps, 'isOpen' | 'setIsOpen'> & { se
             </header>
 
             <nav className="space-y-1">
-                <NavItem isCollapsed={isCollapsed} icon={<NotesIcon className="h-6 w-6" />} text="All Notes" isActive={!activeTag && !activePriority} onClick={onClearFilters} />
+                <NavItem
+                    isCollapsed={isCollapsed}
+                    icon={<NotesIcon className="h-6 w-6" />}
+                    text="Dashboard"
+                    onClick={() => {
+                        onClearFilters();
+                        pushPath('/dashboard');
+                    }}
+                />
+                <NavItem
+                    isCollapsed={isCollapsed}
+                    icon={<NotesIcon className="h-6 w-6 text-accent" />}
+                    text="My Notes"
+                    isActive={!activeTag && !activePriority}
+                    onClick={() => {
+                        onClearFilters();
+                        pushPath('/notes');
+                    }}
+                />
+                <NavItem
+                    isCollapsed={isCollapsed}
+                    icon={<TagIcon className="h-6 w-6 text-sky-500" />}
+                    text="Profile & Settings"
+                    onClick={() => {
+                        pushPath('/profile');
+                        onProfileClick();
+                    }}
+                />
+                <NavItem
+                    isCollapsed={isCollapsed}
+                    icon={<QuestionMarkCircleIcon className="h-6 w-6 text-emerald-500" />}
+                    text="Support Center"
+                    onClick={() => pushPath('/support')}
+                />
             </nav>
 
             <div className="space-y-1 mt-4">
