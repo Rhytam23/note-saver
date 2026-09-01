@@ -8,7 +8,7 @@ interface RouterContextType {
 }
 
 const normalizePath = (pathname: string): string => {
-  if (!pathname || pathname === '') return '/';
+  if (!pathname || pathname === '' || pathname === '/index.html' || pathname.endsWith('/index.html')) return '/';
   if (pathname.length > 1 && pathname.endsWith('/')) {
     return pathname.slice(0, -1);
   }
