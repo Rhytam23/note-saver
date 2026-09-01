@@ -2,5 +2,10 @@
   "deno.enablePaths": [
     "supabase/functions"
   ],
-  "css.lint.unknownAtRules": "ignore"
+  "css.lint.unknownAtRules": "ignore",
+  "yaml.validate": true,
+  "yaml.customTags": [
+    "!Vault",
+    "!Vault scalar"
+  ]
 }

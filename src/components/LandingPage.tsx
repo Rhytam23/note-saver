@@ -7,6 +7,7 @@ import KeyFeatures from './KeyFeatures';
 import WhyChooseUs from './WhyChooseUs';
 import Testimonials from './Testimonials';
 import FeatureHighlights from './FeatureHighlights';
+import GetTheApp from './GetTheApp';
 import Footer from './Footer';
 
 interface LandingPageProps {
@@ -79,7 +80,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, theme, toggleTh
         </button>
       </header>
 
-      {/* Hero Section */}
       <section className="min-h-screen flex flex-col items-center justify-center text-center p-4 relative bg-gradient-to-b from-primary-bg-light/10 to-primary-bg-light/30 dark:from-primary-bg/10 dark:to-primary-bg/30">
         <motion.div
           variants={containerVariants}
@@ -136,11 +136,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, theme, toggleTh
         </motion.div>
       </section>
 
-      {/* Subsequent sections */}
       <div className="w-full z-10">
         <KeyFeatures />
         
-        {/* Purpose Section for Google Verification */}
         <section className={`py-20 px-4 border-y ${colors.border} ${colors.surface}`}>
           <div className="max-w-4xl mx-auto text-center space-y-8">
             <h2 className={`text-3xl md:text-5xl font-serif font-bold ${colors.primaryText}`}>
@@ -163,7 +161,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, theme, toggleTh
         <FeatureHighlights />
         <WhyChooseUs />
         <Testimonials />
-        <Footer 
+        <GetTheApp />
+        <Footer
           variant="detailed" 
           onPrivacyClick={() => setView('privacy')} 
           onTermsClick={() => setView('terms')} 

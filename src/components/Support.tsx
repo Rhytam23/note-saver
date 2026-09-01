@@ -37,7 +37,6 @@ const Support: React.FC = () => {
       </header>
 
       <main className="max-w-5xl w-full mx-auto flex-1 space-y-8">
-        {/* Hero Card */}
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
@@ -75,7 +74,6 @@ const Support: React.FC = () => {
           </div>
         </motion.div>
 
-        {/* Tab Content */}
         {activeTab === 'faq' ? (
           <motion.div
             initial={{ opacity: 0 }}
@@ -168,7 +166,6 @@ const Support: React.FC = () => {
           </motion.div>
         )}
 
-        {/* Links Navigation */}
         <div className="flex flex-wrap justify-center gap-6 text-xs text-secondary-text opacity-80 pt-4">
           <button onClick={() => pushPath('/privacy')} className="hover:text-accent underline">Privacy Policy</button>
           <button onClick={() => pushPath('/terms')} className="hover:text-accent underline">Terms of Service</button>

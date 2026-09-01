@@ -29,10 +29,8 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ noteContent, onApply }) => {
       return;
     }
     
-    // Switch tab first
     setActiveTab(tab);
     
-    // If we already have a result for this tab, don't re-run automatically unless it's a "Scan Again"
     if (results[tab]) return;
 
     await runAction(tab);
@@ -41,14 +39,10 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ noteContent, onApply }) => {
   const formatAiResponse = (text: string) => {
     if (!text) return '';
     return text
-      // Convert bold Markdown
       .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
       .replace(/__(.*?)__/g, '<b>$1</b>')
-      // Convert bullet points if they aren't already HTML
       .replace(/^\* (.*$)/gm, '<li>$1</li>')
-      // Wrap bullet points in <ul> if they are loose
       .replace(/(<li>.*<\/li>)/g, '<ul>$1</ul>')
-      // Remove double <ul> if they got nested
       .replace(/<\/ul><ul>/g, '');
   };
 
@@ -64,7 +58,6 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ noteContent, onApply }) => {
         case 'detect': response = await detectAiContent(noteContent); break;
       }
       
-      // Apply the fallback formatter to handle stray Markdown
       const formattedResponse = formatAiResponse(response);
       setResults(prev => ({ ...prev, [tab]: formattedResponse }));
     } catch (err: any) {
@@ -83,7 +76,7 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ noteContent, onApply }) => {
 
   return (
     <div className={`flex flex-col rounded-xl border transition-all duration-300 ${colors.border} ${colors.surface} overflow-hidden shadow-2xl backdrop-blur-md`}>
-      {/* Tabs Header */}
+      {}
       <div className={`flex border-b ${colors.border} bg-white/5`}>
         {tabs.map((tab) => (
           <button
@@ -102,7 +95,7 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ noteContent, onApply }) => {
         ))}
       </div>
 
-      {/* Content Area */}
+      {}
       <div className="p-4 min-h-[180px] flex flex-col">
         {isLoading ? (
           <div className="flex-1 flex flex-col items-center justify-center space-y-3 py-6">
@@ -127,13 +120,13 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ noteContent, onApply }) => {
           </div>
         ) : (
           <div className="flex-1 animate-in fade-in slide-in-from-bottom-2 duration-500">
-            {/* Sanitize and Render HTML Result */}
+            {}
             <div 
               className={`prose-sm prose-invert text-xs leading-relaxed ${colors.primaryText} max-h-[250px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-white/10`}
               dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(results[activeTab] || '') }}
             />
 
-            {/* Actions Footer */}
+            {}
             <div className="mt-4 pt-3 border-t border-white/5 flex gap-2">
               {activeTab === 'detect' ? (
                 <button

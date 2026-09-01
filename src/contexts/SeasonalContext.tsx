@@ -2,12 +2,10 @@ import React, { createContext, useContext, useState, useEffect, useMemo } from '
 import { getDynamicTheme, getThemeFromCalendarEvents } from "../services/seasonalService";
 import { getUserLocation } from "../services/locationService";
 import { fetchTodayEvents } from "../services/calendarService";
-// import type { SeasonalTheme } from "../types";
 import { getThemeColors } from "../services/themeColorService";
 import { useAuth } from "./AuthContext";
 import { useTheme } from "./ThemeContext";
 
-// Inline types to avoid resolution issues
 export type SeasonalTheme =
   | 'none' | 'winter' | 'autumn' | 'spring' | 'summer' | 'monsoon'
   | 'diwali' | 'holi' | 'pongal' | 'navratri' | 'christmas'
@@ -43,15 +41,12 @@ export const SeasonalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   useEffect(() => {
     const determineTheme = async () => {
-      // Prioritize user's manual preference
       if (user?.themePreference && user.themePreference !== 'auto') {
         setSeasonalTheme(user.themePreference);
         return;
       }
 
-      // Fallback to automatic detection
       try {
-        // 1. Try Google Calendar events first
         const eventTitles = await fetchTodayEvents();
         if (eventTitles.length > 0) {
           const calendarTheme = getThemeFromCalendarEvents(eventTitles);
@@ -61,25 +56,22 @@ export const SeasonalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           }
         }
 
-        // 2. Fallback to location-based seasonal logic
         const location = await getUserLocation();
         const dynamicTheme = getDynamicTheme(location);
         setSeasonalTheme(dynamicTheme);
       } catch (error) {
         console.error("Failed to determine dynamic theme:", error);
-        // Fallback to a default if everything fails
         setSeasonalTheme(getDynamicTheme({ country: 'US', latitude: 39.8283 }));
       }
     };
 
     determineTheme();
 
-    // Optional: Set up an interval to re-check the theme daily if set to auto
     const interval = setInterval(() => {
       if (!user?.themePreference || user.themePreference === 'auto') {
         determineTheme();
       }
-    }, 1000 * 60 * 60 * 24); // every 24 hours
+    }, 1000 * 60 * 60 * 24);
 
     return () => clearInterval(interval);
 

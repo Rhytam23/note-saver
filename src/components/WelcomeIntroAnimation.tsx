@@ -10,14 +10,12 @@ const WelcomeIntroAnimation: React.FC<WelcomeIntroAnimationProps> = ({ onAnimati
     const { colors } = useSeason();
 
     useEffect(() => {
-        // Check for reduced motion preference
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         if (prefersReducedMotion) {
             onAnimationComplete();
             return;
         }
 
-        // Fast, 2.5 second intro animation
         const timer = setTimeout(() => {
             onAnimationComplete();
         }, 2500);

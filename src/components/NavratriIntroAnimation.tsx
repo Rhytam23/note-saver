@@ -24,9 +24,8 @@ const NavratriIntroAnimation: React.FC<IntroAnimationProps> = ({ onAnimationComp
             key="navratri-intro"
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, transition: { duration: 1.0 } }}
-            className="fixed inset-0 z-[200] flex flex-col items-center justify-center overflow-hidden bg-[#2E0219]" // Deep Maroon/Purple
+            className="fixed inset-0 z-[200] flex flex-col items-center justify-center overflow-hidden bg-[#2E0219]"
         >
-            {/* Rotating Mandala Background */}
             <motion.div
                 className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none"
                 animate={{ rotate: 360 }}
@@ -44,21 +43,19 @@ const NavratriIntroAnimation: React.FC<IntroAnimationProps> = ({ onAnimationComp
                 ))}
             </motion.div>
 
-            {/* Main Content */}
             <motion.div
                 initial={{ y: 50, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.8, ease: "backOut" }}
                 className="z-10 text-center flex flex-col items-center"
             >
-                {/* Dandiya Sticks Representation */}
                 <div className="flex justify-center items-center gap-4 mb-6 relative">
                     <motion.div
                         animate={{ rotate: [0, -15, 0] }}
                         transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
                         className="text-7xl md:text-9xl origin-bottom-right"
                     >
-                        🥢  {/* Using chopsticks emoji as abstract representation of Dandiya sticks if needed, or stick-like object */}
+                        🥢
                     </motion.div>
                     <motion.div
                         animate={{ rotate: [0, 15, 0] }}
@@ -68,7 +65,6 @@ const NavratriIntroAnimation: React.FC<IntroAnimationProps> = ({ onAnimationComp
                         🥢
                     </motion.div>
 
-                    {/* Sparkle/Clash Effect */}
                     <motion.div
                         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-5xl"
                         animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}

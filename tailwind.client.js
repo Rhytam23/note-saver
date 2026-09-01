@@ -3,7 +3,6 @@ tailwind.config = {
     theme: {
         extend: {
             colors: {
-                // Dark Mode Palette
                 'primary-bg': '#1B1B1F',
                 'secondary-bg': '#242529',
                 'surface': '#2C2D31',
@@ -11,12 +10,11 @@ tailwind.config = {
                 'secondary-text': '#A1A1AA',
                 'accent': '#FFB400',
                 'accent-hover': '#FFD369',
-                'accent-dark': '#FF6B00', // For gradient
+                'accent-dark': '#FF6B00',
                 'link': '#38BDF8',
                 'error': '#EF4444',
                 'success': '#22C55E',
                 'divider': '#2E2E33',
-                // Light Mode Palette
                 'primary-bg-light': '#F5F6FA',
                 'secondary-bg-light': '#FFFFFF',
                 'surface-light': '#E4E6EB',
@@ -39,3 +37,4 @@ tailwind.config = {
         },
     },
 }
+

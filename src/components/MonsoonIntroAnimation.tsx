@@ -30,7 +30,6 @@ const MonsoonIntroAnimation: React.FC<IntroAnimationProps> = ({ onAnimationCompl
             exit={{ opacity: 0, transition: { duration: 1.0 } }}
             className="fixed inset-0 z-[200] flex flex-col items-center justify-center overflow-hidden bg-slate-900"
         >
-            {/* Rain */}
             <div className="absolute inset-0 pointer-events-none">
                 {raindrops.map(drop => (
                     <div
@@ -49,10 +48,8 @@ const MonsoonIntroAnimation: React.FC<IntroAnimationProps> = ({ onAnimationCompl
                 ))}
             </div>
 
-            {/* Lightning Flash Overlay */}
             <div className="absolute inset-0 bg-white opacity-0 animate-[lightning-flash_4s_infinite_ease-out]" />
 
-            {/* Cloud Icon */}
             <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}

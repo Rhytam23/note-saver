@@ -131,7 +131,7 @@ create table public.notes (
   content text,
   tags text[],
   is_pinned boolean default false,
-  priority text default 'low', // 'high', 'medium', 'low', 'none'
+  priority text default 'low',
   cover_image text,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null

@@ -1,14 +1,13 @@
 import React, { createContext, useContext } from 'react';
 import { useAuth as useAuthHook } from '@/src/hooks/useAuth';
 
-// Inline types
 interface User {
   id: string;
   name?: string | null;
   email?: string | null;
   avatarUrl?: string | null;
   passwordHash?: string;
-  themePreference?: any; // avoid circular dep on SeasonalTheme
+  themePreference?: any;
 }
 
 export interface AuthContextType {
@@ -34,3 +33,4 @@ export const useAuth = () => {
   }
   return context;
 };
+

@@ -3,14 +3,10 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import DOMPurify from 'dompurify';
 
-// --- Helper Functions ---
-
 export const stripHtml = (html: string): string => {
-    // Create a temporary element to parse the HTML
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = DOMPurify.sanitize(html);
     
-    // Add line breaks for block elements to preserve structure
     tempDiv.querySelectorAll('p, blockquote').forEach(el => {
         el.appendChild(document.createTextNode('\n\n'));
     });
@@ -22,26 +18,23 @@ export const stripHtml = (html: string): string => {
         el.appendChild(document.createTextNode('\n'));
     });
 
-    // Extract text content, which now includes the added newlines
     let text = tempDiv.textContent || "";
     
-    // Clean up extra whitespace
-    text = text.replace(/ \n/g, '\n'); // remove spaces before newlines
-    text = text.replace(/\n\s*\n/g, '\n\n'); // collapse multiple newlines into a max of two
+    text = text.replace(/ \n/g, '\n');
+    text = text.replace(/\n\s*\n/g, '\n\n');
     
     return text.trim();
 };
 
 const htmlToMarkdown = (html: string): string => {
   let markdown = html;
-  // Basic conversions. For more complex scenarios, a library would be better.
   markdown = markdown.replace(/<p>(.*?)<\/p>/gi, '$1\n\n');
   markdown = markdown.replace(/<b>(.*?)<\/b>/gi, '**$1**');
   markdown = markdown.replace(/<strong>(.*?)<\/strong>/gi, '**$1**');
   markdown = markdown.replace(/<i>(.*?)<\/i>/gi, '*$1*');
   markdown = markdown.replace(/<em>(.*?)<\/em>/gi, '*$1*');
-  markdown = markdown.replace(/<u>(.*?)<\/u>/gi, '$1'); // Underline is not standard MD
-  markdown = stripHtml(markdown); // Strip any remaining tags
+  markdown = markdown.replace(/<u>(.*?)<\/u>/gi, '$1');
+  markdown = stripHtml(markdown);
   return markdown.trim();
 };
 
@@ -62,14 +55,11 @@ const slugify = (text: string) => {
         .toString()
         .toLowerCase()
         .trim()
-        .replace(/\s+/g, '-') // Replace spaces with -
-        .replace(/[^\w\-]+/g, '') // Remove all non-word chars
-        .replace(/\-\-+/g, '-'); // Replace multiple - with single -
+        .replace(/\s+/g, '-')
+        .replace(/[^\w\-]+/g, '')
+        .replace(/\-\-+/g, '-');
 }
 
-// --- Export Functions ---
-
-// Export a single note
 export const exportNote = (note: Note, format: 'txt' | 'md' | 'pdf') => {
   const filename = slugify(note.title) || 'untitled-note';
 
@@ -90,7 +80,6 @@ export const exportNote = (note: Note, format: 'txt' | 'md' | 'pdf') => {
   }
 };
 
-// PDF generation for a single note
 const exportAsPdf = async (note: Note) => {
   const doc = new jsPDF({
     orientation: 'p',
@@ -101,7 +90,7 @@ const exportAsPdf = async (note: Note) => {
   const tempContainer = document.createElement('div');
   tempContainer.style.position = 'absolute';
   tempContainer.style.left = '-9999px';
-  tempContainer.style.width = '400px'; // A fixed width for consistent rendering
+  tempContainer.style.width = '400px';
   tempContainer.style.padding = '20px';
   tempContainer.style.fontFamily = 'Lora, serif';
   tempContainer.style.color = '#000';
@@ -121,7 +110,7 @@ const exportAsPdf = async (note: Note) => {
   const imgHeight = canvas.height;
   
   const ratio = imgWidth / imgHeight;
-  const canvasPdfWidth = pdfWidth - 20; // with margin
+  const canvasPdfWidth = pdfWidth - 20;
   const canvasPdfHeight = canvasPdfWidth / ratio;
     
   doc.addImage(imgData, 'PNG', 10, 10, canvasPdfWidth, canvasPdfHeight);
@@ -132,3 +121,4 @@ const exportAsPdf = async (note: Note) => {
     
   doc.save(filename);
 };
+

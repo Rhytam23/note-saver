@@ -18,7 +18,7 @@ import SlashCommand from "../extensions/SlashCommand";
 import EmojiSuggestion from "../extensions/EmojiSuggestion";
 import Callout from "../extensions/Callout";
 import { useSeason } from "../contexts/SeasonalContext";
-import { getTagColorClasses } from "../services/colorService";
+import { getTagColorClasses, getSafeCoverStyle } from "../services/colorService";
 import { useClickOutside } from "../hooks/useClickOutside";
 import { useSpeechRecognition } from "../hooks/useSpeechRecognition";
 
@@ -369,7 +369,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onClose, allTags,
               <div className="relative w-full h-40 md:h-52 flex-shrink-0 group">
                 <div
                   className="w-full h-full bg-cover bg-center"
-                  style={{ background: editedNote.coverImage.includes('gradient') || editedNote.coverImage.startsWith('#') ? editedNote.coverImage : `url(${editedNote.coverImage})` }}
+                  style={getSafeCoverStyle(editedNote.coverImage)}
                 />
                 <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button

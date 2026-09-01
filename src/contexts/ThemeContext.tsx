@@ -2,7 +2,6 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import type { Theme } from "../types";
 
 const getInitialTheme = (): Theme => {
-  // This function needs to be safe for server-side rendering, even if not used there, as a best practice.
   if (typeof window === 'undefined') {
     return 'light';
   }
@@ -27,7 +26,6 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
 
-  // useEffect runs after paint, avoiding blocking the main thread.
   useEffect(() => {
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');

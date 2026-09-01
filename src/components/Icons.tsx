@@ -275,7 +275,6 @@ export const DiyaIcon: any = (props) => (
 export const SantaSleighIcon: any = (props) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 80" {...props}>
     <g fill="#5C3A21">
-      {/* Reindeer */}
       <path d="M 10 40 C 5 30, 25 25, 20 45 L 22 55 L 18 55 L 15 45" />
       <path d="M 12 35 L 5 25" stroke="#5C3A21" strokeWidth="2" />
       <path d="M 12 35 L 18 28" stroke="#5C3A21" strokeWidth="2" />
@@ -286,14 +285,11 @@ export const SantaSleighIcon: any = (props) => (
       <path d="M 62 31 L 55 21" stroke="#5C3A21" strokeWidth="2" />
       <path d="M 62 31 L 68 24" stroke="#5C3A21" strokeWidth="2" />
     </g>
-    {/* Harness */}
     <path d="M 72 45 C 90 40, 100 50, 110 50" stroke="#8B4513" strokeWidth="1" fill="none" />
     <path d="M 47 43 C 60 38, 70 48, 80 48" stroke="#8B4513" strokeWidth="1" fill="none" />
     <path d="M 22 45 C 35 40, 45 50, 55 50" stroke="#8B4513" strokeWidth="1" fill="none" />
-    {/* Sleigh */}
     <path d="M 90 65 L 180 65 L 190 50 L 160 50 L 150 35 L 100 35 Q 80 35, 90 65 Z" fill="#A52A2A" />
     <path d="M 95 65 L 175 65 L 180 70 L 90 70 Z" fill="#D2691E" />
-    {/* Santa */}
     <circle cx="120" cy="30" r="10" fill="#DC143C" />
     <circle cx="120" cy="18" r="5" fill="#FFDAB9" />
     <path d="M 115 10 L 125 10 L 120 5 Z" fill="#FFFFFF" />
@@ -405,5 +401,25 @@ export const RedoIcon: any = (props) => (
 export const MinusIcon: any = (props) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M18 12H6" />
+  </svg>
+);
+
+export const WindowsIcon: any = (props) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}>
+    <rect x="2" y="2" width="9" height="9" />
+    <rect x="13" y="2" width="9" height="9" />
+    <rect x="2" y="13" width="9" height="9" />
+    <rect x="13" y="13" width="9" height="9" />
+  </svg>
+);
+
+export const AndroidIcon: any = (props) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}>
+    <path d="M4 12.5a8 8 0 0116 0V19a2 2 0 01-2 2h-1v1.25a1.25 1.25 0 01-2.5 0V21h-4v1.25a1.25 1.25 0 01-2.5 0V21H6a2 2 0 01-2-2z" />
+    <circle cx="9" cy="11.5" r="1.1" fill="#0B1220" />
+    <circle cx="15" cy="11.5" r="1.1" fill="#0B1220" />
+    <path d="M8.5 5.2L6.8 2.6M15.5 5.2l1.7-2.6" stroke="currentColor" strokeWidth="1" strokeLinecap="round" fill="none" />
+    <rect x="1.6" y="12.5" width="2" height="6" rx="1" />
+    <rect x="20.4" y="12.5" width="2" height="6" rx="1" />
   </svg>
 );

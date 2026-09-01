@@ -1,208 +1,142 @@
-
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { Note, Tag } from "../types";
-import { supabase } from "../services/supabase";
+import * as syncEngine from '../services/syncEngine';
+import * as localDb from '../services/localDb';
+import { useConnectivity } from './useConnectivity';
 
-// Helper: Convert DB row (snake_case) to App Note (camelCase)
-const dbToNote = (dbNote: any): Note => ({
-  id: dbNote.id,
-  title: dbNote.title,
-  content: dbNote.content,
-  tags: dbNote.tags || [],
-  isPinned: dbNote.is_pinned,
-  priority: dbNote.priority || 'none',
-  createdAt: dbNote.created_at,
-  updatedAt: dbNote.updated_at,
-  coverImage: dbNote.cover_image,
-});
+export type AggregateSyncStatus =
+  | 'offline'
+  | 'saved-locally'
+  | 'syncing'
+  | 'synced'
+  | 'conflict'
+  | 'sync-failed'
+  | 'backend-unavailable'
+  | 'auth-expired';
 
-// Helper: Convert App Note (camelCase) to DB row (snake_case)
-const noteToDb = (note: Note, userId: string) => ({
-  id: note.id,
-  user_id: userId,
-  title: note.title,
-  content: note.content,
-  tags: note.tags,
-  is_pinned: note.isPinned,
-  priority: note.priority,
-  created_at: note.createdAt,
-  updated_at: note.updatedAt,
-  cover_image: note.coverImage,
-});
+const STUCK_OP_THRESHOLD = 5;
 
 export function useNotes(userId: string | undefined) {
   const [notes, setNotes] = useState<Note[]>([]);
   const [customTags, setCustomTags] = useState<Tag[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [stuckCount, setStuckCount] = useState(0);
+  const connectivity = useConnectivity();
 
-  // Fetch data from Supabase on mount/user change
+  const refresh = useCallback(async (uid: string) => {
+    const { notes: n, tags: t } = await syncEngine.loadLocal(uid);
+    setNotes(n);
+    setCustomTags(t);
+    const queue = await localDb.getQueue(uid);
+    setPendingCount(queue.length);
+    setStuckCount(queue.filter(op => op.attempts >= STUCK_OP_THRESHOLD).length);
+  }, []);
+
+  useEffect(() => {
+    syncEngine.startAutoSync();
+  }, []);
+
   useEffect(() => {
     if (!userId) {
       setNotes([]);
       setCustomTags([]);
       setIsInitialized(false);
+      setPendingCount(0);
       return;
     }
 
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        // 1. Fetch Notes
-        const { data: notesData, error: notesError } = await supabase
-          .from('notes')
-          .select('*');
+    let cancelled = false;
+    setIsLoading(true);
 
-        if (notesError) throw notesError;
+    (async () => {
+      await refresh(userId);
+      if (cancelled) return;
+      setIsLoading(false);
+      setIsInitialized(true);
 
-        // 2. Fetch Tags
-        const { data: tagsData, error: tagsError } = await supabase
-          .from('tags')
-          .select('*');
+      await syncEngine.bootstrap(userId);
+      if (!cancelled) await refresh(userId);
+    })();
 
-        if (tagsError) throw tagsError;
+    const unsubscribe = syncEngine.subscribeLocalChanges(userId, () => {
+      if (!cancelled) refresh(userId);
+    });
 
-        // 3. Migration: If Supabase is empty but LocalStorage has data, upload it.
-        const localNotesKey = `notenirman-notes-${userId}`;
-        const localTagsKey = `notenirman-tags-${userId}`;
-        const localNotes = JSON.parse(window.localStorage.getItem(localNotesKey) || '[]');
-        const localTags = JSON.parse(window.localStorage.getItem(localTagsKey) || '[]');
-
-        let finalNotes: Note[] = notesData ? notesData.map(dbToNote) : [];
-        let finalTags: Tag[] = tagsData || [];
-
-        if ((!notesData || notesData.length === 0) && localNotes.length > 0) {
-          // Optimistically show local notes
-          finalNotes = localNotes;
-
-          // Try to upload in background (Mapping local notes to DB format)
-          const notesToUpload = localNotes.map((n: Note) => noteToDb(n, userId));
-          const { data: uploadedNotes } = await supabase.from('notes').insert(notesToUpload).select();
-
-          if (uploadedNotes) {
-            finalNotes = uploadedNotes.map(dbToNote);
-          }
-        }
-
-        if ((!tagsData || tagsData.length === 0) && localTags.length > 0) {
-          finalTags = localTags;
-          const tagsToUpload = localTags.map((t: Tag) => ({ ...t, user_id: userId }));
-          const { data: uploadedTags } = await supabase.from('tags').insert(tagsToUpload).select();
-
-          if (uploadedTags) {
-            finalTags = uploadedTags;
-          }
-        }
-
-        setNotes(finalNotes);
-        setCustomTags(finalTags);
-
-      } catch (error) {
-        console.error('Error fetching data from Supabase:', error);
-        // Fallback to LocalStorage if Supabase fails entirely
-        const localNotesKey = `notenirman-notes-${userId}`;
-        const localTagsKey = `notenirman-tags-${userId}`;
-        const localNotes = JSON.parse(window.localStorage.getItem(localNotesKey) || '[]');
-        const localTags = JSON.parse(window.localStorage.getItem(localTagsKey) || '[]');
-
-        if (localNotes.length > 0) setNotes(localNotes);
-        if (localTags.length > 0) setCustomTags(localTags);
-      } finally {
-        setIsLoading(false);
-        setIsInitialized(true);
-      }
+    return () => {
+      cancelled = true;
+      unsubscribe();
+      syncEngine.deactivateUser(userId);
     };
-
-    fetchData();
-  }, [userId]);
-
-  // Persist to LocalStorage as Backup (Offline Support)
-  useEffect(() => {
-    if (!userId || !isInitialized) return;
-    const localNotesKey = `notenirman-notes-${userId}`;
-    window.localStorage.setItem(localNotesKey, JSON.stringify(notes));
-  }, [notes, userId, isInitialized]);
+  }, [userId, refresh]);
 
   useEffect(() => {
-    if (!userId || !isInitialized) return;
-    const localTagsKey = `notenirman-tags-${userId}`;
-    window.localStorage.setItem(localTagsKey, JSON.stringify(customTags));
-  }, [customTags, userId, isInitialized]);
-
-  // Sync helpers
-  const syncNoteToSupabase = async (note: Note, action: 'INSERT' | 'UPDATE' | 'DELETE') => {
-    if (!userId) return;
-    try {
-      if (action === 'DELETE') {
-        await supabase.from('notes').delete().eq('id', note.id);
-      } else if (action === 'INSERT') {
-        const dbRow = noteToDb(note, userId);
-        await supabase.from('notes').insert(dbRow);
-      } else {
-        const dbRow = noteToDb(note, userId);
-        await supabase.from('notes').update({ ...dbRow, updated_at: new Date().toISOString() }).eq('id', note.id);
-      }
-    } catch (err) {
-      console.error('Failed to sync note:', err);
+    if (userId && connectivity === 'online') {
+      void syncEngine.processSyncQueue(userId);
     }
-  };
-
-  const syncTagToSupabase = async (tag: Tag, action: 'INSERT' | 'UPDATE' | 'DELETE') => {
-    if (!userId) return;
-    try {
-      if (action === 'DELETE') {
-        await supabase.from('tags').delete().eq('name', tag.name);
-      } else if (action === 'INSERT') {
-        await supabase.from('tags').insert({ ...tag, user_id: userId });
-      } else {
-        await supabase.from('tags').upsert({ ...tag, user_id: userId });
-      }
-    } catch (err) {
-      console.error('Failed to sync tag:', err);
-    }
-  };
-
+  }, [userId, connectivity]);
 
   const addNote = useCallback((note: Note) => {
+    if (!userId) return;
     setNotes(prev => [note, ...prev]);
-    syncNoteToSupabase(note, 'INSERT');
+    void syncEngine.writeNote(userId, note, 'upsert');
   }, [userId]);
 
   const updateNote = useCallback((updatedNote: Note) => {
+    if (!userId) return;
     setNotes(prev => prev.map(n => (n.id === updatedNote.id ? updatedNote : n)));
-    syncNoteToSupabase(updatedNote, 'UPDATE');
+    void syncEngine.writeNote(userId, updatedNote, 'upsert');
   }, [userId]);
 
   const deleteNote = useCallback((id: string) => {
+    if (!userId) return;
     const noteToDelete = notes.find(n => n.id === id);
     setNotes(prev => prev.filter(n => n.id !== id));
     if (noteToDelete) {
-      syncNoteToSupabase(noteToDelete, 'DELETE');
+      void syncEngine.writeNote(userId, noteToDelete, 'delete');
     }
   }, [notes, userId]);
 
   const addOrUpdateCustomTag = useCallback((tag: Tag) => {
+    if (!userId) return;
     setCustomTags(prev => {
       const index = prev.findIndex(t => t.name === tag.name);
-      let newTags;
       if (index > -1) {
-        newTags = [...prev];
-        newTags[index] = { ...newTags[index], ...tag };
-      } else {
-        newTags = [...prev, tag];
+        const next = [...prev];
+        next[index] = { ...next[index], ...tag };
+        return next;
       }
-      return newTags;
+      return [...prev, tag];
     });
-    syncTagToSupabase(tag, 'UPDATE');
+    void syncEngine.writeTag(userId, tag, 'upsert');
   }, [userId]);
 
   const deleteCustomTag = useCallback((tagName: string) => {
+    if (!userId) return;
     const tagToDelete = customTags.find(t => t.name === tagName);
     setCustomTags(prev => prev.filter(t => t.name !== tagName));
     if (tagToDelete) {
-      syncTagToSupabase(tagToDelete, 'DELETE');
+      void syncEngine.writeTag(userId, tagToDelete, 'delete');
     }
   }, [customTags, userId]);
+
+  const conflicts = useMemo(() => notes.filter(n => n.syncStatus === 'conflict'), [notes]);
+
+  const resolveConflict = useCallback((noteId: string, choice: 'local' | 'server' | 'both') => {
+    if (!userId) return;
+    void syncEngine.resolveNoteConflict(userId, noteId, choice);
+  }, [userId]);
+
+  const syncStatus: AggregateSyncStatus = useMemo(() => {
+    if (connectivity === 'auth-expired') return 'auth-expired';
+    if (connectivity === 'backend-unavailable') return 'backend-unavailable';
+    if (connectivity === 'offline') return pendingCount > 0 ? 'saved-locally' : 'offline';
+    if (conflicts.length > 0) return 'conflict';
+    if (stuckCount > 0) return 'sync-failed';
+    if (pendingCount > 0) return 'syncing';
+    return 'synced';
+  }, [connectivity, pendingCount, stuckCount, conflicts.length]);
 
   return {
     notes,
@@ -212,6 +146,14 @@ export function useNotes(userId: string | undefined) {
     customTags,
     addOrUpdateCustomTag,
     deleteCustomTag,
-    isLoading
+    isLoading,
+    isInitialized,
+    syncStatus,
+    connectivity,
+    pendingCount,
+    stuckCount,
+    conflicts,
+    resolveConflict,
   };
 }
+

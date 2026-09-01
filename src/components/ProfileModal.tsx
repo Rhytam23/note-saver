@@ -49,7 +49,6 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose, onLogout, on
   const [isSaving, setIsSaving] = useState(false);
   const [avatarUploading, setAvatarUploading] = useState(false);
 
-  // Security State
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
@@ -80,7 +79,6 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose, onLogout, on
     setIsSaving(true);
     try {
       if (passwordChanged) {
-        // Verify current password first
         const { error: signInError } = await supabase.auth.signInWithPassword({
           email: user.email,
           password: currentPassword
@@ -130,14 +128,13 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose, onLogout, on
       const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(filePath);
       await onUpdateUser({ avatarUrl: publicUrl });
     } catch (error: any) {
-      if (error.message?.includes("bucket") || error.statusCode === '404') { // Simple check
+      if (error.message?.includes("bucket") || error.statusCode === '404') {
         alert("Storage Bucket 'avatars' not found. Please create a Public bucket named 'avatars' in Supabase.");
       } else {
         alert("Error uploading avatar: " + (error.message || "Unknown error"));
       }
     } finally {
       setAvatarUploading(false);
-      // Clear input
       if (event.target) event.target.value = '';
     }
   };
@@ -159,7 +156,6 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose, onLogout, on
         return;
       }
 
-      // Dynamically import jsPDF to avoid load-time weight
       const { jsPDF } = await import('jspdf');
       const doc = new jsPDF();
 
@@ -170,7 +166,6 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose, onLogout, on
 
       let cursorY = margin;
 
-      // Title for the whole document
       doc.setFont("helvetica", "bold");
       doc.setFontSize(22);
       doc.text("My Notes", pageWidth / 2, cursorY, { align: "center" });
@@ -181,7 +176,6 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose, onLogout, on
       doc.text(`Exported on ${new Date().toLocaleDateString()}`, pageWidth / 2, cursorY, { align: "center" });
       cursorY += 20;
 
-      // Helper to check page break
       const checkPageBreak = (spaceNeeded: number) => {
         if (cursorY + spaceNeeded > pageHeight - margin) {
           doc.addPage();
@@ -192,22 +186,18 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose, onLogout, on
       };
 
       notes.forEach((note, index) => {
-        // Strip HTML securely for plain text PDF
         const tempDiv = document.createElement("div");
         tempDiv.innerHTML = DOMPurify.sanitize(note.content);
         const plainTextContent = tempDiv.textContent || tempDiv.innerText || "";
 
-        // Note Container Page Break Check (approximate)
         checkPageBreak(60);
 
-        // Separator
         if (index > 0) {
           doc.setDrawColor(200, 200, 200);
           doc.line(margin, cursorY, pageWidth - margin, cursorY);
           cursorY += 10;
         }
 
-        // Note Title
         checkPageBreak(15);
         doc.setFont("helvetica", "bold");
         doc.setFontSize(16);
@@ -217,7 +207,6 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose, onLogout, on
         doc.text(titleLines, margin, cursorY);
         cursorY += titleLines.length * 7;
 
-        // Metadata (Date & Tags)
         checkPageBreak(10);
         doc.setFont("helvetica", "italic");
         doc.setFontSize(10);
@@ -227,7 +216,6 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose, onLogout, on
         doc.text(`${dateStr}${tagsStr}`, margin, cursorY);
         cursorY += 8;
 
-        // Content
         doc.setFont("helvetica", "normal");
         doc.setFontSize(12);
         doc.setTextColor(40, 40, 40);
@@ -240,7 +228,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose, onLogout, on
           cursorY += 6;
         });
 
-        cursorY += 15; // Spacing after note
+        cursorY += 15;
       });
 
       doc.save(`Notenirman-notes-${new Date().toISOString().split('T')[0]}.pdf`);
@@ -278,7 +266,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose, onLogout, on
         </header>
 
         <div className="p-6 space-y-6 overflow-y-auto">
-          {/* Avatar Section */}
+          {}
           <div className="flex items-center space-x-4">
             <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
               <div className="w-16 h-16 rounded-full bg-link flex items-center justify-center text-white text-3xl font-bold flex-shrink-0 overflow-hidden border-2 border-transparent group-hover:border-accent transition-all">
@@ -299,40 +287,15 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose, onLogout, on
                 className="hidden"
                 accept="image/*"
                 onChange={handleAvatarChange}
+                disabled={avatarUploading}
               />
             </div>
             <div>
-              <label className={`text-sm font-medium ${colors.secondaryText}`}>Email</label>
-              <p className={`${colors.primaryText} mt-1`}>{user.email}</p>
+              <p className={`font-semibold text-lg ${colors.primaryText}`}>{user.name || 'User'}</p>
+              <p className={`text-sm ${colors.secondaryText}`}>{user.email}</p>
             </div>
           </div>
 
-          <div>
-            <label htmlFor="name" className={`text-sm font-medium ${colors.secondaryText}`}>Full Name</label>
-            <input
-              id="name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter your name"
-              className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-accent focus:border-accent text-left text-gray-900 dark:text-white"
-            />
-          </div>
-          <div>
-            <label htmlFor="theme" className={`text-sm font-medium ${colors.secondaryText}`}>Seasonal Theme</label>
-            <select
-              id="theme"
-              value={themePreference}
-              onChange={(e) => setThemePreference(e.target.value as SeasonalTheme | 'auto')}
-              className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-accent focus:border-accent text-gray-900 dark:text-white"
-            >
-              {themeOptions.map(option => (
-                <option key={option.value} value={option.value}>{option.label}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Security Section */}
           <div className="pt-4 border-t border-divider-light dark:border-divider">
             <h3 className={`text-sm font-medium mb-3 ${colors.secondaryText}`}>Security</h3>
             <div className="space-y-3">

@@ -52,7 +52,6 @@ const CoverImagePicker: React.FC<CoverImagePickerProps> = ({ onSelect, onClose, 
             </div>
 
             <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
-                {/* Remove Option */}
                 {activeCover && (
                     <button
                         onClick={() => onSelect('')}
@@ -62,7 +61,6 @@ const CoverImagePicker: React.FC<CoverImagePickerProps> = ({ onSelect, onClose, 
                     </button>
                 )}
 
-                {/* Gradients */}
                 <div>
                     <h4 className={`text-xs font-semibold uppercase tracking-wider mb-2 ${colors.secondaryText}`}>Gradients</h4>
                     <div className="grid grid-cols-2 gap-2">
@@ -78,7 +76,6 @@ const CoverImagePicker: React.FC<CoverImagePickerProps> = ({ onSelect, onClose, 
                     </div>
                 </div>
 
-                {/* Solid Colors */}
                 <div>
                     <h4 className={`text-xs font-semibold uppercase tracking-wider mb-2 ${colors.secondaryText}`}>Colors</h4>
                     <div className="grid grid-cols-4 gap-2">
@@ -95,7 +92,6 @@ const CoverImagePicker: React.FC<CoverImagePickerProps> = ({ onSelect, onClose, 
                 </div>
             </div>
 
-            {/* Overlay click to close handling should be done by parent or wrapper */}
         </motion.div>
     );
 };

@@ -69,7 +69,6 @@ const Testimonials: React.FC = () => {
               <p className={`flex-1 mb-6 ${colors.primaryText}`}>"{testimonial.quote}"</p>
               <div className="flex items-center">
                 <div className="w-12 h-12 rounded-full bg-slate-300 dark:bg-slate-600 flex-shrink-0 mr-4">
-                  {/* <img src={testimonial.avatar} alt={testimonial.name} className="w-full h-full rounded-full object-cover" /> */}
                 </div>
                 <div>
                   <p className={`font-bold ${colors.primaryText}`}>{testimonial.name}</p>

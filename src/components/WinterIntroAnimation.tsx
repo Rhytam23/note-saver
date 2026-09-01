@@ -17,7 +17,7 @@ const WinterIntroAnimation: React.FC<WinterIntroAnimationProps> = ({ onAnimation
             if (onAnimationComplete) {
                 onAnimationComplete();
             }
-        }, 7000); // Total duration 7s
+        }, 7000);
         return () => clearTimeout(timer);
     }, [onAnimationComplete]);
 
@@ -28,10 +28,8 @@ const WinterIntroAnimation: React.FC<WinterIntroAnimationProps> = ({ onAnimation
             exit={{ opacity: 0, transition: { duration: 1.0, delay: 6.0 } }}
             className="fixed inset-0 z-[200] overflow-hidden"
         >
-            {/* Background Sky - Cooler, more icy colors */}
             <div className={`absolute inset-0 transition-colors duration-1000 ${isDark ? 'bg-[linear-gradient(180deg,#0f172a,#1e3a8a)]' : 'bg-[linear-gradient(180deg,#e0f2fe,#bae6fd)]'}`} />
 
-            {/* Stars */}
             {isDark && (
                 <div className="absolute inset-0">
                     {Array.from({ length: 70 }).map((_, i) => (
@@ -45,9 +43,8 @@ const WinterIntroAnimation: React.FC<WinterIntroAnimationProps> = ({ onAnimation
                 </div>
             )}
 
-            {/* Snowfall */}
             <div className="absolute inset-0 pointer-events-none">
-                {Array.from({ length: 80 }).map((_, i) => ( // More snow for just winter
+                {Array.from({ length: 80 }).map((_, i) => (
                     <motion.div
                         key={i}
                         className="absolute bg-white/90 rounded-full"
@@ -63,8 +60,6 @@ const WinterIntroAnimation: React.FC<WinterIntroAnimationProps> = ({ onAnimation
                 ))}
             </div>
 
-            {/* Snowman Element (Simple CSS/SVG) */}
-            {/* Snowman Element (Simple CSS/SVG) */}
             <motion.div
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
@@ -76,7 +71,6 @@ const WinterIntroAnimation: React.FC<WinterIntroAnimationProps> = ({ onAnimation
                 </div>
             </motion.div>
 
-            {/* Title & Tagline */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}

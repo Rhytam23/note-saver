@@ -14,12 +14,12 @@ import Sidebar from "./components/Sidebar";
 import NoteList from "./components/NoteList";
 import NoteEditor from "./components/NoteEditor";
 import FloatingActionButton from "./components/FloatingActionButton";
+import SyncStatusIndicator from "./components/SyncStatusIndicator";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Footer from "./components/Footer";
 import SeasonalAnimations from "./components/SeasonalAnimations";
 import SeasonalLoading from "./components/SeasonalLoading";
 
-// Direct Core Page Imports (Prevents Dynamic Module Import Failures & Production White Screens)
 import LandingPage from './components/LandingPage';
 import AuthScreen from './components/AuthScreen';
 import PrivacyPolicy from './components/PrivacyPolicy';
@@ -33,12 +33,10 @@ import PasswordReset from './components/PasswordReset';
 import EmailVerification from './components/EmailVerification';
 import Maintenance from './components/Maintenance';
 
-// Lazy Load Heavy Modals
 const ProfileModal = React.lazy(() => import('./components/ProfileModal'));
 const TutorialModal = React.lazy(() => import('./components/TutorialModal'));
 const WelcomeIntroAnimation = React.lazy(() => import('./components/WelcomeIntroAnimation'));
 
-// Lazy Load Seasonal Intro Animations
 const IndependenceDayIntro = React.lazy(() => import('./components/IndependenceDayIntro'));
 const SummerIntroAnimation = React.lazy(() => import('./components/SummerIntroAnimation'));
 const WinterIntroAnimation = React.lazy(() => import('./components/WinterIntroAnimation'));
@@ -55,7 +53,7 @@ const NewYearIntroAnimation = React.lazy(() => import('./components/NewYearIntro
 const App: React.FC = () => {
   const { user, loading, logout, updateUser, updatePassword } = useAuth() as any;
   const { theme, toggleTheme } = useTheme() as any;
-  const { notes, addNote, updateNote, deleteNote, customTags, addOrUpdateCustomTag, deleteCustomTag } = useNotes(user?.id);
+  const { notes, addNote, updateNote, deleteNote, customTags, addOrUpdateCustomTag, deleteCustomTag, syncStatus, pendingCount, conflicts, resolveConflict } = useNotes(user?.id);
   const { theme: seasonalTheme, colors } = useSeason();
   const { path, pushPath } = useRouter();
 
@@ -70,14 +68,12 @@ const App: React.FC = () => {
   const [isProfileModalOpen, setProfileModalOpen] = useState(false);
   const [isTutorialOpen, setTutorialOpen] = useState(false);
 
-  // Sync profile route with modal
   useEffect(() => {
     if (path === '/profile' && user) {
       setProfileModalOpen(true);
     }
   }, [path, user]);
 
-  // Intro Animation States
   const [showIndependenceDayIntro, setShowIndependenceDayIntro] = useState(false);
   const [showNavratriBanner, setShowNavratriBanner] = useState(false);
   const [showSummerIntro, setShowSummerIntro] = useState(false);
@@ -92,7 +88,6 @@ const App: React.FC = () => {
   const [showNavratriIntro, setShowNavratriIntro] = useState(false);
   const [showNewYearIntro, setShowNewYearIntro] = useState(false);
 
-  // Welcome Animation State with notenirman_landing_seen persistence & reduced motion
   const [showWelcome, setShowWelcome] = useState(() => {
     if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       return false;
@@ -107,7 +102,6 @@ const App: React.FC = () => {
     localStorage.setItem('hasSeenWelcome', 'true');
   }, []);
 
-  // Enforce zero animation replay for authenticated users
   useEffect(() => {
     if (user) {
       setShowWelcome(false);
@@ -283,7 +277,6 @@ const App: React.FC = () => {
     }
   };
 
-  // Define Protected Routes
   const isProtectedRoute = ['/dashboard', '/notes', '/profile'].includes(path);
   const isAppRoute = (path === '/' && user) || (isProtectedRoute && user);
 
@@ -292,12 +285,10 @@ const App: React.FC = () => {
   }
 
   const renderContent = () => {
-    // Protected route check for unauthenticated users
     if (isProtectedRoute && !user) {
       return <AccessDenied key="403" />;
     }
 
-    // Main App View for Authenticated Users on App Routes
     if (isAppRoute) {
       return (
         <div className="flex-1 flex w-full relative z-10">
@@ -344,6 +335,12 @@ const App: React.FC = () => {
             </main>
             <Footer variant="simple" />
             <FloatingActionButton onClick={handleAddNewNote} />
+            <SyncStatusIndicator
+              status={syncStatus}
+              pendingCount={pendingCount}
+              conflicts={conflicts}
+              onResolveConflict={resolveConflict}
+            />
             <AnimatePresence>
               {selectedNoteId && (
                 <NoteEditor
@@ -384,7 +381,6 @@ const App: React.FC = () => {
       );
     }
 
-    // Specific Route Switch
     switch (path) {
       case '/':
         return (

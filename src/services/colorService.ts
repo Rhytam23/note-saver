@@ -1,4 +1,4 @@
-﻿import type { Tag } from '../types';
+import type { Tag } from '../types';
 
 export const tagColorOptions = [
     { name: 'sky', textClass: 'text-sky-400', bgClass: 'bg-sky-500/10', borderClass: 'border-sky-500/20', swatchClass: 'bg-sky-400' },
@@ -33,7 +33,6 @@ export const getTagColorClasses = (tagName: string, customTags: Tag[]): string =
     if (color) {
         return `${color.bgClass} ${color.textClass} ${color.borderClass}`;
     }
-    // Fallback
     const fallbackColor = tagColorOptions[0];
     return `${fallbackColor.bgClass} ${fallbackColor.textClass} ${fallbackColor.borderClass}`;
 };
@@ -46,3 +45,23 @@ export const getTextColorClass = (tagName: string, customTags: Tag[]): string =>
 
     return color ? color.textClass : tagColorOptions[0].textClass;
 };
+
+export const getSafeCoverStyle = (coverImage?: string): React.CSSProperties => {
+    if (!coverImage) return {};
+    const trimmed = coverImage.trim().toLowerCase();
+    
+    if (trimmed.startsWith('javascript:') || trimmed.startsWith('data:') || trimmed.startsWith('vbscript:')) {
+        return {};
+    }
+
+    if (coverImage.includes('gradient') || coverImage.startsWith('#') || coverImage.startsWith('rgb')) {
+        return { background: coverImage };
+    }
+
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('/')) {
+        return { backgroundImage: `url(${encodeURI(coverImage)})` };
+    }
+
+    return {};
+};
+

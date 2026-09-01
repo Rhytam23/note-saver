@@ -1,10 +1,20 @@
-﻿import { MotionStyle } from 'framer-motion';
+import { MotionStyle } from 'framer-motion';
 
 export type NotePriority = 'high' | 'medium' | 'low' | 'none';
 
 export type PriorityFilter = 'high' | 'medium' | 'low' | null;
 
-export interface Note {
+export type SyncStatus = 'synced' | 'pending' | 'syncing' | 'failed' | 'conflict';
+
+export interface SyncMeta {
+  version?: number;
+  syncStatus?: SyncStatus;
+  deleted?: boolean;
+  deletedAt?: string | null;
+  conflictServerData?: Record<string, any> | null;
+}
+
+export interface Note extends SyncMeta {
   id: string;
   title: string;
   content: string;
@@ -34,7 +44,7 @@ export interface User {
   themePreference?: SeasonalTheme | 'auto';
 }
 
-export interface Tag {
+export interface Tag extends SyncMeta {
   name: string;
   imageUrl?: string;
   color?: string;
@@ -60,3 +70,4 @@ export interface UserLocation {
   country: string;
   latitude: number;
 }
+

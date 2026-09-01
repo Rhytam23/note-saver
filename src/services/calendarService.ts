@@ -1,4 +1,4 @@
-﻿import { supabase } from './supabase';
+import { supabase } from './supabase';
 
 export interface CalendarEvent {
     summary: string;
@@ -8,10 +8,6 @@ export interface CalendarEvent {
     };
 }
 
-/**
- * Fetches today's events from the user's primary Google Calendar.
- * Requires the 'https://www.googleapis.com/auth/calendar.readonly' scope.
- */
 export const fetchTodayEvents = async (): Promise<string[]> => {
     try {
         const { data: { session } } = await supabase.auth.getSession();

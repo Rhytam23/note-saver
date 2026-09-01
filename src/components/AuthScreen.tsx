@@ -62,7 +62,6 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onBackToHome, mode }) => {
     e.preventDefault();
     setError(null);
 
-    // Forgot Password Flow
     if (isForgotPasswordView) {
       try {
         await resetPassword(email.trim().toLowerCase());
@@ -73,7 +72,6 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onBackToHome, mode }) => {
       return;
     }
 
-    // Signup Validation
     if (!isLoginView && !isPasswordStrong) {
       setError("Please ensure your password meets all requirements.");
       return;
@@ -88,7 +86,6 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onBackToHome, mode }) => {
         setError(null);
       }
     } catch (err: any) {
-      // Improve error message for unverified email
       if (err.message?.includes('Email not confirmed')) {
         setError('Please verify your email address to log in. Check your inbox!');
       } else {
@@ -101,7 +98,6 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onBackToHome, mode }) => {
     setError(null);
     try {
       await login();
-      // Google login redirects, so no need to handle success here immediately
     } catch (err: any) {
       setError(err.message || 'Google Sign-In failed.');
     }
