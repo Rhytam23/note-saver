@@ -31,7 +31,6 @@ const HoliIntroAnimation: React.FC<IntroAnimationProps> = ({ onAnimationComplete
             exit={{ opacity: 0, transition: { duration: 1.0 } }}
             className="fixed inset-0 z-[200] flex flex-col items-center justify-center overflow-hidden bg-white"
         >
-            {/* Color Splashes */}
             {splashes.map(splash => (
                 <motion.div
                     key={splash.id}
@@ -55,7 +54,6 @@ const HoliIntroAnimation: React.FC<IntroAnimationProps> = ({ onAnimationComplete
                 />
             ))}
 
-            {/* Main Content */}
             <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}

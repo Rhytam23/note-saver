@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import type { Variants } from 'framer-motion';
 import { exportNote, stripHtml } from '../services/exportService';
 import { useClickOutside } from '../hooks/useClickOutside';
-import { getTagColorClasses } from '../services/colorService';
+import { getTagColorClasses, getSafeCoverStyle } from '../services/colorService';
 import { useSeason } from '../contexts/SeasonalContext';
 
 interface NoteCardProps {
@@ -88,7 +88,7 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, customTags, onSelectNote, onD
       {note.coverImage && (
         <div
           className="h-32 w-full rounded-t-xl bg-cover bg-center border-b border-white/5"
-          style={{ background: note.coverImage.includes('gradient') || note.coverImage.startsWith('#') ? note.coverImage : `url(${note.coverImage})` }}
+          style={getSafeCoverStyle(note.coverImage)}
         />
       )}
       <div className="p-4 sm:p-6 flex-1">

@@ -18,7 +18,7 @@ const ChristmasIntroAnimation: React.FC<ChristmasIntroAnimationProps> = ({ onAni
             if (onAnimationComplete) {
                 onAnimationComplete();
             }
-        }, 11000); // Increased total duration to 11s to fit sequential animations
+        }, 11000);
         return () => clearTimeout(timer);
     }, [onAnimationComplete]);
 
@@ -38,10 +38,8 @@ const ChristmasIntroAnimation: React.FC<ChristmasIntroAnimationProps> = ({ onAni
             exit={{ opacity: 0, transition: { duration: 1.0, delay: 10.0 } }}
             className="fixed inset-0 z-[200] overflow-hidden"
         >
-            {/* Background Sky */}
             <div className={`absolute inset-0 transition-colors duration-1000 ${isDark ? 'bg-[linear-gradient(180deg,#0a1936,#1e2d4c)]' : 'bg-[linear-gradient(180deg,#f0f9ff,#dbeafe)]'}`} />
 
-            {/* Stars */}
             {isDark && (
                 <div className="absolute inset-0">
                     {Array.from({ length: 70 }).map((_, i) => (
@@ -55,14 +53,12 @@ const ChristmasIntroAnimation: React.FC<ChristmasIntroAnimationProps> = ({ onAni
                 </div>
             )}
 
-            {/* Santa Animation (First Phase) */}
             <motion.div
                 initial={{ x: '-30vw', y: '15vh' }}
                 animate={{ x: '110vw', y: '10vh', transition: { duration: 5, delay: 0.5, ease: 'easeInOut' } }}
                 className="absolute z-30"
             >
                 <SantaSleighIcon className="w-48 h-auto text-red-600" style={{ filter: 'drop-shadow(0 5px 15px rgba(0,0,0,0.3))' }} />
-                {/* Sparkle Trail */}
                 <div className="absolute top-0 left-0 w-full h-full">
                     {sparkles.map(s => (
                         <div key={s.id} className="absolute bg-yellow-300 rounded-full" style={{
@@ -75,7 +71,6 @@ const ChristmasIntroAnimation: React.FC<ChristmasIntroAnimationProps> = ({ onAni
                 </div>
             </motion.div>
 
-            {/* Giant Christmas Tree Element (Second Phase - Enters after Santa leaves) */}
             <motion.div
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
@@ -87,7 +82,6 @@ const ChristmasIntroAnimation: React.FC<ChristmasIntroAnimationProps> = ({ onAni
                 </div>
             </motion.div>
 
-            {/* Snowfall */}
             <div className="absolute inset-0 pointer-events-none">
                 {Array.from({ length: 50 }).map((_, i) => (
                     <motion.div
@@ -105,7 +99,6 @@ const ChristmasIntroAnimation: React.FC<ChristmasIntroAnimationProps> = ({ onAni
                 ))}
             </div>
 
-            {/* Title & Tagline (Third Phase) */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}

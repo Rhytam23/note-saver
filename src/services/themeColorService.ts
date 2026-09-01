@@ -1,8 +1,6 @@
 ﻿import type { SeasonalTheme } from "../types";
 
-/**
- * Defines the set of dynamic color classes that change based on the seasonal theme.
- */
+
 export interface ThemeColors {
     primaryText: string;
     secondaryText: string;
@@ -14,8 +12,6 @@ export interface ThemeColors {
     bgOpacity60: string;
 }
 
-// Base color schemes for light and dark modes.
-// These are used when the theme is 'none' or as a fallback.
 const baseLight: ThemeColors = {
     primaryText: 'text-slate-800',
     secondaryText: 'text-slate-500',
@@ -38,8 +34,6 @@ const baseDark: ThemeColors = {
     bgOpacity60: 'bg-slate-900/60',
 };
 
-// A map of seasonal themes to their color overrides.
-// Each theme can have different overrides for light and dark modes.
 const themes: Record<SeasonalTheme, { light: Partial<ThemeColors>; dark: Partial<ThemeColors> }> = {
     none: { light: {}, dark: {} },
     winter: {
@@ -60,8 +54,8 @@ const themes: Record<SeasonalTheme, { light: Partial<ThemeColors>; dark: Partial
             secondaryText: 'text-teal-600',
             border: 'border-amber-300/60',
             hover: 'hover:bg-white/60',
-            surface: 'bg-white/40', // For frosted glass effect
-            bgSimple: 'bg-[#fdf3dc]/50', // Sandy beige
+            surface: 'bg-white/40',
+            bgSimple: 'bg-[#fdf3dc]/50',
             bgOpacity80: 'bg-[#fdf3dc]/70',
             bgOpacity60: 'bg-[#fdf3dc]/50',
         },
@@ -70,8 +64,8 @@ const themes: Record<SeasonalTheme, { light: Partial<ThemeColors>; dark: Partial
             secondaryText: 'text-sky-300',
             border: 'border-teal-700/50',
             hover: 'hover:bg-teal-900/50',
-            surface: 'bg-teal-950/40', // For frosted glass effect
-            bgSimple: 'bg-[#0a1b2f]/50', // Midnight blue
+            surface: 'bg-teal-950/40',
+            bgSimple: 'bg-[#0a1b2f]/50',
             bgOpacity80: 'bg-[#0a1b2f]/70',
             bgOpacity60: 'bg-[#0a1b2f]/50',
         }
@@ -120,7 +114,7 @@ const themes: Record<SeasonalTheme, { light: Partial<ThemeColors>; dark: Partial
             secondaryText: 'text-green-800',
             border: 'border-red-200/60',
             hover: 'hover:bg-white/60',
-            surface: 'bg-white/40', // Glassmorphism like Summer
+            surface: 'bg-white/40',
             bgSimple: 'bg-red-50/50',
             bgOpacity80: 'bg-white/70',
             bgOpacity60: 'bg-white/50',
@@ -130,8 +124,8 @@ const themes: Record<SeasonalTheme, { light: Partial<ThemeColors>; dark: Partial
             secondaryText: 'text-green-300',
             border: 'border-red-900/50',
             hover: 'hover:bg-red-900/30',
-            surface: 'bg-[#0f172a]/40', // Darker glass
-            bgSimple: 'bg-[#0f172a]/50', // Dark Slate
+            surface: 'bg-[#0f172a]/40',
+            bgSimple: 'bg-[#0f172a]/50',
             bgOpacity80: 'bg-[#0f172a]/70',
             bgOpacity60: 'bg-[#0f172a]/50',
         }
@@ -148,11 +142,11 @@ const themes: Record<SeasonalTheme, { light: Partial<ThemeColors>; dark: Partial
             bgOpacity60: 'bg-white/60',
         },
         dark: {
-            primaryText: 'text-yellow-100', // Gold/Cream text
+            primaryText: 'text-yellow-100',
             secondaryText: 'text-purple-200',
-            border: 'border-yellow-500/30', // Subtle gold border
+            border: 'border-yellow-500/30',
             hover: 'hover:bg-purple-900/40',
-            surface: 'bg-[#1e1b4b]/40', // Deep Indigo glass
+            surface: 'bg-[#1e1b4b]/40',
             bgSimple: 'bg-[#1e1b4b]/60',
             bgOpacity80: 'bg-[#1e1b4b]/80',
             bgOpacity60: 'bg-[#1e1b4b]/60',
@@ -174,9 +168,9 @@ const themes: Record<SeasonalTheme, { light: Partial<ThemeColors>; dark: Partial
         dark: {
             primaryText: 'text-slate-100',
             secondaryText: 'text-amber-300',
-            border: 'border-[#d4af37]/30', // Muted Gold border
+            border: 'border-[#d4af37]/30',
             hover: 'hover:bg-green-500/10',
-            surface: 'bg-[#000080]/30', // Navy blue surface
+            surface: 'bg-[#000080]/30',
             bgSimple: 'bg-[#000080]/60',
             bgOpacity80: 'bg-[#000080]/80',
             bgOpacity60: 'bg-[#000080]/60'
@@ -184,13 +178,7 @@ const themes: Record<SeasonalTheme, { light: Partial<ThemeColors>; dark: Partial
     },
 };
 
-/**
- * Returns a set of Tailwind CSS color classes for the given theme and mode.
- * It merges the base colors with any seasonal overrides.
- * @param theme - The current seasonal theme.
- * @param isDarkMode - Whether dark mode is active.
- * @returns An object of Tailwind class strings for dynamic styling.
- */
+
 export function getThemeColors(theme: SeasonalTheme, isDarkMode: boolean): ThemeColors {
     const base = isDarkMode ? baseDark : baseLight;
     const seasonalOverrides = isDarkMode ? themes[theme]?.dark : themes[theme]?.light;

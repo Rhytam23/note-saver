@@ -4,10 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { AshokaChakraIcon, LightningBoltIcon } from './Icons';
 import { useTheme } from '../contexts/ThemeContext';
 
-// Helper to generate random values for animations
 const random = (min: number, max: number) => Math.random() * (max - min) + min;
 
-// Props for components that adapt to light/dark mode
 interface ThemeProps {
     isDarkMode: boolean;
 }
@@ -32,7 +30,6 @@ const WinterThemeBackground: React.FC<ThemeProps> = ({ isDarkMode }) => {
 
     return (
         <div className={`w-full h-full overflow-hidden relative transition-colors duration-700 ${isDarkMode ? 'bg-[linear-gradient(180deg,#021428,#071936)]' : 'bg-[linear-gradient(180deg,#dbeffd,#f8fbff)]'}`}>
-            {/* Aurora and Stars for Dark Mode */}
             {isDarkMode && (
                 <>
                     <div className="pointer-events-none absolute inset-0 -z-10">
@@ -60,13 +57,11 @@ const WinterThemeBackground: React.FC<ThemeProps> = ({ isDarkMode }) => {
                 </>
             )}
 
-            {/* Clouds for both modes */}
             <div className={`absolute top-0 left-0 w-full h-full transition-opacity opacity-50 dark:opacity-20`}>
                 <div className="absolute top-[10%] left-0 w-64 h-24 bg-white rounded-full filter blur-3xl animate-[cloud-drift-left_80s_linear_infinite]" />
                 <div className="absolute top-[25%] left-0 w-80 h-32 bg-white rounded-full filter blur-3xl animate-[cloud-drift-right_120s_linear_infinite]" style={{ animationDelay: '-60s' }} />
             </div>
 
-            {/* Snowfall for both modes */}
             <div className="absolute inset-0 z-20 pointer-events-none">
                 {snowFlakes.map(flake => (
                     <div
@@ -84,9 +79,7 @@ const WinterThemeBackground: React.FC<ThemeProps> = ({ isDarkMode }) => {
                 ))}
             </div>
 
-            {/* Foreground elements */}
             <div className="absolute bottom-0 left-0 right-0 h-48 pointer-events-none z-10">
-                {/* Pine Trees */}
                 <div
                     className="absolute bottom-12 left-[15%] w-24 h-48 opacity-20 dark:opacity-30"
                     style={{
@@ -103,7 +96,6 @@ const WinterThemeBackground: React.FC<ThemeProps> = ({ isDarkMode }) => {
                         backgroundRepeat: 'no-repeat',
                     }}
                 />
-                {/* Snow Banks */}
                 <div className={`absolute left-0 right-0 bottom-0 h-32 rounded-t-[100%] ${isDarkMode ? 'bg-gradient-to-t from-[#071936] via-[#071936] to-transparent' : 'bg-white/80'}`} />
             </div>
         </div>
@@ -127,7 +119,6 @@ const ChristmasThemeBackground: React.FC<ThemeProps> = ({ isDarkMode }) => {
 
     return (
         <div className={`w-full h-full overflow-hidden relative transition-colors duration-700 ${isDarkMode ? 'bg-[linear-gradient(180deg,#0a1936,#1e2d4c)]' : 'bg-[linear-gradient(180deg,#f0f9ff,#dbeafe)]'}`}>
-            {/* Aurora and Stars for Dark Mode */}
             {isDarkMode && (
                 <>
                     <div className="pointer-events-none absolute inset-0">
@@ -144,7 +135,6 @@ const ChristmasThemeBackground: React.FC<ThemeProps> = ({ isDarkMode }) => {
                 </>
             )}
 
-            {/* Snowfall for both modes */}
             <div className="absolute inset-0 z-20 pointer-events-none">
                 {snowFlakes.map(flake => (
                     <div key={flake.id} className="absolute rounded-full bg-white/90" style={{
@@ -154,9 +144,7 @@ const ChristmasThemeBackground: React.FC<ThemeProps> = ({ isDarkMode }) => {
                 ))}
             </div>
 
-            {/* Foreground elements with lights */}
             <div className="absolute bottom-0 left-0 right-0 h-48 pointer-events-none z-10">
-                {/* Decorated Pine Trees */}
                 {[
                     { left: '15%', w: 24, h: 48, delay: 0 },
                     { left: '70%', w: 32, h: 64, delay: 0.5 }
@@ -166,7 +154,6 @@ const ChristmasThemeBackground: React.FC<ThemeProps> = ({ isDarkMode }) => {
                             background: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 200"><polygon points="50,0 100,200 0,200" fill="${isDarkMode ? '%2306203A' : '%23B0C4DE'}" /></svg>')`,
                             backgroundSize: 'contain', backgroundRepeat: 'no-repeat'
                         }} />
-                        {/* Lights */}
                         {isDarkMode && Array.from({ length: 10 }).map((_, l) => (
                             <div key={l} className="absolute rounded-full" style={{
                                 width: '4px', height: '4px', top: `${30 + Math.random() * 60}%`, left: `${20 + Math.random() * 60}%`,
@@ -245,21 +232,19 @@ const Spring: React.FC<ThemeProps> = ({ isDarkMode }) => {
 const Summer: React.FC<ThemeProps> = ({ isDarkMode }) => {
     const backgroundStyle = {
         background: isDarkMode
-            ? 'linear-gradient(to bottom, #0a1b2f, #1e4d71 50%, #3cb7b4 100%)' // Night beach
-            : 'linear-gradient(to bottom, #aee1f9, #fddbb0, #fdf3dc)', // Day beach
+            ? 'linear-gradient(to bottom, #0a1b2f, #1e4d71 50%, #3cb7b4 100%)'
+            : 'linear-gradient(to bottom, #aee1f9, #fddbb0, #fdf3dc)',
     };
 
     return (
         <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden">
             <div className="absolute inset-0" style={backgroundStyle}></div>
 
-            {/* Drifting Clouds */}
             <div className="absolute top-0 left-0 w-full h-full">
                 <div className="absolute top-[10%] left-0 w-64 h-24 bg-white/30 rounded-full filter blur-2xl animate-[cloud-drift-left_80s_linear_infinite]" />
                 <div className="absolute top-[25%] left-0 w-80 h-32 bg-white/20 rounded-full filter blur-3xl animate-[cloud-drift-right_120s_linear_infinite]" style={{ animationDelay: '-60s' }} />
             </div>
 
-            {/* Floating Pollen / Dust Motes */}
             {Array.from({ length: 25 }).map((_, i) => (
                 <div
                     key={`pollen-${i}`}
@@ -269,15 +254,13 @@ const Summer: React.FC<ThemeProps> = ({ isDarkMode }) => {
                         width: `${random(1, 3)}px`,
                         height: `${random(1, 3)}px`,
                         backgroundColor: isDarkMode ? 'rgba(253, 251, 212, 0.4)' : 'rgba(255, 255, 255, 0.7)',
-                        // @ts-ignore
                         '--max-opacity': random(0.3, 0.7),
                         animation: `pollen-drift ${random(15, 30)}s ease-in-out infinite`,
                         animationDelay: `${random(0, 20)}s`,
-                    }}
+                    } as React.CSSProperties}
                 />
             ))}
 
-            {/* Bokeh Sparkles */}
             {Array.from({ length: 15 }).map((_, i) => (
                 <div
                     key={`bokeh-${i}`}
@@ -294,7 +277,6 @@ const Summer: React.FC<ThemeProps> = ({ isDarkMode }) => {
                 />
             ))}
 
-            {/* Heat Shimmer */}
             <div className="absolute bottom-0 left-0 w-full h-1/4 bg-transparent animate-[heat-shimmer_7s_ease-in-out_infinite]" />
         </div>
     );
@@ -331,7 +313,6 @@ const lightningPaths = [
     "M 50 0 L 55 30 L 45 30 L 50 70 L 65 70 L 40 110 L 50 110 L 45 140",
 ];
 
-// --- Intelligent Monsoon Theme ---
 
 type TimeOfDay = 'morning' | 'afternoon' | 'evening' | 'night';
 interface WeatherConfig {
@@ -436,9 +417,9 @@ const Monsoon: React.FC<ThemeProps> = ({ isDarkMode }) => {
                 className="absolute"
                 style={{
                     left: `${random(-10, 110)}vw`,
-                    width: '2px', // Increased visibility
+                    width: '2px',
                     height: `${random(15, 40)}px`,
-                    backgroundColor: isDarkMode ? 'rgba(173, 216, 230, 0.8)' : 'rgba(70, 130, 180, 0.6)', // Darker/More visible blue
+                    backgroundColor: isDarkMode ? 'rgba(173, 216, 230, 0.8)' : 'rgba(70, 130, 180, 0.6)',
                     animation: `rain-fall ${random(params.rainSpeed[0], params.rainSpeed[1])}s linear infinite`,
                     animationDelay: `${random(0, 2)}s`,
                 }}
@@ -467,7 +448,6 @@ const Monsoon: React.FC<ThemeProps> = ({ isDarkMode }) => {
 };
 
 const NewYear: React.FC = () => {
-    // Generate static sparkles
     const sparkles = useMemo(() => Array.from({ length: 30 }).map((_, i) => ({
         id: i,
         left: random(0, 100),
@@ -481,7 +461,6 @@ const NewYear: React.FC = () => {
         <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-[#1e1b4b] to-slate-950"></div>
 
-            {/* Distant Fireworks flashes */}
             {Array.from({ length: 5 }).map((_, i) => (
                 <div
                     key={`firework-bg-${i}`}
@@ -499,7 +478,6 @@ const NewYear: React.FC = () => {
                 />
             ))}
 
-            {/* Golden Sparkles */}
             {sparkles.map(sparkle => (
                 <div
                     key={sparkle.id}
@@ -509,7 +487,7 @@ const NewYear: React.FC = () => {
                         top: `${sparkle.top}%`,
                         width: `${sparkle.size}px`,
                         height: `${sparkle.size}px`,
-                        backgroundColor: '#FDE047', // Yellow-300
+                        backgroundColor: '#FDE047',
                         boxShadow: '0 0 4px #FDE047',
                         animation: `icon-star-twinkle ${sparkle.duration}s ease-in-out infinite`,
                         animationDelay: `${sparkle.delay}s`,
@@ -517,7 +495,6 @@ const NewYear: React.FC = () => {
                 />
             ))}
 
-            {/* Rising Particles */}
             {Array.from({ length: 20 }).map((_, i) => (
                 <div
                     key={`particle-${i}`}
@@ -527,7 +504,7 @@ const NewYear: React.FC = () => {
                         top: '110vh',
                         width: `${random(2, 4)}px`,
                         height: `${random(2, 4)}px`,
-                        animation: `winter-snow-fall ${random(10, 20)}s linear infinite reverse`, // Reverse for rising
+                        animation: `winter-snow-fall ${random(10, 20)}s linear infinite reverse`,
                         animationDelay: `${random(0, 10)}s`,
                         opacity: random(0.2, 0.5)
                     }}
@@ -539,11 +516,9 @@ const NewYear: React.FC = () => {
 
 const Eid: React.FC<ThemeProps> = ({ isDarkMode }) => {
     if (!isDarkMode) {
-        // Light mode: celebratory, soft, and bright
         return (
             <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-b from-emerald-100/40 to-yellow-50/40"></div>
-                {/* Gold Sparkles */}
                 {Array.from({ length: 30 }).map((_, i) => (
                     <div
                         key={`sparkle-${i}`}
@@ -553,7 +528,7 @@ const Eid: React.FC<ThemeProps> = ({ isDarkMode }) => {
                             left: `${random(10, 90)}vw`,
                             width: `${random(1, 3)}px`,
                             height: `${random(1, 3)}px`,
-                            backgroundColor: '#FFD700', // Gold color
+                            backgroundColor: '#FFD700',
                             boxShadow: '0 0 8px #FFD700',
                             animation: `icon-star-twinkle ${random(3, 6)}s ease-in-out infinite`,
                             animationDelay: `${random(0, 5)}s`,
@@ -564,7 +539,6 @@ const Eid: React.FC<ThemeProps> = ({ isDarkMode }) => {
         );
     }
 
-    // Dark mode: serene, night-sky theme
     return (
         <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-b from-[#0F172A] to-[#3B0A45]"></div>
@@ -587,7 +561,6 @@ const Eid: React.FC<ThemeProps> = ({ isDarkMode }) => {
                     🏮
                 </div>
             ))}
-            {/* Sparkles */}
             {Array.from({ length: 20 }).map((_, i) => (
                 <div
                     key={`sparkle-${i}`}
@@ -639,9 +612,7 @@ const Navratri: React.FC<ThemeProps> = ({ isDarkMode }) => {
 
 const Pongal: React.FC = () => (
     <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden">
-        {/* Gentle sunrise gradient */}
         <div className="absolute inset-0 bg-gradient-to-b from-orange-200/40 to-yellow-100/40"></div>
-        {/* Sun glow */}
         <div
             className="absolute top-[10%] left-1/2 -translate-x-1/2 w-[50vh] h-[50vh] rounded-full"
             style={{
@@ -649,7 +620,6 @@ const Pongal: React.FC = () => (
                 animation: 'sun-rise-glow 10s ease-in-out infinite',
             }}
         />
-        {/* Sugarcane stalks (subtle visual element) */}
         {Array.from({ length: 15 }).map((_, i) => (
             <div
                 key={i}
@@ -712,7 +682,6 @@ const IndependenceDayIndia: React.FC = () => {
 const Diwali: React.FC = () => (
     <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-[#0F172A] via-[#1B1F3B] to-[#3B0A45]"></div>
-        {/* Floating Sparkles (Instead of Diyas) */}
         {Array.from({ length: 30 }).map((_, i) => (
             <div
                 key={`sparkle-bg-${i}`}
@@ -730,7 +699,6 @@ const Diwali: React.FC = () => (
                 ✨
             </div>
         ))}
-        {/* Additional Bokeh Sparkles */}
         {Array.from({ length: 25 }).map((_, i) => (
             <div
                 key={`sparkle-bokeh-${i}`}

@@ -22,7 +22,6 @@ const IndependenceDayIntro: React.FC<IndependenceDayIntroProps> = ({ onAnimation
                 background: 'linear-gradient(to bottom, #FF9933 25%, #FFFFFF 50%, #138808 75%)',
             }}
         >
-            {/* Centered Ashoka Chakra */}
             <motion.div
                 initial={{ opacity: 0, scale: 0.1, rotate: -180 }}
                 animate={{ opacity: 1, scale: 1, rotate: 0 }}
@@ -35,7 +34,6 @@ const IndependenceDayIntro: React.FC<IndependenceDayIntroProps> = ({ onAnimation
                 />
             </motion.div>
 
-            {/* Title & Tagline */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}

@@ -2,14 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom scrollbar for a more integrated look */
 :root {
     --scrollbar-track: #FFFFFF;
-    /* secondary-bg-light */
     --scrollbar-thumb: #CED0D4;
-    /* divider-light */
     --scrollbar-thumb-hover: #FFB400;
-    /* accent */
     --divider-light: #CED0D4;
     --primary-text-light: #1B1B1F;
     --secondary-text-light: #65676B;
@@ -18,9 +14,7 @@
 
 html.dark {
     --scrollbar-track: #242529;
-    /* secondary-bg */
     --scrollbar-thumb: #2E2E33;
-    /* divider */
     --divider: #2E2E33;
     --primary-text: #F5F6FA;
     --secondary-text: #A1A1AA;
@@ -34,12 +28,11 @@ html.dark {
 html,
 body {
     -ms-overflow-style: none;
-    /* IE and Edge */
     scrollbar-width: none;
-    /* Firefox */
 }
 
-/* Seasonal Animations */
+
+
 @keyframes leaf-fall {
     0% {
         transform: translateY(-10vh) rotate(0deg);
@@ -76,7 +69,7 @@ body {
     }
 }
 
-/* Diwali Background Animations */
+
 @keyframes float-up {
     0% {
         transform: translateY(0) scale(1);
@@ -107,7 +100,7 @@ body {
     user-select: none;
 }
 
-/* Intelligent Monsoon Theme Animations */
+
 @keyframes rain-fall {
     0% {
         transform: translateY(-20vh) translateX(10vw) rotate(-10deg);
@@ -198,7 +191,7 @@ body {
     }
 }
 
-/* Festival Animations */
+
 @keyframes sun-rise-glow {
 
     0%,
@@ -260,7 +253,7 @@ body {
 
     30% {
         opacity: 0;
-        /* Fade out quickly after burst */
+        
         transform: scale(1.5);
     }
 
@@ -282,7 +275,7 @@ body {
     }
 }
 
-/* New Navratri Theme Animations */
+
 @keyframes golden-dust-fall {
     0% {
         transform: translateY(-10vh);
@@ -317,7 +310,7 @@ body {
     }
 }
 
-/* Landing Page animations */
+
 @keyframes lamp-glow {
 
     0%,
@@ -330,7 +323,7 @@ body {
     }
 }
 
-/* Refined Summer Theme Animations */
+
 @keyframes cloud-drift-left {
     from {
         transform: translateX(-100%);
@@ -399,7 +392,7 @@ body {
     }
 }
 
-/* Dynamic Header Icon Animations */
+
 @keyframes icon-pulse {
 
     0%,
@@ -582,7 +575,7 @@ body {
     }
 }
 
-/* Winter & Christmas Theme Animations */
+
 @keyframes winter-snow-fall {
     0% {
         transform: translateY(-10vh) translateX(0) rotate(0deg);
@@ -650,7 +643,7 @@ body {
     transform-origin: center;
 }
 
-/* Quill Editor Theming */
+
 .ql-toolbar {
     border-radius: 8px 8px 0 0 !important;
     border-color: var(--divider-light) !important;
@@ -726,7 +719,7 @@ html.dark .ql-snow .ql-toolbar button:hover .ql-stroke {
     stroke: var(--primary-text) !important;
 }
 
-/* Enhanced Quill Editor Customization */
+
 .quill-editor-custom {
     display: flex;
     flex-direction: column;
@@ -764,7 +757,7 @@ html.light .quill-editor-custom .ql-toolbar {
     border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
 }
 
-/* Hide placeholder in dark mode if needed or style it */
+
 .ql-editor.ql-blank::before {
     color: var(--secondary-text) !important;
     font-style: italic;
@@ -772,7 +765,7 @@ html.light .quill-editor-custom .ql-toolbar {
 }
 
 
-/* Tiptap Editor Styles */
+
 .ProseMirror {
     outline: none !important;
     min-height: 50vh;
@@ -786,7 +779,7 @@ html.light .quill-editor-custom .ql-toolbar {
     pointer-events: none;
 }
 
-/* Typography Defaults for Tiptap */
+
 .ProseMirror h1 {
     font-size: 2em;
     font-weight: bold;
@@ -829,7 +822,7 @@ html.light .quill-editor-custom .ql-toolbar {
     border-radius: 0.5rem;
 }
 
-/* Task List / Checkbox Styles */
+
 .ProseMirror ul[data-type="taskList"] {
     list-style: none;
     padding: 0;
@@ -856,7 +849,7 @@ html.light .quill-editor-custom .ql-toolbar {
     opacity: 0.6;
 }
 
-/* Callout Block Styles */
+
 .ProseMirror .callout {
     display: flex;
     gap: 0.75rem;
@@ -876,7 +869,7 @@ html.light .quill-editor-custom .ql-toolbar {
     flex: 1;
 }
 
-/* Mobile Safe Area Utilities */
+
 .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom, 24px);
 }
@@ -893,7 +886,7 @@ html.light .quill-editor-custom .ql-toolbar {
     padding-top: env(safe-area-inset-top);
 }
 
-/* Notion-style Editor Features */
+
 .ProseMirror {
     padding-bottom: 200px;
 }
@@ -935,7 +928,7 @@ html:not(.dark) .callout {
     margin: 0 !important;
 }
 
-/* Task List Styling */
+
 ul[data-type="taskList"] {
     list-style: none;
     padding: 0;

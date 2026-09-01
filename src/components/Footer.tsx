@@ -53,7 +53,6 @@ const Footer: React.FC<FooterProps> = ({ variant = 'simple', onPrivacyClick, onT
     );
   }
 
-  // Detailed Variant (For Landing Page)
   return (
     <motion.footer
       initial={{ opacity: 0, y: 20 }}
@@ -62,7 +61,6 @@ const Footer: React.FC<FooterProps> = ({ variant = 'simple', onPrivacyClick, onT
       className={`w-full border-t p-12 mt-20 ${colors.border} ${isSummer ? 'bg-orange-50/30' : 'bg-transparent'}`}
     >
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 text-left">
-        {/* Column 1: Brand */}
         <div className="space-y-4">
           <div className="flex items-center space-x-2">
             <span className="text-3xl">📄</span>
@@ -72,7 +70,6 @@ const Footer: React.FC<FooterProps> = ({ variant = 'simple', onPrivacyClick, onT
           {isNavratri && <DiyaIcon className="h-8 w-8 text-amber-400" />}
         </div>
 
-        {/* Column 2: Explore */}
         <div className="space-y-4">
             <h3 className={`font-bold text-sm uppercase tracking-wider ${colors.primaryText}`}>Explore</h3>
             <ul className={`space-y-2 text-sm ${colors.secondaryText}`}>
@@ -82,7 +79,6 @@ const Footer: React.FC<FooterProps> = ({ variant = 'simple', onPrivacyClick, onT
             </ul>
         </div>
 
-        {/* Column 3: Support */}
         <div className="space-y-4">
             <h3 className={`font-bold text-sm uppercase tracking-wider ${colors.primaryText}`}>Support</h3>
             <ul className={`space-y-2 text-sm ${colors.secondaryText}`}>
@@ -104,7 +100,6 @@ const Footer: React.FC<FooterProps> = ({ variant = 'simple', onPrivacyClick, onT
             </ul>
         </div>
 
-        {/* Column 4: Legal */}
         <div className="space-y-4">
             <h3 className={`font-bold text-sm uppercase tracking-wider ${colors.primaryText}`}>Legal</h3>
             <ul className={`space-y-2 text-sm ${colors.secondaryText}`}>
@@ -126,7 +121,6 @@ const Footer: React.FC<FooterProps> = ({ variant = 'simple', onPrivacyClick, onT
             </ul>
         </div>
 
-        {/* Column 5: Social */}
         <div className="space-y-4">
             <h3 className={`font-bold text-sm uppercase tracking-wider ${colors.primaryText}`}>Connect</h3>
             <div className="flex flex-wrap gap-4">

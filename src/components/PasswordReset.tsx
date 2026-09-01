@@ -55,7 +55,6 @@ const PasswordReset: React.FC = () => {
       if (updatePassword) {
         await updatePassword(password);
       } else {
-        // Fallback supabase update
         const { supabase } = await import('../services/supabase');
         const { error: resetErr } = await supabase.auth.updateUser({ password });
         if (resetErr) throw resetErr;

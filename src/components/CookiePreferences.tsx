@@ -68,7 +68,6 @@ const CookiePreferences: React.FC = () => {
           </div>
 
           <div className="space-y-6 divide-y divide-gray-200 dark:divide-gray-800">
-            {/* Essential Cookies */}
             <div className="pt-4 flex items-start justify-between gap-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
@@ -87,7 +86,6 @@ const CookiePreferences: React.FC = () => {
               />
             </div>
 
-            {/* Analytics Cookies */}
             <div className="pt-6 flex items-start justify-between gap-4">
               <div className="space-y-1">
                 <h3 className={`font-bold ${colors.primaryText}`}>Analytics & Performance</h3>
@@ -103,7 +101,6 @@ const CookiePreferences: React.FC = () => {
               />
             </div>
 
-            {/* Functional Cookies */}
             <div className="pt-6 flex items-start justify-between gap-4">
               <div className="space-y-1">
                 <h3 className={`font-bold ${colors.primaryText}`}>Customization & Seasonal Themes</h3>

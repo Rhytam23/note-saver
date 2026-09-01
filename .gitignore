@@ -1,4 +1,3 @@
-# Logs
 logs
 *.log
 npm-debug.log*
@@ -12,10 +11,10 @@ dist-ssr
 *.local
 .env
 .env.*
+!.env.example
 .DS_Store
 Thumbs.db
 
-# IDES
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
@@ -28,9 +27,12 @@ Thumbs.db
 
 .vercel
 
-# Agents & AI Skills
+supabase/.temp/
+supabase/.branches/
+
 .agents/
 .claude/
 .junie/
 skills/
 skills-lock.json
+

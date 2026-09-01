@@ -21,14 +21,10 @@ export function useAuth(): AuthContextType {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    // 1. Get initial session
     const checkSession = async () => {
-      console.log('[useAuth] Checking session...');
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) console.error('[useAuth] Session check error:', error);
-
-        console.log('[useAuth] Initial session:', session ? 'Found' : 'Not found');
 
         if (session?.user) {
           setUser({
@@ -47,10 +43,7 @@ export function useAuth(): AuthContextType {
 
     checkSession();
 
-    // 2. Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log(`[useAuth] Auth change event: ${event}`, session ? 'Session Active' : 'No Session');
-
       if (session?.user) {
         setUser({
           id: session.user.id,
@@ -69,7 +62,6 @@ export function useAuth(): AuthContextType {
     };
   }, []);
 
-  // Google Login
   const login = useCallback(async (): Promise<void> => {
     setIsSubmitting(true);
     try {
@@ -85,11 +77,9 @@ export function useAuth(): AuthContextType {
       console.error("Google Login failed:", error);
       throw error;
     } finally {
-      // Loading stops when we redirect or fail
     }
   }, []);
 
-  // Email Login
   const loginWithEmail = useCallback(async (email: string, password: string): Promise<void> => {
     setIsSubmitting(true);
     try {
@@ -106,7 +96,6 @@ export function useAuth(): AuthContextType {
     }
   }, []);
 
-  // Signup
   const signup = useCallback(async (name: string, email: string, password: string): Promise<void> => {
     setIsSubmitting(true);
     try {
@@ -139,12 +128,9 @@ export function useAuth(): AuthContextType {
   }, []);
 
   const updateUser = useCallback(async (updatedFields: Partial<User>): Promise<void> => {
-    // Note: Updating Supabase user metadata requires a separate call if we want it persisted serverside.
-    // For now, we update local state to reflect changes instantly in UI.
     if (user) {
       setUser({ ...user, ...updatedFields });
 
-      // Optional: Persist name/avatar changes to Supabase User Metadata
       if (updatedFields.name || updatedFields.avatarUrl) {
         await supabase.auth.updateUser({
           data: {
@@ -197,3 +183,4 @@ export function useAuth(): AuthContextType {
     resetPassword,
   };
 }
+

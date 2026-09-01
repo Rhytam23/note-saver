@@ -27,7 +27,6 @@ const SpringIntroAnimation: React.FC<IntroAnimationProps> = ({ onAnimationComple
             exit={{ opacity: 0, transition: { duration: 1.0 } }}
             className="fixed inset-0 z-[200] flex flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-pink-100 to-green-100 dark:from-pink-950 dark:to-green-950"
         >
-            {/* Falling Petals */}
             {petals.map(petal => (
                 <motion.div
                     key={petal.id}

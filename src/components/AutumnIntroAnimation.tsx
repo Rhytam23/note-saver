@@ -29,7 +29,6 @@ const AutumnIntroAnimation: React.FC<IntroAnimationProps> = ({ onAnimationComple
             exit={{ opacity: 0, transition: { duration: 1.0 } }}
             className="fixed inset-0 z-[200] flex flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-orange-100 to-amber-200 dark:from-orange-900 dark:to-amber-950"
         >
-            {/* Falling Leaves */}
             {leaves.map(leaf => (
                 <motion.div
                     key={leaf.id}
@@ -38,7 +37,7 @@ const AutumnIntroAnimation: React.FC<IntroAnimationProps> = ({ onAnimationComple
                         y: '110vh',
                         opacity: [0, 1, 1, 0],
                         rotate: leaf.rotation + 360,
-                        x: [0, 50, -50, 20] // swaying motion
+                        x: [0, 50, -50, 20]
                     }}
                     transition={{
                         duration: leaf.duration,

@@ -14,7 +14,6 @@ export const useSpeechRecognition = (): UseSpeechRecognitionReturn => {
   const [transcript, setTranscript] = useState('');
   const recognitionRef = useRef<any>(null);
 
-  // Check for browser support
   const hasRecognitionSupport = !!(
     (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
   );

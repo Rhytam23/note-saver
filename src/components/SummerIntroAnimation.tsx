@@ -6,7 +6,6 @@ interface SummerIntroAnimationProps {
 }
 
 const SummerIntroAnimation: React.FC<SummerIntroAnimationProps> = ({ onAnimationComplete }) => {
-    // This timer reliably triggers the exit after 6 seconds.
     useEffect(() => {
         const timer = setTimeout(onAnimationComplete, 6000);
         return () => clearTimeout(timer);
@@ -20,7 +19,6 @@ const SummerIntroAnimation: React.FC<SummerIntroAnimationProps> = ({ onAnimation
             className="fixed inset-0 z-[200] flex flex-col items-center justify-end overflow-hidden"
             style={{ background: '#aee1f9' }}
         >
-            {/* Sun */}
             <motion.div
                 initial={{ y: '50%' }}
                 animate={{ y: '-150%' }}
@@ -32,7 +30,6 @@ const SummerIntroAnimation: React.FC<SummerIntroAnimationProps> = ({ onAnimation
                 }}
             />
 
-            {/* Title & Tagline */}
             <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}

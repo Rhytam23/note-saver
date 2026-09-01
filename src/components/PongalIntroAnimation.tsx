@@ -18,7 +18,6 @@ const PongalIntroAnimation: React.FC<IntroAnimationProps> = ({ onAnimationComple
             exit={{ opacity: 0, transition: { duration: 1.0 } }}
             className="fixed inset-0 z-[200] flex flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-yellow-100 via-orange-100 to-yellow-200"
         >
-            {/* Background Sun Rays */}
             <div className="absolute inset-0 flex items-center justify-center opacity-30">
                 <motion.div
                     animate={{ rotate: 360 }}
@@ -27,7 +26,6 @@ const PongalIntroAnimation: React.FC<IntroAnimationProps> = ({ onAnimationComple
                 />
             </div>
 
-            {/* Sugarcane Stalks */}
             <motion.div
                 initial={{ y: 100, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
@@ -45,7 +43,6 @@ const PongalIntroAnimation: React.FC<IntroAnimationProps> = ({ onAnimationComple
                 🎋
             </motion.div>
 
-            {/* Main Pot Content */}
             <motion.div
                 initial={{ scale: 0.5, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}

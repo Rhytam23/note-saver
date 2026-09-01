@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// Sparkle Component for the celebration
 const Sparkle = ({ delay }: { delay: number }) => (
     <motion.div
         initial={{ scale: 0, opacity: 0 }}
@@ -29,15 +28,9 @@ const NewYearIntroAnimation: React.FC<NewYearIntroAnimationProps> = ({ onAnimati
     const [stage, setStage] = useState<'countdown-1' | 'countdown-2' | 'countdown-3' | 'celebration'>('countdown-1');
 
     useEffect(() => {
-        // Timeline:
-        // 0s: Start (11:59:58)
-        // 1s: 11:59:59
-        // 2s: 12:00:00 (Celebration start)
-        // 6s: End
-
         const timer1 = setTimeout(() => setStage('countdown-2'), 1000);
-        const timer2 = setTimeout(() => setStage('countdown-3'), 2000); // This is 12:00:00
-        const timer3 = setTimeout(() => setStage('celebration'), 2000); // Sync celebration trigger
+        const timer2 = setTimeout(() => setStage('countdown-3'), 2000);
+        const timer3 = setTimeout(() => setStage('celebration'), 2000);
         const timerEnd = setTimeout(onAnimationComplete, 6500);
 
         return () => {
@@ -48,10 +41,10 @@ const NewYearIntroAnimation: React.FC<NewYearIntroAnimationProps> = ({ onAnimati
         };
     }, [onAnimationComplete]);
 
-    // Generate random sparkles
     const sparkles = Array.from({ length: 40 }).map((_, i) => (
         <Sparkle key={i} delay={Math.random() * 0.5} />
     ));
+
 
     return (
         <motion.div
@@ -90,12 +83,10 @@ const NewYearIntroAnimation: React.FC<NewYearIntroAnimationProps> = ({ onAnimati
                         key="celebration"
                         className="relative flex flex-col items-center justify-center w-full h-full"
                     >
-                        {/* Background Effects */}
                         <div className="absolute inset-0 overflow-hidden pointer-events-none">
                             {sparkles}
                         </div>
 
-                        {/* Main Text */}
                         <motion.h1
                             initial={{ scale: 0.5, opacity: 0, y: 50 }}
                             animate={{ scale: 1, opacity: 1, y: 0 }}
