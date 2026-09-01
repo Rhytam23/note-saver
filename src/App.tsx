@@ -32,6 +32,8 @@ import Support from './components/Support';
 import PasswordReset from './components/PasswordReset';
 import EmailVerification from './components/EmailVerification';
 import Maintenance from './components/Maintenance';
+import { checkForUpdates, type UpdateInfo } from './services/updateService';
+import UpdateModal from './components/UpdateModal';
 
 const ProfileModal = React.lazy(() => import('./components/ProfileModal'));
 const TutorialModal = React.lazy(() => import('./components/TutorialModal'));
@@ -67,12 +69,23 @@ const App: React.FC = () => {
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [isProfileModalOpen, setProfileModalOpen] = useState(false);
   const [isTutorialOpen, setTutorialOpen] = useState(false);
+  const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null);
 
   useEffect(() => {
     if (path === '/profile' && user) {
       setProfileModalOpen(true);
     }
   }, [path, user]);
+
+  useEffect(() => {
+    let isMounted = true;
+    checkForUpdates().then(info => {
+      if (isMounted && info && info.hasUpdate) {
+        setUpdateInfo(info);
+      }
+    });
+    return () => { isMounted = false; };
+  }, []);
 
   const [showIndependenceDayIntro, setShowIndependenceDayIntro] = useState(false);
   const [showNavratriBanner, setShowNavratriBanner] = useState(false);
@@ -504,6 +517,12 @@ const App: React.FC = () => {
             )}
           </AnimatePresence>
         </Suspense>
+
+        <AnimatePresence>
+          {updateInfo && (
+            <UpdateModal updateInfo={updateInfo} onClose={() => setUpdateInfo(null)} />
+          )}
+        </AnimatePresence>
 
         {renderContent()}
       </div>
