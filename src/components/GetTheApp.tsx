@@ -16,6 +16,8 @@ interface PlatformDef {
   sublabel: string;
   icon: React.ReactNode;
   match: (assetName: string) => boolean;
+  fallbackUrl: string;
+  fileName: string;
 }
 
 const platforms: PlatformDef[] = [
@@ -25,6 +27,8 @@ const platforms: PlatformDef[] = [
     sublabel: '.exe installer, 64-bit',
     icon: <WindowsIcon className="h-9 w-9 text-accent" />,
     match: (name) => name.toLowerCase().endsWith('.exe'),
+    fallbackUrl: '/downloads/NoteNirman-Setup.exe',
+    fileName: 'NoteNirman-Setup.exe',
   },
   {
     key: 'android',
@@ -32,6 +36,8 @@ const platforms: PlatformDef[] = [
     sublabel: '.apk',
     icon: <AndroidIcon className="h-9 w-9 text-accent" />,
     match: (name) => name.toLowerCase().endsWith('.apk'),
+    fallbackUrl: 'https://github.com/Rhytam23/note-saver/releases/download/v0.1.0/NoteNirman.apk',
+    fileName: 'NoteNirman.apk',
   },
 ];
 
@@ -74,7 +80,7 @@ const GetTheApp: React.FC = () => {
         }
         setDownloadUrls(resolved);
       } catch {
-        // Ignore fetch error; fallback URL handles seamless navigation
+        // Ignore fetch error; fallback direct URL handles file download
       }
     };
 
@@ -105,8 +111,7 @@ const GetTheApp: React.FC = () => {
         <div className="max-w-2xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-6">
           {platforms.map((platform, index) => {
             const directUrl = downloadUrls[platform.key];
-            const href = directUrl || FALLBACK_RELEASES_URL;
-            const isDirect = Boolean(directUrl);
+            const href = directUrl || platform.fallbackUrl;
 
             return (
               <motion.div
@@ -122,11 +127,9 @@ const GetTheApp: React.FC = () => {
                 <p className={`text-sm mb-6 ${colors.secondaryText}`}>{platform.sublabel}</p>
                 <motion.a
                   href={href}
-                  target={isDirect ? undefined : "_blank"}
-                  rel={isDirect ? undefined : "noopener noreferrer"}
-                  download={isDirect ? true : undefined}
+                  download={platform.fileName}
                   aria-label={`Download Notenirman for ${platform.label}`}
-                  title={isDirect ? `Download ${platform.label} installer` : `Get ${platform.label} build on GitHub Releases`}
+                  title={`Download ${platform.label} installer (${platform.fileName})`}
                   whileHover={{ scale: 1.04 }}
                   whileTap={{ scale: 0.96 }}
                   className="w-full py-3 rounded-full font-bold text-sm tracking-wide transition-all bg-accent text-primary-bg hover:shadow-lg cursor-pointer flex items-center justify-center gap-2 shadow-md hover:bg-accent/90"
@@ -146,4 +149,5 @@ const GetTheApp: React.FC = () => {
 };
 
 export default GetTheApp;
+
 
