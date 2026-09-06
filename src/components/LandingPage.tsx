@@ -150,12 +150,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 NEW
               </span>
             </button>
-            <button
-              onClick={() => scrollToSection('pricing')}
-              className="text-gray-600 dark:text-gray-300 hover:text-amber-500 dark:hover:text-amber-400 transition-colors"
-            >
-              Pricing
-            </button>
+
             <button
               onClick={() => scrollToSection('purpose')}
               className="text-gray-600 dark:text-gray-300 hover:text-amber-500 dark:hover:text-amber-400 transition-colors"
@@ -243,12 +238,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             >
               AI Copilot
             </button>
-            <button
-              onClick={() => scrollToSection('pricing')}
-              className="block w-full text-left py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-amber-500"
-            >
-              Pricing
-            </button>
+
             <button
               onClick={() => scrollToSection('purpose')}
               className="block w-full text-left py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-amber-500"
@@ -591,84 +581,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <FeatureHighlights />
         </div>
 
-        {/* Pricing Section */}
-        <section id="pricing" className="py-20 px-4 max-w-6xl mx-auto text-center space-y-10">
-          <div className="space-y-4 max-w-2xl mx-auto">
-            <span
-              className="px-3.5 py-1 text-xs font-mono font-semibold rounded-full border"
-              style={{
-                backgroundColor: `${currentThemeConfig.accentHex}15`,
-                borderColor: `${currentThemeConfig.accentHex}30`,
-                color: currentThemeConfig.accentHex,
-              }}
-            >
-              SIMPLE & TRANSPARENT
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-serif font-bold text-gray-900 dark:text-gray-100">
-              Free forever for local use.<br />
-              Upgrade for unlimited AI & Sync.
-            </h2>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto text-left">
-            {/* Free Plan */}
-            <div className="p-8 rounded-3xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col justify-between space-y-6">
-              <div className="space-y-4">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">Local Starter</h3>
-                <div className="text-3xl font-serif font-bold" style={{ color: currentThemeConfig.accentHex }}>
-                  $0 <span className="text-sm font-sans font-normal text-gray-500">/ forever</span>
-                </div>
-                <ul className="space-y-2.5 text-sm text-gray-600 dark:text-gray-300">
-                  <li className="flex items-center space-x-2"><span>✓</span><span>Unlimited local notes & tags</span></li>
-                  <li className="flex items-center space-x-2"><span>✓</span><span>Offline-first storage</span></li>
-                  <li className="flex items-center space-x-2"><span>✓</span><span>Dynamic seasonal themes</span></li>
-                  <li className="flex items-center space-x-2"><span>✓</span><span>Basic Gemini AI features</span></li>
-                </ul>
-              </div>
-              <button
-                onClick={onGetStarted}
-                className="w-full py-3 rounded-full border border-gray-300 dark:border-gray-700 font-semibold text-gray-800 dark:text-gray-200 hover:text-amber-500 transition-colors"
-              >
-                Start Free
-              </button>
-            </div>
-
-            {/* Pro Plan */}
-            <div
-              className="p-8 rounded-3xl bg-gradient-to-b border-2 shadow-xl flex flex-col justify-between space-y-6 relative overflow-hidden"
-              style={{
-                borderColor: currentThemeConfig.accentHex,
-                backgroundImage: `linear-gradient(to bottom, ${currentThemeConfig.accentHex}15, ${currentThemeConfig.accentHex}05, transparent)`,
-              }}
-            >
-              <div
-                className="absolute top-4 right-4 px-3 py-0.5 rounded-full text-gray-950 font-mono font-bold text-[10px]"
-                style={{ backgroundColor: currentThemeConfig.accentHex }}
-              >
-                RECOMMENDED
-              </div>
-              <div className="space-y-4">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">Pro Workspace</h3>
-                <div className="text-3xl font-serif font-bold" style={{ color: currentThemeConfig.accentHex }}>
-                  $0 <span className="text-sm font-sans font-normal text-gray-500">/ beta free</span>
-                </div>
-                <ul className="space-y-2.5 text-sm text-gray-600 dark:text-gray-300">
-                  <li className="flex items-center space-x-2"><span>✓</span><span>Everything in Local Starter</span></li>
-                  <li className="flex items-center space-x-2"><span>✓</span><span>Multi-device realtime sync</span></li>
-                  <li className="flex items-center space-x-2"><span>✓</span><span>Unlimited Gemini Copilot RAG</span></li>
-                  <li className="flex items-center space-x-2"><span>✓</span><span>Audio notes & transcriptions</span></li>
-                </ul>
-              </div>
-              <button
-                onClick={onGetStarted}
-                className="w-full py-3 rounded-full text-gray-950 font-bold hover:opacity-90 transition-colors shadow"
-                style={{ backgroundColor: currentThemeConfig.accentHex }}
-              >
-                Get Started Free →
-              </button>
-            </div>
-          </div>
-        </section>
 
         <WhyChooseUs />
         <Testimonials />
