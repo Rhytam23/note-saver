@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useSeason } from '../contexts/SeasonalContext';
+import { NoteNirmanLogo } from './NoteNirmanLogo';
 
 interface WelcomeIntroAnimationProps {
     onAnimationComplete: () => void;
@@ -40,7 +41,7 @@ const WelcomeIntroAnimation: React.FC<WelcomeIntroAnimationProps> = ({ onAnimati
                     transition={{ duration: 0.6, ease: "easeOut" }}
                     className="flex items-center justify-center mb-4"
                 >
-                    <span className="text-6xl md:text-8xl" role="img" aria-label="lamp">🪔</span>
+                    <NoteNirmanLogo size="xl" />
                 </motion.div>
 
                 <div className={`text-4xl md:text-6xl font-serif font-bold text-center ${colors.primaryText}`}>

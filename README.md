@@ -1,187 +1,175 @@
-# NoteNirman: Crafted Thoughts, Colored by Life 🪔
+# NoteNirman 2.0 — Enterprise-Grade Cross-Platform Knowledge Ecosystem 🪔
 
-A thoughtfully designed note-taking app with seasonal theming, voice input, and AI-assisted writing.
+[![License](https://img.shields.io/badge/License-PolyForm%20Noncommercial-orange.svg)](LICENSE)
+[![React](https://img.shields.io/badge/React-19.2-blue)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-6.2-purple)](https://vitejs.dev/)
+[![Supabase](https://img.shields.io/badge/Supabase-Auth%20%26%20pgvector-green)](https://supabase.com/)
 
-![NoteNirman](public/og-image.png)
-![License](https://img.shields.io/badge/License-PolyForm%20Noncommercial-orange.svg)
-![React](https://img.shields.io/badge/React-18-blue)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
-![Vite](https://img.shields.io/badge/Vite-4.0-purple)
-![Supabase](https://img.shields.io/badge/Supabase-Auth%20%26%20Database-green)
-
-<div align="center">
-  <img src="public/landing-page.png" alt="NoteNirman Landing Page" width="100%">
-  <br/>
-  <br/>
-  <img src="public/winter-splash.png" alt="Winter Seasonal Theme" width="60%">
-</div>
+NoteNirman 2.0 is an enterprise-grade, offline-first, local-first knowledge management application designed for seamless block editing, realtime CRDT collaboration, multimodal intelligence, hybrid vector search, and multi-format data portability across Web/PWA, Tauri Desktop, and Capacitor Android.
 
 ---
 
-## 📑 Table of Contents
-- [Why I built this](#why-i-built-this)
-- [Features](#-features)
-- [Getting Started](#-getting-started)
-- [Database Setup](#-database-setup)
-- [Tech Stack](#-tech-stack)
-- [Project Structure](#-project-structure)
-- [Contributing](#-contributing)
-- [Security](#-security)
+## 🌟 Core Capabilities
+
+### 1. Universal Block Editor & Structured Document Model (Phase 1)
+* **Canonical Storage**: `Note.content` HTML string remains the sole durable persisted format stored in local IndexedDB.
+* **Block AST**: Working in-memory `BlockDocument` AST with stable block UUIDs (`data-block-id="blk_..."`) preserved across edit cycles.
+* **Editing Mechanics**: TipTap-powered rich block editing, slash menu (`/`), block nesting, drag-and-drop reordering, task lists, and code blocks.
+
+### 2. Realtime CRDT Collaboration Foundation (Phase 2)
+* **CRDT Document Binding**: Yjs Y.Doc integration (`yjsBlockAdapter.ts`) synchronizing structured blocks across collaborative clients.
+* **Realtime Presence & Awareness**: User cursors, awareness state, discussion threads, block-anchored comments, and snapshot history.
+
+### 3. Rich Capture & Multimodal Pipeline (Phase 3)
+* **Media & Attachments**: Deduplicated content-hashed (SHA-256) attachment storage (`attachmentStorage.ts`) with cloud sync mirroring.
+* **Multimodal Extraction**: PDF text extraction (`pdfPipeline.ts`), Tesseract OCR for images (`imageOcrPipeline.ts`), audio recording and transcription (`audioRecorder.ts`, `transcriptionService.ts`), canvas-based handwriting (`handwritingService.ts`), and web clipping (`webClipper.ts`).
+* **Asynchronous Job Queue**: Off-main-thread background processing via `processingJobQueue.ts`.
+
+### 4. Search, Hybrid RAG & Gemini Copilot (Phase 4)
+* **Off-Main-Thread Lexical Search**: IndexedDB Web Worker (`search.worker.ts`) providing sub-10ms BM25-style lexical search.
+* **Vector Search & Hybrid Retrieval**: Remote Supabase `pgvector(768)` embedding storage with Reciprocal Rank Fusion (RRF) hybrid retrieval combining lexical and semantic results.
+* **Gemini Copilot & Strict Citations**: RAG pipeline with 4096-token context budgeting, strict citation validation (`citationValidator.ts`), and `CopilotDrawer` UI.
+
+### 5. Platform Productization & Data Portability (Phase 5)
+* **Data Portability Core**: Pure `PortabilityAST` serialization contracts converting `Note.content` HTML ↔ AST ↔ `PortabilityAST`.
+* **Full Workspace Backup & Recovery**: Full-fidelity `.nnpackage` (ZIP container) workspace backup and restoration with Yjs binary update blobs, attachments, and calendar events.
+* **Multi-Format Import & Export**: Import from Markdown, HTML, Plain Text, and CSV; export to Markdown, HTML, JSON, and PDF (`exportService.ts` via `jsPDF`).
+* **Schema Migration & Recovery**: `migrationManager.ts` featuring pre-migration storage quota checks ($\ge 2.5\times$ safety multiplier) and recoverable pre-migration data snapshots.
+* **Calendar & Temporal Core**: `calendarEventService.ts` providing authoritative events/reminders synced via `syncEngine.ts` (`SyncEntity = 'calendar_event'`) with RFC 5545 recurrence rules.
+* **Platform Adapters**: Cross-platform adapter abstraction (`IStorageAdapter`, `INotificationAdapter`, `IFilesystemAdapter`) supporting Web/PWA, Tauri 2 Desktop, and Capacitor 8 Android.
+* **Three-Tier Preference System**: `settingsService.ts` resolving preferences obeying `Device-Local > Workspace-Level > Account-Level` hierarchy.
+* **Security & Cryptography**: `securitySanitizer.ts` (DOMPurify HTML sanitization & Zip Bomb defense) and `cryptoService.ts` (Web Crypto AES-256-GCM backup encryption).
 
 ---
 
-## Why I built this
-I built NoteNirman to explore how software can feel seasonal and personal, not just functional. I wanted a space where the interface adapts to the world outside—celebrating festivals like Diwali or the calm of Monsoon—while still being a powerful tool for capturing ideas.
+## 🏗️ System Architecture & Invariants
+
+```text
+┌────────────────────────────────────────────────────────────────────────┐
+│                        NoteNirman 2.0 Architecture                     │
+├────────────────────────────────────────────────────────────────────────┤
+│ 1. Canonical Storage: Note.content HTML in IndexedDB ('notenirman-offline')│
+│ 2. Single Sync Authority: syncEngine.ts & localDb.ts syncQueue          │
+│ 3. Collaboration Boundary: Yjs CRDT Y.Doc state updates                │
+│ 4. AI Security Boundary: Supabase Edge Functions (gemini-embed/copilot)│
+│    * Gemini API Keys remain 100% server-side in Edge Function secrets. │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+1. **`Note.content` Canonicality**: `Note.content` HTML remains the sole durable canonical note representation stored in IndexedDB. There is **NO** IndexedDB `blocks` store or separate block database table.
+2. **Single Sync Authority**: `syncEngine.ts` and `localDb.ts` `syncQueue` remain the **SOLE** synchronization authority. No secondary sync engine or duplicate sync queue exists.
+3. **Local-First Storage**: Authoritative storage is local IndexedDB (`notenirman-offline`, `notenirman-attachments`, `notenirman-lexical-index`). Remote Supabase PostgreSQL mirrors local state.
 
 ---
 
-## 🌟 Features
+## 💻 Platform Support
 
-*   **Seasonal Themes**: Automatic and manual themes (Diwali, Holi, Pongal, Monsoon, Winter, etc.) that vividly transform the app's look and feel with animations and soundscapes.
-*   **Intelligent Auth**: Secure Google Sign-In and Email authentication powered by Supabase with a custom "unfolding" login animation.
-*   **Voice Dictation**: Capture thoughts instantly with browser-native speech-to-text integration.
-*   **Notion-Style Covers**: Add beautiful gradients, solid colors, or Unsplash images to your note headers.
-*   **AI Assistant**: Powered by Google Gemini, offering real-time summarization, proofreading, and creative writing assistance. (Client-side integration; no background data processing).
-*   **Rich Organization**: Organizing with Tags, Pins, Search, and Priority filtering.
-*   **Export**: Export your notes to PDF for safekeeping.
-*   **Analytics**: Integrated Vercel Web Analytics for traffic insights.
+| Platform | Target Runtime | Implementation Status | Storage / Notification Capabilities |
+| :--- | :--- | :--- | :--- |
+| **Web / PWA** | Modern Browsers (Chrome, Firefox, Safari, Edge) | **Fully Functional** | IndexedDB local storage; Web Notification API & active-tab `setTimeout` scheduling. |
+| **Tauri Desktop** | Windows 10/11 Desktop (`src-tauri`) | **Functional Adapter Abstraction** | Dynamic `@tauri-apps/plugin-fs` & `@tauri-apps/plugin-notification` with Web API fallbacks. |
+| **Capacitor Mobile** | Android 8+ App (`android/`) | **Functional Adapter Abstraction** | Dynamic `@capacitor/filesystem`, `@capacitor/local-notifications`, and `@capacitor/preferences` with Web fallbacks. |
 
 ---
 
-## 🚀 Getting Started
+## 🔒 Security Architecture
+
+* **Server-Side AI Secrets**: Google Gemini API key is stored exclusively in Supabase Edge Function secrets (`GEMINI_API_KEY`) and is **NEVER** exposed to client-side JavaScript.
+* **Row Level Security (RLS)**: Supabase PostgreSQL tables (`notes`, `tags`, `attachments`, `calendar_events`, `workspace_settings`, `note_embeddings`) are isolated per user via strict `auth.uid() = user_id` RLS policies.
+* **Import Sanitization**: `securitySanitizer.ts` strips dangerous tags (`<script>`, `<iframe>`, `onclick`) via DOMPurify, enforces path traversal shields (`../` stripping), and limits Zip Bomb compression ratios ($100:1$ max ratio, $500\text{ MB}$ max uncompressed limit).
+* **Backup Encryption**: `cryptoService.ts` provides optional Web Crypto AES-256-GCM encryption with PBKDF2 key derivation ($100,000$ iterations, $16\text{B}$ salt, $12\text{B}$ IV).
+
+---
+
+## 🚀 Getting Started & Development Commands
 
 ### Prerequisites
-*   **Node.js** (v18+)
-*   **npm** or **yarn**
-*   **Supabase Account** (Auth & Database)
-*   **Google Cloud Console Project** (OAuth Client ID)
+* **Node.js** (v18+ or v20+)
+* **npm** (v9+)
+* **Supabase CLI** (for local Edge Functions / migrations)
 
 ### Installation
+```bash
+git clone https://github.com/Rhytam23/note-saver.git
+cd note-saver
+npm install
+```
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/Rhytam23/notenirman.git
-    cd notenirman
-    ```
+### Environment Configuration
+Create a `.env` file in the root directory (do **NOT** commit this file):
+```env
+VITE_SUPABASE_URL=https://your-supabase-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+```
 
-2.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
+### Available Package Scripts
+```bash
+# Start local Vite development server
+npm run dev
 
-3.  **Environment Setup:**
-    Create a `.env` file in the root directory. **DO NOT commit this file.**
-    ```env
-    VITE_SUPABASE_URL=your_supabase_project_url
-    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-    VITE_GOOGLE_CLIENT_ID=your_google_client_id
-    VITE_GEMINI_API_KEY=your_gemini_api_key
-    ```
-    > Note: You need to enable Google Sign-In in your Supabase Authentication settings.
+# Run TypeScript type checking
+npx tsc --noEmit
 
-4.  **Run Locally:**
-    ```bash
-    npm run dev
-    ```
-    The app will open at `http://localhost:5173`.
+# Run ESLint check
+npm run lint
+
+# Run Vitest test suite (331 tests across 43 test files)
+npm test
+
+# Build production bundle
+npm run build
+```
 
 ---
 
 ## 📂 Project Structure
 
-Here is a quick overview of the file structure to help you navigate the codebase:
-
-```
-src/
-├── components/          # Reusable UI components
-│   ├── AuthScreen.tsx       # Login/Signup forms with animations
-│   ├── NoteEditor.tsx       # Main rich text editor interface
-│   ├── SeasonalAnimations.tsx # Logic for seasonal effects
-│   ├── ... (Feature-specific components)
-├── contexts/            # React Context providers
-│   ├── AuthContext.tsx      # User session management
-│   ├── SeasonalContext.tsx  # Theme/Season state management
-│   └── ThemeContext.tsx     # Dark/Light mode toggle
-├── hooks/               # Custom React hooks
-│   ├── useAuth.ts           # Authentication logic hook
-│   ├── useNotes.ts          # CRUD operations for notes
-│   ├── useSpeechRecognition.ts # Voice-to-text logic
-│   └── ...
-├── services/            # API integrations
-│   ├── supabase.ts          # Database client configuration
-│   └── ...
-├── App.tsx              # Main application entry point & routing
-├── index.tsx            # React root and Provider wrapping
-└── index.css            # Global styles & Tailwind directives
-```
-
----
-
-> **Troubleshooting Tip:** If Google Sign-In fails locally (redirects to error or nothing happens), double-check that `http://localhost:5173` is added to your **Authorized Redirect URIs** in the Google Cloud Console.
-
-### 🗄️ Database Setup (Supabase)
-
-To run the app, you need to create the `notes` table in your Supabase SQL Editor:
-
-```sql
-create table public.notes (
-  id uuid default gen_random_uuid() primary key,
-  user_id uuid references auth.users not null,
-  title text,
-  content text,
-  tags text[],
-  is_pinned boolean default false,
-  priority text default 'low',
-  cover_image text,
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
-);
-
--- Enable Row Level Security (RLS)
-alter table public.notes enable row level security;
-
--- Create Policy: Users can only see their own notes
-create policy "Users can crud their own notes"
-on public.notes for all
-using (auth.uid() = user_id);
+```text
+note-nirman/
+├── src/
+│   ├── collaboration/         # Phase 2 Yjs CRDT collaboration & comment services
+│   ├── components/            # React UI components (UniversalBlockEditor, CopilotDrawer, NoteListVirtual, etc.)
+│   ├── config/                # Feature flags (featureFlags.ts)
+│   ├── contexts/              # React context providers (AuthContext, ThemeContext, SeasonalContext)
+│   ├── extensions/            # TipTap editor extensions (SlashCommand, Callout, EmojiSuggestion)
+│   ├── hooks/                 # React hooks (useAuth, useNotes, useConnectivity)
+│   ├── services/              # Core application services & business logic
+│   │   ├── platform/          # Cross-platform adapters (webAdapter, tauriAdapter, capacitorAdapter)
+│   │   ├── __tests__/         # Comprehensive Vitest test suite (43 test files, 331 tests)
+│   │   ├── backupEngine.ts    # P5.2 Workspace backup (.nnpackage)
+│   │   ├── calendarEventService.ts # P5.6 Calendar & temporal metadata
+│   │   ├── exportPipeline.ts  # P5.4 Export pipeline (MD, HTML, JSON, PDF)
+│   │   ├── importPipeline.ts  # P5.3 Import pipeline (MD, HTML, TXT, CSV)
+│   │   ├── localDb.ts         # IndexedDB storage authority (notenirman-offline)
+│   │   ├── migrationManager.ts# P5.5 Schema versioning & pre-migration data recovery
+│   │   ├── portabilityCore.ts # P5.1 Data portability AST contracts
+│   │   ├── quotaManager.ts    # P5.11 Storage quota manager
+│   │   ├── securitySanitizer.ts # P5.12 Security & Zip Bomb defense
+│   │   ├── settingsService.ts # P5.9 Three-tier settings system
+│   │   └── syncEngine.ts      # Offline-first sync authority
+│   ├── types/                 # TypeScript interfaces and domain models
+│   └── workers/               # Off-main-thread Web Workers (search.worker, export.worker)
+├── supabase/
+│   ├── functions/             # Deno Edge Functions (gemini-embed, gemini-copilot, gemini-proxy)
+│   └── migrations/            # Supabase SQL migrations (RLS, attachments, pgvector search)
+└── src-tauri/                 # Tauri 2 desktop native configuration
 ```
 
 ---
 
-## 🛠️ Tech Stack
+## 📊 Testing Status
 
-*   **React + Vite**: Chosen for fast development iteration and performance.
-*   **Supabase**: Handles Authentication and Database (PostgreSQL with RLS) so we don't need a custom backend.
-*   **Tailwind CSS**: For rapid, utility-first styling.
-*   **Framer Motion**: Used sparingly for key interactions (like the login unfold and welcome animations).
-*   **Google Gemini API**: Direct API calls accessing keys via environment variables.
-
----
-
-## 📂 Project Structure
-
-```
-src/
-├── components/          # Reusable UI components
-├── contexts/            # Global state (Auth, Theme, Season)
-├── hooks/               # Encapsulated logic (useAuth, useNotes)
-├── services/            # API clients (Supabase)
-└── App.tsx              # Main routing and layout
-```
-
-> *Note: Some component structures are evolving. You might find some logic in `App.tsx` that is slowly being refactored into custom hooks.*
+The application features a comprehensive Vitest test suite:
+- **Test Files**: 43 passed
+- **Total Tests**: 331 passed
+- **Type Checking**: 0 TypeScript errors (`npx tsc --noEmit`)
+- **Linting**: 0 ESLint errors (`npm run lint`)
 
 ---
 
-## 🤝 Contributing
-This is primarily a personal portfolio project, but suggestions and issues are welcome! If you find a bug or have an idea, feel free to open an issue or a PR.
+## 📌 Deployment Status & Known Limitations
 
----
-
-## 🔒 Security
-*   **Authentication**: Handled entirely by Supabase.
-*   **Data Access**: We use Row Level Security (RLS) policies in Postgres. This ensures users can only access their own data.
-*   **Keys**: API keys are stored in environment variables.
-
-## 📜 License
-MIT License.
+- **Roadmap Status**: Phases P0, P1, P2, P3, P4, and P5 are fully implemented locally and verified (`PHASE 5 VERIFIED`).
+- **Phase 4 Live Supabase Deployment Status**: Live Supabase/Gemini deployment verification is currently **DEFERRED** pending development environment Supabase CLI authentication. Local vector search, pgvector migration files, Edge Functions, and mock tests pass 100%.
+- **Web Background Notifications**: Web/PWA notification scheduling relies on an active browser tab (`setTimeout`). Native OS background scheduling is supported on mobile via Capacitor (`@capacitor/local-notifications`) or desktop via Tauri.

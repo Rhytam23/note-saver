@@ -62,13 +62,20 @@ export function useAuth(): AuthContextType {
     };
   }, []);
 
+  const getSafeOrigin = (): string => {
+    if (typeof window !== 'undefined' && window.location.origin && window.location.origin !== 'null') {
+      return window.location.origin;
+    }
+    return 'https://notenirman.vercel.app';
+  };
+
   const login = useCallback(async (): Promise<void> => {
     setIsSubmitting(true);
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin,
+          redirectTo: getSafeOrigin(),
           scopes: 'https://www.googleapis.com/auth/calendar.readonly'
         }
       });
@@ -103,7 +110,7 @@ export function useAuth(): AuthContextType {
         email,
         password,
         options: {
-          emailRedirectTo: window.location.origin,
+          emailRedirectTo: getSafeOrigin(),
           data: {
             full_name: name,
           }
