@@ -67,7 +67,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   setView,
   onQuickAccess,
 }) => {
-  const { theme: contextSeason, colors } = useSeason();
+  const { theme: contextSeason, colors, setSeasonalTheme } = useSeason();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showVideoModal, setShowVideoModal] = useState(false);
 
@@ -86,6 +86,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   }, [contextSeason]);
 
   const currentThemeConfig = HERO_THEMES[activeSeason] || HERO_THEMES.autumn;
+
+  const handleSeasonSelect = (seasonId: SeasonalThemeMode) => {
+    setActiveSeason(seasonId);
+    setSeasonalTheme(seasonId);
+  };
 
   const handleDoubleClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
@@ -113,10 +118,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4 }}
       onDoubleClick={handleDoubleClick}
-      className="flex-1 flex flex-col w-full cursor-default select-none relative bg-gray-50 dark:bg-[#090b10] text-gray-900 dark:text-gray-100 overflow-x-hidden min-h-screen"
+      className="flex-1 flex flex-col w-full cursor-default select-none relative bg-transparent text-gray-900 dark:text-gray-100 overflow-x-hidden min-h-screen"
     >
       {/* SaaS Navigation Header */}
-      <header className="sticky top-0 left-0 right-0 z-40 backdrop-blur-md bg-white/80 dark:bg-[#090b10]/80 border-b border-gray-200/60 dark:border-gray-800/60 transition-colors duration-300">
+      <header className="sticky top-0 left-0 right-0 z-40 backdrop-blur-md bg-white/70 dark:bg-[#090b10]/70 border-b border-gray-200/60 dark:border-gray-800/60 transition-colors duration-300">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
           
           {/* Top-Left Brand with Authoritative NoteNirman Logo */}
@@ -150,7 +155,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 NEW
               </span>
             </button>
-
             <button
               onClick={() => scrollToSection('purpose')}
               className="text-gray-600 dark:text-gray-300 hover:text-amber-500 dark:hover:text-amber-400 transition-colors"
@@ -238,7 +242,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             >
               AI Copilot
             </button>
-
             <button
               onClick={() => scrollToSection('purpose')}
               className="block w-full text-left py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-amber-500"
@@ -442,7 +445,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <HeroProductPreview activeSeason={activeSeason} />
 
             {/* Interactive Seasonal Theme Selector Bar (Supports ALL 13 themes in repository) */}
-            <div className="mt-4 w-full flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-2.5 rounded-2xl bg-white/60 dark:bg-gray-900/60 border border-gray-200/80 dark:border-gray-800/80 backdrop-blur-md shadow-sm">
+            <div className="mt-4 w-full flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-2.5 rounded-2xl bg-white/70 dark:bg-gray-900/70 border border-gray-200/80 dark:border-gray-800/80 backdrop-blur-md shadow-sm">
               
               {/* Brand Concept Subtitle */}
               <div className="text-xs font-serif italic text-gray-500 dark:text-gray-400">
@@ -450,14 +453,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </div>
 
               {/* Scrollable / Interactive Seasonal Theme Switcher Pills */}
-              <div className="flex items-center space-x-1.5 bg-gray-100 dark:bg-gray-950 p-1.5 rounded-xl border border-gray-200 dark:border-gray-800 overflow-x-auto max-w-full no-scrollbar">
+              <div className="flex items-center space-x-1.5 bg-gray-100/80 dark:bg-gray-950/80 p-1.5 rounded-xl border border-gray-200/70 dark:border-gray-800/70 overflow-x-auto max-w-full no-scrollbar">
                 {ALL_SEASONAL_THEMES.map((s) => {
                   const isActive = activeSeason === s.id;
                   const itemConfig = HERO_THEMES[s.id];
                   return (
                     <button
                       key={s.id}
-                      onClick={() => setActiveSeason(s.id)}
+                      onClick={() => handleSeasonSelect(s.id)}
                       className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all duration-200 whitespace-nowrap ${
                         isActive
                           ? 'text-gray-950 shadow-sm font-bold scale-105'
@@ -580,8 +583,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <div id="ai-copilot">
           <FeatureHighlights />
         </div>
-
-
 
         <WhyChooseUs />
         <Testimonials />
