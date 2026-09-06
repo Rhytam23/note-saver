@@ -25,6 +25,7 @@ export interface ThemeColors {
 export interface SeasonalContextType {
   theme: SeasonalTheme;
   colors: ThemeColors;
+  setSeasonalTheme: (theme: SeasonalTheme) => void;
 }
 
 const SeasonalContext = createContext<SeasonalContextType | undefined>(undefined);
@@ -32,7 +33,7 @@ const SeasonalContext = createContext<SeasonalContextType | undefined>(undefined
 export const SeasonalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth() as any;
   const { theme: colorMode } = useTheme() as any;
-  const [seasonalTheme, setSeasonalTheme] = useState<SeasonalTheme>('none');
+  const [seasonalTheme, setSeasonalTheme] = useState<SeasonalTheme>('autumn');
 
   const colors = useMemo(() => {
     const isDarkMode = colorMode === 'dark';
@@ -77,9 +78,8 @@ export const SeasonalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   }, [user?.themePreference]);
 
-
   return (
-    <SeasonalContext.Provider value={{ theme: seasonalTheme, colors }}>
+    <SeasonalContext.Provider value={{ theme: seasonalTheme, colors, setSeasonalTheme }}>
       {children}
     </SeasonalContext.Provider>
   );
