@@ -7,8 +7,19 @@ interface RouterContextType {
   query: Record<string, string>;
 }
 
-const normalizePath = (pathname: string): string => {
-  if (!pathname || pathname === '' || pathname === '/index.html' || pathname.endsWith('/index.html')) return '/';
+const normalizePath = (rawPathname: string): string => {
+  if (!rawPathname) return '/';
+  const pathname = rawPathname.replace(/\\/g, '/');
+  if (
+    pathname === '' ||
+    pathname === '/' ||
+    pathname === '/index.html' ||
+    pathname.endsWith('/index.html') ||
+    pathname.includes('index.html') ||
+    pathname.startsWith('file:')
+  ) {
+    return '/';
+  }
   if (pathname.length > 1 && pathname.endsWith('/')) {
     return pathname.slice(0, -1);
   }

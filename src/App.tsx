@@ -34,6 +34,7 @@ import EmailVerification from './components/EmailVerification';
 import Maintenance from './components/Maintenance';
 import { checkForUpdates, type UpdateInfo } from './services/updateService';
 import UpdateModal from './components/UpdateModal';
+import { detectPlatform } from './services/platform/platformAdapterFactory';
 
 const ProfileModal = React.lazy(() => import('./components/ProfileModal'));
 const TutorialModal = React.lazy(() => import('./components/TutorialModal'));
@@ -51,6 +52,8 @@ const HoliIntroAnimation = React.lazy(() => import('./components/HoliIntroAnimat
 const PongalIntroAnimation = React.lazy(() => import('./components/PongalIntroAnimation'));
 const NavratriIntroAnimation = React.lazy(() => import('./components/NavratriIntroAnimation'));
 const NewYearIntroAnimation = React.lazy(() => import('./components/NewYearIntroAnimation'));
+
+let appSessionIntroEvaluated = false;
 
 const App: React.FC = () => {
   const { user, loading, logout, updateUser, updatePassword } = useAuth() as any;
@@ -101,27 +104,55 @@ const App: React.FC = () => {
   const [showNavratriIntro, setShowNavratriIntro] = useState(false);
   const [showNewYearIntro, setShowNewYearIntro] = useState(false);
 
-  const [showWelcome, setShowWelcome] = useState(() => {
-    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      return false;
-    }
-    const landingSeen = localStorage.getItem('notenirman_landing_seen') || localStorage.getItem('hasSeenWelcome');
-    return !landingSeen;
-  });
+  const [showWelcome, setShowWelcome] = useState(false);
 
   const handleWelcomeComplete = useCallback(() => {
     setShowWelcome(false);
-    localStorage.setItem('notenirman_landing_seen', 'true');
-    localStorage.setItem('hasSeenWelcome', 'true');
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('notenirman_landing_seen', 'true');
+      localStorage.setItem('hasSeenWelcome', 'true');
+      sessionStorage.setItem('notenirman_session_intro_seen', 'true');
+    }
   }, []);
 
   useEffect(() => {
-    if (user) {
+    // 1. Wait until authentication loading state resolves
+    if (loading) return;
+
+    // 2. If intro state was already evaluated in this runtime session, skip
+    if (appSessionIntroEvaluated) {
       setShowWelcome(false);
-      localStorage.setItem('notenirman_landing_seen', 'true');
-      localStorage.setItem('hasSeenWelcome', 'true');
+      return;
     }
-  }, [user]);
+
+    appSessionIntroEvaluated = true;
+
+    // 3. Determine if user should see the first-visit intro
+    const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const landingSeen = typeof window !== 'undefined' && (
+      localStorage.getItem('notenirman_landing_seen') === 'true' ||
+      localStorage.getItem('hasSeenWelcome') === 'true' ||
+      sessionStorage.getItem('notenirman_session_intro_seen') === 'true'
+    );
+
+    // Skip intro if user is authenticated, already seen, reduced motion enabled, or accessing non-root entry path
+    if (user || prefersReducedMotion || landingSeen || path !== '/') {
+      setShowWelcome(false);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('notenirman_landing_seen', 'true');
+        localStorage.setItem('hasSeenWelcome', 'true');
+        sessionStorage.setItem('notenirman_session_intro_seen', 'true');
+      }
+    } else {
+      // Show intro ONCE for new unauthenticated user entering via root '/'
+      setShowWelcome(true);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('notenirman_landing_seen', 'true');
+        localStorage.setItem('hasSeenWelcome', 'true');
+        sessionStorage.setItem('notenirman_session_intro_seen', 'true');
+      }
+    }
+  }, [loading, user, path]);
 
   useEffect(() => {
     if (showWelcome) return;
@@ -457,11 +488,11 @@ const App: React.FC = () => {
   return (
     <ErrorBoundary>
       <div className={`flex flex-col min-h-screen font-sans antialiased transition-colors duration-500 ${theme === 'dark' ? 'dark' : ''} ${colors.bgSimple}`}>
-        <SpeedInsights />
+        {detectPlatform() === 'web' && <SpeedInsights />}
         <SeasonalAnimations />
         <Suspense fallback={null}>
           <AnimatePresence mode="wait">
-            {showWelcome && (
+            {showWelcome && !user && (
               <WelcomeIntroAnimation onAnimationComplete={handleWelcomeComplete} />
             )}
           </AnimatePresence>

@@ -13,7 +13,7 @@ export const fetchTodayEvents = async (): Promise<string[]> => {
         const { data: { session } } = await supabase.auth.getSession();
         
         if (!session || !session.provider_token) {
-            console.log('[CalendarService] No active session or provider token found.');
+            console.info('[CalendarService] No active session or provider token found.');
             return [];
         }
 

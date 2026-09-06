@@ -9,12 +9,14 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { Analytics } from "@vercel/analytics/react";
 import { RouterProvider } from "./contexts/RouterContext";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { detectPlatform } from "./services/platform/platformAdapterFactory";
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
 const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'dummy-google-client-id';
+const isWeb = detectPlatform() === 'web';
 
 root.render(
   <ErrorBoundary>
@@ -24,7 +26,7 @@ root.render(
           <SeasonalProvider>
             <RouterProvider>
               <App />
-              <Analytics />
+              {isWeb && <Analytics />}
             </RouterProvider>
           </SeasonalProvider>
         </ThemeProvider>
