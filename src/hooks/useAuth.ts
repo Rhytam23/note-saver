@@ -15,9 +15,36 @@ export interface AuthContextType {
   resetPassword: (email: string) => Promise<void>;
 }
 
+const getInitialCachedUser = (): User | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (key.startsWith('sb-') || key.includes('supabase')) && key.endsWith('-auth-token')) {
+        const raw = localStorage.getItem(key);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          const sessionUser = parsed?.user || parsed?.currentSession?.user;
+          if (sessionUser?.id) {
+            return {
+              id: sessionUser.id,
+              name: sessionUser.user_metadata?.full_name || sessionUser.email?.split('@')[0] || 'User',
+              email: sessionUser.email || '',
+              avatarUrl: sessionUser.user_metadata?.avatar_url || null,
+            };
+          }
+        }
+      }
+    }
+  } catch (e) {
+    // Ignore storage parse errors
+  }
+  return null;
+};
+
 export function useAuth(): AuthContextType {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(() => getInitialCachedUser());
+  const [loading, setLoading] = useState<boolean>(() => !getInitialCachedUser());
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {

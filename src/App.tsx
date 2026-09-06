@@ -155,8 +155,6 @@ const App: React.FC = () => {
   }, [loading, user, path]);
 
   useEffect(() => {
-    if (showWelcome) return;
-
     setShowIndependenceDayIntro(false);
     setShowSummerIntro(false);
     setShowWinterIntro(false);
@@ -171,6 +169,18 @@ const App: React.FC = () => {
     setShowNewYearIntro(false);
     setShowNavratriBanner(false);
 
+    // Intro animations are for first-visit unauthenticated users ONLY.
+    // Authenticated users and returning visitors must NEVER see seasonal intro screens.
+    const landingSeen = typeof window !== 'undefined' && (
+      localStorage.getItem('notenirman_landing_seen') === 'true' ||
+      localStorage.getItem('hasSeenWelcome') === 'true' ||
+      sessionStorage.getItem('notenirman_session_intro_seen') === 'true'
+    );
+
+    if (showWelcome || user || appSessionIntroEvaluated || landingSeen) {
+      return;
+    }
+
     if (seasonalTheme === 'independence_day_in') setShowIndependenceDayIntro(true);
     if (seasonalTheme === 'navratri') setShowNavratriIntro(true);
     if (seasonalTheme === 'summer') setShowSummerIntro(true);
@@ -183,7 +193,7 @@ const App: React.FC = () => {
     if (seasonalTheme === 'holi') setShowHoliIntro(true);
     if (seasonalTheme === 'pongal') setShowPongalIntro(true);
     if (seasonalTheme === 'new_year') setShowNewYearIntro(true);
-  }, [seasonalTheme, showWelcome]);
+  }, [seasonalTheme, showWelcome, user]);
 
   const allTags = useMemo(() => {
     const tagSet = new Set<string>();
