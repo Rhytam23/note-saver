@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { Theme, SeasonalTheme } from '../types';
+import type { Theme } from '../types';
 import { SunIcon, MoonIcon } from './Icons';
 import { useSeason } from '../contexts/SeasonalContext';
 import { HeroProductPreview, HERO_THEMES, SeasonalThemeMode } from './HeroProductPreview';
