@@ -219,6 +219,8 @@ export async function processSyncQueue(userId: string): Promise<void> {
 async function processOp(userId: string, op: SyncOp): Promise<void> {
   if (op.entity === 'note') {
     await processNoteOp(userId, op);
+  } else if (op.entity === 'calendar_event') {
+    await processCalendarEventOp(userId, op);
   } else {
     await processTagOp(userId, op);
   }
@@ -356,3 +358,120 @@ export function startAutoSync(): void {
   }, 20000);
 }
 
+// ---------------------------------------------------------------------------
+// Calendar Event Sync Handler (P5.6)
+// Extends syncEngine.ts without introducing a second sync engine or queue.
+// Existing Note and Tag synchronization remains 100% unchanged.
+// ---------------------------------------------------------------------------
+
+async function processCalendarEventOp(userId: string, op: SyncOp): Promise<void> {
+  const local = await localDb.getCalendarEvent(op.entityId);
+  if (!local) {
+    await localDb.removeOp(op.opId);
+    return;
+  }
+
+  if (op.action === 'delete') {
+    // Propagate soft delete to Supabase, then hard-delete locally
+    const { error } = await supabase
+      .from('calendar_events')
+      .update({
+        is_deleted: true,
+        deleted_at: local.deletedAt ?? Date.now(),
+        updated_at: Date.now(),
+      })
+      .eq('id', op.entityId);
+    if (error) throw error;
+    await localDb.deleteCalendarEventHard(op.entityId);
+    await localDb.removeOp(op.opId);
+    return;
+  }
+
+  // LWW: fetch remote version
+  const { data: serverRow, error: fetchErr } = await supabase
+    .from('calendar_events')
+    .select('id, version, updated_at')
+    .eq('id', op.entityId)
+    .maybeSingle();
+  if (fetchErr) throw fetchErr;
+
+  const localVersion = local.version ?? 0;
+  const serverVersion = (serverRow as any)?.version ?? 0;
+
+  if (serverVersion > op.baseVersion && serverVersion > localVersion) {
+    // Server is newer — pull full remote record, apply locally (LWW)
+    const { data: fullRow } = await supabase
+      .from('calendar_events')
+      .select('*')
+      .eq('id', op.entityId)
+      .maybeSingle();
+    if (fullRow) {
+      await localDb.putCalendarEvent(dbToCalendarEvent(fullRow));
+    }
+    await localDb.removeOp(op.opId);
+    return;
+  }
+
+  // Local is newer — push to Supabase
+  const { error: upsertErr } = await supabase
+    .from('calendar_events')
+    .upsert(calendarEventToDbRow(local, userId))
+    .select('version')
+    .maybeSingle();
+  if (upsertErr) throw upsertErr;
+
+  // Update local version after successful push
+  await localDb.putCalendarEvent({ ...local, version: localVersion + 1 });
+  await localDb.removeOp(op.opId);
+  notifyChange(userId);
+}
+
+// ---------------------------------------------------------------------------
+// Calendar Event row converters (snake_case ↔ camelCase)
+// ---------------------------------------------------------------------------
+
+function dbToCalendarEvent(row: any): import('../types/calendar').CalendarEventEntity {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    noteId: row.note_id,
+    blockId: row.block_id ?? null,
+    title: row.title,
+    description: row.description ?? null,
+    startAt: row.start_at,
+    endAt: row.end_at ?? null,
+    isAllDay: row.is_all_day ?? false,
+    timezone: row.timezone ?? 'UTC',
+    recurrenceRule: row.recurrence_rule ?? null,
+    reminderMinutesBefore: row.reminder_minutes_before ?? null,
+    status: row.status ?? 'scheduled',
+    version: row.version ?? 1,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    isDeleted: row.is_deleted ?? false,
+    deletedAt: row.deleted_at ?? null,
+  };
+}
+
+function calendarEventToDbRow(event: import('../types/calendar').CalendarEventEntity, userId: string): Record<string, unknown> {
+  return {
+    id: event.id,
+    user_id: userId,
+    note_id: event.noteId,
+    block_id: event.blockId ?? null,
+    title: event.title,
+    description: event.description ?? null,
+    start_at: event.startAt,
+    end_at: event.endAt ?? null,
+    is_all_day: event.isAllDay,
+    timezone: event.timezone,
+    recurrence_rule: event.recurrenceRule ?? null,
+    reminder_minutes_before: event.reminderMinutesBefore ?? null,
+    status: event.status,
+    version: event.version,
+    created_at: event.createdAt,
+    updated_at: event.updatedAt,
+    is_deleted: event.isDeleted,
+    deleted_at: event.deletedAt ?? null,
+  };
+}
