@@ -1,3 +1,11 @@
+> **⚠ Superseded / historical record only — do not treat this as current.**
+>
+> The very first plan for turning this into a mobile app, from 2026-03-26. Superseded by everything that actually happened afterwards; kept only as the starting point of the trail.
+>
+> Moved here unmodified on 2026-09-22 so the reasoning trail isn't lost.
+
+---
+
 # Initial App Transformation Plan
 
 Project: NoteNirman Mobile App

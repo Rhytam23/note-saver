@@ -1,3 +1,11 @@
+> **⚠ Superseded / historical record only — do not treat this as current.**
+>
+> Describes an early refactor where the project lived under an `app/` subfolder. That layout no longer exists — the project has lived at the repo root since. Superseded by [docs/SETUP.md](../SETUP.md).
+>
+> Moved here unmodified on 2026-09-22 so the reasoning trail isn't lost.
+
+---
+
 # Environment & Build Configuration
 
 ## Capacitor Config
