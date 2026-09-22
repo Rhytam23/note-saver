@@ -34,6 +34,7 @@ import SeasonalLoading from "./components/SeasonalLoading";
 
 import LandingPage from './components/LandingPage';
 import AuthScreen from './components/AuthScreen';
+import UpdateBanner from './components/UpdateBanner';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfService from './components/TermsOfService';
 import NotFound from './components/NotFound';
@@ -737,6 +738,7 @@ const App: React.FC = () => {
     <ErrorBoundary>
       <div className={`flex flex-col min-h-screen font-sans antialiased transition-colors duration-500 ${theme === 'dark' ? 'dark' : ''} ${colors.bgSimple}`}>
         {detectPlatform() === 'web' && <SpeedInsights />}
+        <UpdateBanner />
         <SeasonalAnimations />
         <Suspense fallback={null}>
           <AnimatePresence mode="wait">

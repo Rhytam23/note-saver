@@ -11,6 +11,50 @@ archived.
 
 ---
 
+## 2026-09-22 — Self-updating landing-page downloads + in-app update-check banner
+
+**Decision:** The release pipeline (`.github/workflows/release.yml`) now
+copies the freshly-built Windows installer and Android APK into
+`public/downloads/` and writes `public/downloads/version.json`, committing
+and pushing that straight to `main` after every tagged release. The
+installed desktop/Android apps poll that same `version.json` once on
+launch and show a dismissible banner ("Download update") when it's newer
+than the running build - never a silent auto-install.
+
+**Why:** The landing page's download buttons pointed at static files in
+`public/downloads/` that nobody was updating - they were still serving the
+`v0.1.0` Windows exe with no Android APK at all, well after `v0.1.1` had
+shipped. The repo is private, so client code can't call the GitHub
+Releases API directly to fetch the latest build (unauthenticated requests
+404 on a private repo) - same-origin files on the already-public
+`notenirman.vercel.app` site sidestep that without exposing any token to
+the client. A real Tauri auto-updater (code-signed deltas installed
+automatically) was considered and rejected for now: it needs a signing-key
++ `latest.json` infrastructure this project doesn't have yet, and the
+user explicitly wants a prompt-and-let-them-choose flow instead of a
+silent swap.
+
+**Technical detail:** `useUpdateCheck.ts` (new) reads the app's own
+installed version via `@tauri-apps/api/app`'s `getVersion()` on desktop or
+`@capacitor/app`'s `App.getInfo()` on Android, compares it against
+`version.json`, and surfaces the newer one via `UpdateBanner.tsx` (new),
+mounted in `App.tsx`. A dismissed version is remembered per-device in
+`localStorage` so it doesn't reappear until the *next* release. Web is
+untouched (`detectPlatform() === 'web'` short-circuits the whole hook) -
+the web app is always current since every push to `main` redeploys it.
+
+**Manual step:** None - this is fully automated from the next tagged
+release onward. This session's push also manually re-synced
+`public/downloads/` to the already-published `v0.1.1` assets as a one-time
+catch-up.
+
+**Verified:** `npx tsc --noEmit` and `npm run lint` clean; confirmed in
+the dev server that `/downloads/version.json` and `/downloads/*.apk`
+serve correctly and the reported APK size matches the real `v0.1.1`
+release asset.
+
+---
+
 ## 2026-09-22 — Native Google sign-in on desktop and Android
 
 **Decision:** Google sign-in was previously web-only (`detectPlatform() === 'web'`

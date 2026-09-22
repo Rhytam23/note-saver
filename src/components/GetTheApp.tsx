@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, useTransform } from 'framer-motion';
 import { useSeason } from '../contexts/SeasonalContext';
 import { WindowsIcon, AndroidIcon } from './Icons';
@@ -13,9 +13,11 @@ interface PlatformDef {
   detail: string;
   icon: React.ReactNode;
   installNote: string;
-  // Direct, same-origin download path. null means no build is published yet.
-  downloadUrl: string | null;
-  version: string;
+  // Direct, same-origin download path. Kept at a fixed filename - the
+  // release pipeline overwrites it on every tagged release (see
+  // .github/workflows/release.yml, "Publish Latest Downloads To Landing
+  // Page"), so this link never needs to be hand-edited again.
+  downloadUrl: string;
 }
 
 const platforms: PlatformDef[] = [
@@ -26,7 +28,6 @@ const platforms: PlatformDef[] = [
     icon: <WindowsIcon className="h-7 w-7" />,
     installNote: 'If Windows SmartScreen appears, choose More info, then Run anyway. The installer is not code-signed yet.',
     downloadUrl: '/downloads/NoteNirman-Setup.exe',
-    version: '0.1.0',
   },
   {
     key: 'android',
@@ -34,10 +35,33 @@ const platforms: PlatformDef[] = [
     detail: 'APK',
     icon: <AndroidIcon className="h-7 w-7" />,
     installNote: 'Open the file after it downloads. Android will ask you to allow installs from your browser or Files app, since this APK is not from the Play Store.',
-    downloadUrl: null,
-    version: '0.1.0',
+    downloadUrl: '/downloads/NoteNirman.apk',
   },
 ];
+
+interface VersionManifest {
+  version: string;
+}
+
+/**
+ * Reads the same version.json the release pipeline publishes and the
+ * in-app update-check banner polls (see useUpdateCheck.ts), so the version
+ * number shown here can never drift from what's actually downloadable.
+ */
+function useLatestVersion(): string | null {
+  const [version, setVersion] = useState<string | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/downloads/version.json')
+      .then(res => (res.ok ? res.json() : null))
+      .then((data: VersionManifest | null) => {
+        if (!cancelled && data?.version) setVersion(data.version);
+      })
+      .catch(() => undefined);
+    return () => { cancelled = true; };
+  }, []);
+  return version;
+}
 
 interface GetTheAppProps {
   accent: string;
@@ -47,6 +71,7 @@ interface GetTheAppProps {
 const GetTheApp: React.FC<GetTheAppProps> = ({ accent, onOpenWebApp }) => {
   const { colors } = useSeason();
   const { tier } = useMotionCapability();
+  const latestVersion = useLatestVersion();
 
   // Gentle, staggered depth on the 3 cards as the grid scrolls into view -
   // card 0 barely moves, card 2 a little more. Three explicit calls (not a
@@ -91,7 +116,7 @@ const GetTheApp: React.FC<GetTheAppProps> = ({ accent, onOpenWebApp }) => {
                 {platform.icon}
                 <div className={colors.primaryText}>
                   <h3 className="font-semibold leading-tight">{platform.label}</h3>
-                  <p className={`text-sm ${colors.secondaryText}`}>{platform.detail} · v{platform.version}</p>
+                  <p className={`text-sm ${colors.secondaryText}`}>{platform.detail}{latestVersion ? ` · v${latestVersion}` : ''}</p>
                 </div>
               </div>
               <p className={`mt-4 text-sm leading-relaxed flex-1 ${colors.secondaryText}`}>{platform.installNote}</p>
