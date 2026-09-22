@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useTransform } from 'framer-motion';
 import type { Theme } from '../types';
 import { SunIcon, MoonIcon } from './Icons';
 import { useSeason } from '../contexts/SeasonalContext';
 import { HeroProductPreview, HERO_THEMES, SeasonalThemeMode } from './HeroProductPreview';
 import { NoteNirmanLogo } from './NoteNirmanLogo';
+import { SeasonalCardStack } from './SeasonalCardStack';
 import GetTheApp from './GetTheApp';
 import Footer from './Footer';
+import { useMotionCapability } from '../hooks/useMotionCapability';
+import { useParallax } from '../hooks/useParallax';
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -92,6 +95,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   }, [contextSeason]);
 
   const accent = (HERO_THEMES[activeSeason] || HERO_THEMES.autumn).accentHex;
+
+  const { tier: motionTier } = useMotionCapability();
+  // Decorative-only parallax: never applied to text or interactive controls,
+  // just to background accents, so nothing shifts under a reader or a click.
+  const featuresParallax = useParallax(motionTier, [-30, 30]);
+  const themesParallax = useParallax(motionTier, [-20, 20]);
+  const themesScale = useTransform(
+    themesParallax.scrollYProgress,
+    [0, 0.5],
+    motionTier === 'full' ? [0.98, 1] : [1, 1]
+  );
 
   const handleSeasonSelect = (seasonId: SeasonalThemeMode) => {
     setActiveSeason(seasonId);
@@ -271,8 +285,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </section>
 
         {/* Features */}
-        <section id="features" className={`border-y ${colors.border} ${colors.surface}`}>
-          <div className="max-w-6xl 2xl:max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
+        <section
+          id="features"
+          ref={featuresParallax.ref}
+          className={`relative overflow-hidden border-y ${colors.border} ${colors.surface}`}
+        >
+          {/* Decorative-only background accent; the slow parallax layer. */}
+          <motion.div
+            aria-hidden="true"
+            className="absolute -top-24 right-0 w-[420px] h-[420px] rounded-full blur-3xl opacity-20 pointer-events-none"
+            style={{ backgroundColor: accent, y: featuresParallax.y }}
+          />
+          <div className="relative max-w-6xl 2xl:max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -317,14 +341,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
         {/* Themes: the seasonal system. Automatic by default - this picker is a live preview,
             not a persisted account setting (that lives in Profile & Settings once signed in). */}
-        <section id="themes" className="max-w-6xl 2xl:max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-80px' }}
-            transition={{ duration: 0.5 }}
-            className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start"
-          >
+        <section id="themes" className="relative overflow-hidden">
+          <div ref={themesParallax.ref} className="max-w-6xl 2xl:max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-80px' }}
+              transition={{ duration: 0.5 }}
+              className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start"
+            >
             <div className="lg:col-span-5">
               <h2 className={`text-3xl sm:text-4xl font-serif font-bold tracking-tight ${colors.primaryText}`}>
                 A workspace that follows the calendar
@@ -333,8 +358,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 NoteNirman picks a theme automatically based on today&rsquo;s date and Indian festivals &mdash; no setup needed. Tap a swatch to preview it right here, and once you&rsquo;re signed in, set a favourite permanently from Profile &amp; Settings.
               </p>
             </div>
-            <div className="lg:col-span-7">
-              <div role="radiogroup" aria-label="Preview a theme" className="flex flex-wrap gap-2">
+            <motion.div className="lg:col-span-7 relative" style={{ scale: themesScale }}>
+              {/* Decorative-only accent behind the stack; takes the parallax y so the
+                  swatch buttons themselves never move under a reader's cursor. */}
+              <motion.div
+                aria-hidden="true"
+                className="absolute -inset-x-6 -top-6 h-40 rounded-full blur-3xl opacity-20 pointer-events-none"
+                style={{ backgroundColor: accent, y: themesParallax.y }}
+              />
+              <div className="relative mb-6 max-w-sm">
+                <SeasonalCardStack activeSeason={activeSeason} />
+              </div>
+              <div role="radiogroup" aria-label="Preview a theme" className="relative flex flex-wrap gap-2">
                 {ALL_SEASONAL_THEMES.map(s => {
                   const isActive = activeSeason === s.id;
                   const swatch = HERO_THEMES[s.id].accentHex;
@@ -362,8 +397,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 })}
               </div>
               <p className={`mt-3 text-sm ${colors.secondaryText}`}>Just previewing this page &mdash; it doesn&rsquo;t change your account.</p>
-            </div>
-          </motion.div>
+            </motion.div>
+            </motion.div>
+          </div>
         </section>
 
         <GetTheApp accent={accent} onOpenWebApp={onGetStarted} />

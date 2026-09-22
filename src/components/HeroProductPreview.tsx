@@ -1,6 +1,7 @@
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useRef } from 'react';
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import type { SeasonalTheme } from '../types';
+import { useMotionCapability } from '../hooks/useMotionCapability';
 
 export type SeasonalThemeMode = SeasonalTheme;
 
@@ -224,9 +225,44 @@ export interface HeroProductPreviewProps {
 
 export const HeroProductPreview: React.FC<HeroProductPreviewProps> = ({ activeSeason = 'autumn' }) => {
   const currentSeason = HERO_THEMES[activeSeason] || HERO_THEMES.autumn;
+  const { tier } = useMotionCapability();
+
+  // Cursor-follow tilt. Hooks are always called (rules-of-hooks); only the
+  // DOM listeners below are conditionally attached on tier === 'full', so a
+  // 'reduced'/'off' tier pays nothing for a mousemove listener it won't use.
+  const perspectiveRef = useRef<HTMLDivElement>(null);
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const springX = useSpring(mouseX, { stiffness: 150, damping: 20 });
+  const springY = useSpring(mouseY, { stiffness: 150, damping: 20 });
+  const rotateX = useTransform(springY, [-0.5, 0.5], [7, -7]);
+  const rotateY = useTransform(springX, [-0.5, 0.5], [-8, 8]);
+
+  const tiltEnabled =
+    tier === 'full' &&
+    typeof window !== 'undefined' &&
+    window.matchMedia?.('(hover: hover) and (pointer: fine)').matches;
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = perspectiveRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    mouseX.set((e.clientX - rect.left) / rect.width - 0.5);
+    mouseY.set((e.clientY - rect.top) / rect.height - 0.5);
+  };
+
+  const handleMouseLeave = () => {
+    mouseX.set(0);
+    mouseY.set(0);
+  };
 
   return (
-    <div className="relative w-full select-none">
+    <div
+      ref={perspectiveRef}
+      className="relative w-full select-none"
+      style={{ perspective: 1200 }}
+      onMouseMove={tiltEnabled ? handleMouseMove : undefined}
+      onMouseLeave={tiltEnabled ? handleMouseLeave : undefined}
+    >
       {/* Outer Atmosphere Container with Dynamic Theme Transitions */}
       <AnimatePresence mode="wait">
         <motion.div
@@ -235,6 +271,7 @@ export const HeroProductPreview: React.FC<HeroProductPreviewProps> = ({ activeSe
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
+          style={tiltEnabled ? { rotateX, rotateY, transformStyle: 'preserve-3d' } : undefined}
           className={`relative rounded-3xl p-3 sm:p-6 overflow-hidden ${currentSeason.bgTint} border border-gray-800 ${currentSeason.borderGlow} shadow-2xl transition-colors duration-500`}
         >
           {/* Background Window Scene Effect */}

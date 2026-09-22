@@ -1,7 +1,9 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, useTransform } from 'framer-motion';
 import { useSeason } from '../contexts/SeasonalContext';
 import { WindowsIcon, AndroidIcon } from './Icons';
+import { useMotionCapability } from '../hooks/useMotionCapability';
+import { useParallax } from '../hooks/useParallax';
 
 type PlatformKey = 'windows' | 'android';
 
@@ -44,6 +46,16 @@ interface GetTheAppProps {
 
 const GetTheApp: React.FC<GetTheAppProps> = ({ accent, onOpenWebApp }) => {
   const { colors } = useSeason();
+  const { tier } = useMotionCapability();
+
+  // Gentle, staggered depth on the 3 cards as the grid scrolls into view -
+  // card 0 barely moves, card 2 a little more. Three explicit calls (not a
+  // hook-in-a-loop) since there are always exactly 3 cards here.
+  const grid = useParallax(tier, [0, 1]); // range unused directly, just want the shared scrollYProgress + ref
+  const cardY0 = useTransform(grid.scrollYProgress, [0, 1], tier === 'full' ? [0, 6] : [0, 0]);
+  const cardY1 = useTransform(grid.scrollYProgress, [0, 1], tier === 'full' ? [0, 14] : [0, 0]);
+  const cardY2 = useTransform(grid.scrollYProgress, [0, 1], tier === 'full' ? [0, 22] : [0, 0]);
+  const cardParallax = [cardY0, cardY1, cardY2];
 
   return (
     <section id="get-the-app" className={`border-t ${colors.border} ${colors.surface}`}>
@@ -63,10 +75,13 @@ const GetTheApp: React.FC<GetTheAppProps> = ({ accent, onOpenWebApp }) => {
           </p>
         </motion.div>
 
-        <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div ref={grid.ref} className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-5">
           {platforms.map((platform, index) => (
+            // Outer element carries the scroll-linked parallax `y`; the inner
+            // motion.div keeps its own independent whileInView reveal `y` -
+            // kept on separate elements so the two motion values don't fight.
+            <motion.div key={platform.key} style={{ y: cardParallax[index] }}>
             <motion.div
-              key={platform.key}
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-80px' }}
@@ -98,8 +113,10 @@ const GetTheApp: React.FC<GetTheAppProps> = ({ accent, onOpenWebApp }) => {
                 </span>
               )}
             </motion.div>
+            </motion.div>
           ))}
 
+          <motion.div style={{ y: cardParallax[2] }}>
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -120,6 +137,7 @@ const GetTheApp: React.FC<GetTheAppProps> = ({ accent, onOpenWebApp }) => {
             >
               Open the web app
             </button>
+          </motion.div>
           </motion.div>
         </div>
       </div>
