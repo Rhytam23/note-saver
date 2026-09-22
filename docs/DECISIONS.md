@@ -53,6 +53,20 @@ the dev server that `/downloads/version.json` and `/downloads/*.apk`
 serve correctly and the reported APK size matches the real `v0.1.1`
 release asset.
 
+**Follow-up (same day) - found by actually testing the live site:**
+pushing a disposable `v0.1.2-1` test tag through the full pipeline and
+then checking `https://notenirman.vercel.app/downloads/` directly showed
+`version.json` and the new `.apk` both came back as `text/html` (the
+SPA's `index.html`), not the real file - `vercel.json`'s catch-all SPA
+rewrite (`"source": "/(.*)" -> "/index.html"`) was swallowing those paths
+in production even though the Vite dev server served them fine (dev and
+Vercel resolve static files vs. rewrites differently). The pre-existing
+`.exe` route happened to still work, which is why this had gone
+unnoticed. Fixed by excluding `downloads/` from the rewrite with a
+negative-lookahead source pattern (`"/((?!downloads/).*)"`), so anything
+under `/downloads/` always resolves to the real static file instead of
+falling through to the app shell.
+
 ---
 
 ## 2026-09-22 — Native Google sign-in on desktop and Android
