@@ -8,8 +8,20 @@
             "type": "image/png"
         }
     ],
-    "start_url": ".",
+    "id": "/",
+    "scope": "/",
+    "description": "Offline-first notes for students, with Gemini AI and seasonal themes.",
+    "start_url": "/",
     "display": "standalone",
+    "share_target": {
+        "action": "/",
+        "method": "GET",
+        "params": {
+            "title": "share_title",
+            "text": "share_text",
+            "url": "share_url"
+        }
+    },
     "theme_color": "#1B1B1F",
     "background_color": "#1B1B1F"
 }

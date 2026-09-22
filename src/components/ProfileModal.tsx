@@ -1,10 +1,14 @@
 import React, { useState, useRef } from 'react';
-import { motion, Variants } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { CloseIcon, LogoutIcon, SaveIcon, SpinnerIcon, EditIcon } from './Icons';
 import type { User, SeasonalTheme } from '../types';
 import { useSeason } from '../contexts/SeasonalContext';
 import { supabase } from '../services/supabase';
 import DOMPurify from 'dompurify';
+import * as localDb from '../services/localDb';
+import { announceLocalChange, processSyncQueue, writeNote } from '../services/syncEngine';
+import { importBatchFiles } from '../services/importPipeline';
+import { createWorkspaceBackup, restoreWorkspaceBackup, validateBackupPackage } from '../services/backupEngine';
 
 interface ProfileModalProps {
   user: User;
@@ -53,6 +57,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose, onLogout, on
   const [confirmPassword, setConfirmPassword] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const restoreInputRef = useRef<HTMLInputElement>(null);
+  const importInputRef = useRef<HTMLInputElement>(null);
 
   const handleSave = async () => {
     const nameChanged = name.trim() !== (user.name || '');
@@ -142,14 +148,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose, onLogout, on
   const handleExport = async () => {
     setIsSaving(true);
     try {
-      const notesString = localStorage.getItem(`Notenirman-notes-${user.id}`);
-      if (!notesString) {
-        alert("No notes to export.");
-        setIsSaving(false);
-        return;
-      }
-
-      const notes: any[] = JSON.parse(notesString);
+      // Notes live in IndexedDB (localStorage only holds pre-sync legacy data).
+      const notes: any[] = await localDb.getLocalNotes(user.id);
       if (notes.length === 0) {
         alert("No notes to export.");
         setIsSaving(false);
@@ -241,6 +241,93 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose, onLogout, on
     }
   };
 
+  const handleBackup = async () => {
+    setIsSaving(true);
+    try {
+      const pkg = await createWorkspaceBackup(user.id);
+      if (pkg.notes.length === 0) {
+        alert("No notes to back up yet.");
+        return;
+      }
+      const blob = new Blob([JSON.stringify(pkg)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `notenirman-backup-${new Date().toISOString().split('T')[0]}.nnpackage.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error("Backup failed", e);
+      alert("Failed to create the backup.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleRestoreFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+
+    setIsSaving(true);
+    try {
+      const pkg = JSON.parse(await file.text());
+      const validation = validateBackupPackage(pkg);
+      if (!validation.valid) {
+        alert(['This file is not a valid NoteNirman backup.', ...validation.errors.slice(0, 3)].join('\n'));
+        return;
+      }
+      // Merge only: notes already on this device are kept, and never replaced by an older copy.
+      const result = await restoreWorkspaceBackup(user.id, pkg, { mode: 'merge' });
+      announceLocalChange(user.id);
+      void processSyncQueue(user.id);
+      if (!result.success) {
+        alert(['Restore failed.', ...result.errors.slice(0, 3)].join('\n'));
+        return;
+      }
+      const skipped = result.warnings.filter(w => w.startsWith('Skipped')).length;
+      alert(`Restored ${result.restoredNotesCount} note(s).${skipped ? ` ${skipped} note(s) were skipped because the copy on this device is newer.` : ''}`);
+    } catch (err) {
+      console.error("Restore failed", err);
+      alert("Could not read that file. Choose a NoteNirman backup you exported earlier.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleImportFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    e.target.value = '';
+    if (files.length === 0) return;
+
+    setIsSaving(true);
+    try {
+      const payloads = await Promise.all(
+        files.map(async file => ({
+          filename: file.name,
+          content: await file.text(),
+          mimeType: file.type,
+          sizeBytes: file.size,
+          userId: user.id,
+        }))
+      );
+      const result = await importBatchFiles(payloads);
+      for (const note of result.importedNotes) {
+        await writeNote(user.id, note, 'upsert');
+      }
+      const failed = result.failedFiles.map(f => `${f.filename}: ${f.reason}`);
+      const summary = `Imported ${result.importedNotes.length} of ${result.totalProcessed} file(s).`;
+      alert(failed.length ? [summary, '', ...failed.slice(0, 5)].join('\n') : summary);
+    } catch (err) {
+      console.error("Import failed", err);
+      alert("Import failed. Check that the files are text, Markdown, HTML, CSV or JSON.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const userInitial = user.name ? user.name[0].toUpperCase() : (user.email ? user.email[0].toUpperCase() : '?');
 
   return (
@@ -290,10 +377,31 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose, onLogout, on
                 disabled={avatarUploading}
               />
             </div>
-            <div>
-              <p className={`font-semibold text-lg ${colors.primaryText}`}>{user.name || 'User'}</p>
+            <div className="flex-1 min-w-0">
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Display name"
+                aria-label="Display name"
+                className={`w-full font-semibold text-lg bg-transparent border-b border-transparent hover:border-divider focus:border-accent focus:outline-none ${colors.primaryText}`}
+              />
               <p className={`text-sm ${colors.secondaryText}`}>{user.email}</p>
             </div>
+          </div>
+
+          <div className="pt-4 border-t border-divider-light dark:border-divider">
+            <h3 className={`text-sm font-medium mb-3 ${colors.secondaryText}`}>Theme</h3>
+            <select
+              value={themePreference}
+              onChange={(e) => setThemePreference(e.target.value as SeasonalTheme | 'auto')}
+              aria-label="Theme preference"
+              className="block w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-accent focus:border-accent text-gray-900 dark:text-white"
+            >
+              {themeOptions.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
           </div>
 
           <div className="pt-4 border-t border-divider-light dark:border-divider">
@@ -333,6 +441,44 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose, onLogout, on
               <SaveIcon className="h-5 w-5" />
               <span>Export All Notes (PDF)</span>
             </button>
+            <div className="mt-3 grid grid-cols-2 gap-3">
+              <button
+                onClick={handleBackup}
+                disabled={isSaving}
+                className="flex items-center justify-center px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm text-gray-700 dark:text-gray-200 disabled:opacity-50"
+              >
+                Back up everything
+              </button>
+              <button
+                onClick={() => restoreInputRef.current?.click()}
+                disabled={isSaving}
+                className="flex items-center justify-center px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm text-gray-700 dark:text-gray-200 disabled:opacity-50"
+              >
+                Restore from backup
+              </button>
+              <input ref={restoreInputRef} type="file" accept=".json,application/json" className="hidden" onChange={handleRestoreFile} />
+            </div>
+            <button
+              onClick={() => importInputRef.current?.click()}
+              disabled={isSaving}
+              className="mt-3 w-full flex items-center justify-center px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm text-gray-700 dark:text-gray-200 disabled:opacity-50"
+            >
+              Import notes from files
+            </button>
+            <input
+              ref={importInputRef}
+              type="file"
+              multiple
+              accept=".md,.markdown,.txt,.html,.htm,.csv,.json,text/*"
+              className="hidden"
+              onChange={handleImportFiles}
+            />
+            <p className={`mt-2 text-xs ${colors.secondaryText}`}>
+              Import Markdown, HTML, text, CSV or JSON files, for example from Obsidian, Notion or Google Keep. Unzip exports first; Evernote .enex files are not supported yet.
+            </p>
+            <p className={`mt-2 text-xs ${colors.secondaryText}`}>
+              A backup is one file with all your notes. Restoring adds them back without replacing newer notes on this device.
+            </p>
           </div>
         </div>
 

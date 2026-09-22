@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from "./contexts/AuthContext";
 import { useTheme } from "./contexts/ThemeContext";
 import { useNotes } from "./hooks/useNotes";
-import type { Note, Tag, User, NotePriority, PriorityFilter } from "./types";
+import type { Note, NotePriority, PriorityFilter } from "./types";
 import { useSeason } from "./contexts/SeasonalContext";
 import { useRouter } from "./contexts/RouterContext";
 import { v4 as uuidv4 } from 'uuid';
@@ -12,8 +12,19 @@ import { v4 as uuidv4 } from 'uuid';
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
 import NoteList from "./components/NoteList";
-import NoteEditor from "./components/NoteEditor";
+const NoteEditor = React.lazy(() => import("./components/NoteEditor"));
 import FloatingActionButton from "./components/FloatingActionButton";
+import TemplatePicker from "./components/TemplatePicker";
+import TrashModal from "./components/TrashModal";
+import FlashcardsModal from "./components/FlashcardsModal";
+import RemindersModal from "./components/RemindersModal";
+import { syncRemindersForUser } from "./services/reminderEngine";
+import type { NoteTemplate } from "./services/noteTemplates";
+import { buildSharedNote } from "./services/sharedContent";
+import PassphraseModal from "./components/PassphraseModal";
+import NotebooksModal from "./components/NotebooksModal";
+import LinkGraphModal from "./components/LinkGraphModal";
+import { isNoteLocked, lockNoteContent, unlockNoteContent } from "./services/noteLock";
 import SyncStatusIndicator from "./components/SyncStatusIndicator";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Footer from "./components/Footer";
@@ -24,7 +35,6 @@ import LandingPage from './components/LandingPage';
 import AuthScreen from './components/AuthScreen';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfService from './components/TermsOfService';
-import FAQ from './components/FAQ';
 import NotFound from './components/NotFound';
 import AccessDenied from './components/AccessDenied';
 import CookiePreferences from './components/CookiePreferences';
@@ -71,6 +81,24 @@ const App: React.FC = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [isProfileModalOpen, setProfileModalOpen] = useState(false);
+  const [isTemplatePickerOpen, setTemplatePickerOpen] = useState(false);
+  const [isTrashOpen, setTrashOpen] = useState(false);
+  const [isFlashcardsOpen, setFlashcardsOpen] = useState(false);
+  const [isRemindersOpen, setRemindersOpen] = useState(false);
+  const [isNotebooksOpen, setNotebooksOpen] = useState(false);
+  const [isGraphOpen, setGraphOpen] = useState(false);
+
+  // Passphrase-locked notes. Decrypted text lives only here, in memory, for this tab session —
+  // it is never written back to `notes` or to storage. Re-locking a note re-encrypts before save.
+  const [unlockedNotes, setUnlockedNotes] = useState<Record<string, { plain: string; passphrase: string }>>({});
+  const [viewLockGate, setViewLockGate] = useState<{ noteId: string } | null>(null);
+  const [createLockFor, setCreateLockFor] = useState<Note | null>(null);
+  const [removeLockFor, setRemoveLockFor] = useState<Note | null>(null);
+  const [lockError, setLockError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) setUnlockedNotes({});
+  }, [user]);
   const [isTutorialOpen, setTutorialOpen] = useState(false);
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null);
 
@@ -89,6 +117,18 @@ const App: React.FC = () => {
     });
     return () => { isMounted = false; };
   }, []);
+
+  // Reminders only fire while the app is open (see reminderEngine.ts); keep them scheduled
+  // for whatever is currently due, and re-check whenever the app regains focus.
+  useEffect(() => {
+    if (!user) return;
+    void syncRemindersForUser(user.id);
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') void syncRemindersForUser(user.id);
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [user]);
 
   const [showIndependenceDayIntro, setShowIndependenceDayIntro] = useState(false);
   const [showNavratriBanner, setShowNavratriBanner] = useState(false);
@@ -216,7 +256,7 @@ const App: React.FC = () => {
       try {
         const plainText = stripHtml(content).toLowerCase();
         contentMatch = plainText.includes(term);
-      } catch (e) {
+      } catch {
         contentMatch = content.toLowerCase().includes(term);
       }
 
@@ -230,8 +270,44 @@ const App: React.FC = () => {
   const pinnedNotes = useMemo(() => filteredNotes.filter(n => n.isPinned).sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()), [filteredNotes]);
   const unpinnedNotes = useMemo(() => filteredNotes.filter(n => !n.isPinned).sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()), [filteredNotes]);
 
-  const handleSelectNote = (id: string | null) => {
+  const openNoteById = (id: string | null) => {
     setSelectedNoteId(id);
+  };
+
+  const handleSelectNote = (id: string | null) => {
+    if (!id) {
+      openNoteById(null);
+      return;
+    }
+    const note = notes.find(n => n.id === id);
+    if (note && isNoteLocked(note) && !unlockedNotes[id]) {
+      setLockError(null);
+      setViewLockGate({ noteId: id });
+      return;
+    }
+    openNoteById(id);
+  };
+
+  const handleToggleLock = (note: Note) => {
+    setLockError(null);
+    if (isNoteLocked(note)) {
+      setRemoveLockFor(note);
+    } else {
+      setCreateLockFor(note);
+    }
+  };
+
+  const handleSaveFromEditor = (noteToSave: Note) => {
+    const session = unlockedNotes[noteToSave.id];
+    if (!session) {
+      handleSaveNote(noteToSave);
+      return;
+    }
+    // The editor is working with decrypted text; re-encrypt before it ever reaches storage or sync.
+    void lockNoteContent(noteToSave.content, session.passphrase).then(locked => {
+      handleSaveNote({ ...noteToSave, content: locked });
+      setUnlockedNotes(prev => ({ ...prev, [noteToSave.id]: { ...prev[noteToSave.id], plain: noteToSave.content } }));
+    });
   };
 
   const handleAddNewNote = useCallback(() => {
@@ -257,6 +333,61 @@ const App: React.FC = () => {
     setSelectedNoteId(newNote.id);
   }, [activeTag, customTags, addNote]);
 
+  const handleCreateLinkedNote = useCallback((title: string) => {
+    const now = new Date().toISOString();
+    const newNote: Note = {
+      id: uuidv4(),
+      title,
+      content: '',
+      tags: [],
+      createdAt: now,
+      updatedAt: now,
+      isPinned: false,
+      priority: 'none',
+    };
+    addNote(newNote);
+    setSelectedNoteId(newNote.id);
+  }, [addNote]);
+
+  // "Share to NoteNirman" from another app opens the site with the shared content in the URL.
+  useEffect(() => {
+    if (!user || typeof window === 'undefined') return;
+    const draft = buildSharedNote(window.location.search);
+    if (!draft) return;
+
+    const now = new Date().toISOString();
+    const sharedNote: Note = {
+      id: uuidv4(),
+      title: draft.title,
+      content: draft.content,
+      tags: [],
+      createdAt: now,
+      updatedAt: now,
+      isPinned: false,
+      priority: 'none',
+    };
+    addNote(sharedNote);
+    setSelectedNoteId(sharedNote.id);
+    window.history.replaceState({}, '', window.location.pathname);
+  }, [user, addNote]);
+
+  const handleAddFromTemplate = useCallback((template: NoteTemplate) => {
+    const now = new Date().toISOString();
+    const newNote: Note = {
+      id: uuidv4(),
+      title: template.title,
+      content: template.content,
+      tags: template.tags,
+      createdAt: now,
+      updatedAt: now,
+      isPinned: false,
+      priority: 'none',
+    };
+    addNote(newNote);
+    setSelectedNoteId(newNote.id);
+    setTemplatePickerOpen(false);
+  }, [addNote]);
+
   const handleSaveNote = (noteToSave: Note) => {
     noteToSave.tags.forEach(tag => {
       if (!allTags.includes(tag)) {
@@ -277,6 +408,49 @@ const App: React.FC = () => {
     if (selectedNoteId === id) {
       setSelectedNoteId(null);
     }
+  };
+
+  const handleLockCreateSubmit = (passphrase: string) => {
+    if (!createLockFor) return;
+    const note = createLockFor;
+    void lockNoteContent(note.content, passphrase).then(locked => {
+      handleSaveNote({ ...note, content: locked });
+      setUnlockedNotes(prev => {
+        const next = { ...prev };
+        delete next[note.id];
+        return next;
+      });
+      setCreateLockFor(null);
+    });
+  };
+
+  const handleLockViewSubmit = (passphrase: string) => {
+    if (!viewLockGate) return;
+    const note = notes.find(n => n.id === viewLockGate.noteId);
+    if (!note) { setViewLockGate(null); return; }
+    unlockNoteContent(note.content, passphrase)
+      .then(plain => {
+        setUnlockedNotes(prev => ({ ...prev, [note.id]: { plain, passphrase } }));
+        setViewLockGate(null);
+        openNoteById(note.id);
+      })
+      .catch(() => setLockError('That passphrase is not correct.'));
+  };
+
+  const handleLockRemoveSubmit = (passphrase: string) => {
+    if (!removeLockFor) return;
+    const note = removeLockFor;
+    unlockNoteContent(note.content, passphrase)
+      .then(plain => {
+        handleSaveNote({ ...note, content: plain });
+        setUnlockedNotes(prev => {
+          const next = { ...prev };
+          delete next[note.id];
+          return next;
+        });
+        setRemoveLockFor(null);
+      })
+      .catch(() => setLockError('That passphrase is not correct.'));
   };
 
   const handleTogglePin = (id: string) => {
@@ -326,7 +500,7 @@ const App: React.FC = () => {
     try {
       const doc = new DOMParser().parseFromString(html, 'text/html');
       return doc.body.textContent || "";
-    } catch (e) {
+    } catch {
       return "";
     }
   };
@@ -364,6 +538,12 @@ const App: React.FC = () => {
             onAddTag={(tag) => addOrUpdateCustomTag({ name: tag })}
             onDeleteCustomTag={deleteCustomTag}
             onTutorialClick={() => setTutorialOpen(true)}
+            onOpenTrash={() => setTrashOpen(true)}
+            onOpenFlashcards={() => setFlashcardsOpen(true)}
+            onOpenReminders={() => setRemindersOpen(true)}
+            onOpenTemplates={() => setTemplatePickerOpen(true)}
+            onOpenNotebooks={() => setNotebooksOpen(true)}
+            onOpenGraph={() => setGraphOpen(true)}
           />
           <div className="flex-1 flex flex-col min-w-0">
             <Header
@@ -385,9 +565,31 @@ const App: React.FC = () => {
                 onSelectNote={handleSelectNote}
                 onDeleteNote={handleDeleteNote}
                 onTogglePin={handleTogglePin}
+                onToggleLock={handleToggleLock}
               />
             </main>
             <Footer variant="simple" />
+            {isTrashOpen && user && <TrashModal userId={user.id} onClose={() => setTrashOpen(false)} />}
+            {isFlashcardsOpen && user && <FlashcardsModal userId={user.id} notes={notes} onClose={() => setFlashcardsOpen(false)} />}
+            {isRemindersOpen && user && <RemindersModal userId={user.id} notes={notes} onClose={() => setRemindersOpen(false)} />}
+            {isNotebooksOpen && (
+              <NotebooksModal
+                customTags={customTags}
+                onAddChapter={tag => addOrUpdateCustomTag(tag)}
+                onOpenChapter={tagName => { setActiveTag(tagName); setNotebooksOpen(false); }}
+                onClose={() => setNotebooksOpen(false)}
+              />
+            )}
+            {isGraphOpen && (
+              <LinkGraphModal
+                notes={notes}
+                onOpenNote={id => { setGraphOpen(false); handleSelectNote(id); }}
+                onClose={() => setGraphOpen(false)}
+              />
+            )}
+            {isTemplatePickerOpen && (
+              <TemplatePicker onSelect={handleAddFromTemplate} onClose={() => setTemplatePickerOpen(false)} />
+            )}
             <FloatingActionButton onClick={handleAddNewNote} />
             <SyncStatusIndicator
               status={syncStatus}
@@ -395,16 +597,51 @@ const App: React.FC = () => {
               conflicts={conflicts}
               onResolveConflict={resolveConflict}
             />
+            {viewLockGate && (
+              <PassphraseModal
+                mode="unlock"
+                title="Enter passphrase to open this note"
+                error={lockError}
+                onSubmit={handleLockViewSubmit}
+                onCancel={() => setViewLockGate(null)}
+              />
+            )}
+            {createLockFor && (
+              <PassphraseModal
+                mode="create"
+                title="Lock this note"
+                onSubmit={handleLockCreateSubmit}
+                onCancel={() => setCreateLockFor(null)}
+              />
+            )}
+            {removeLockFor && (
+              <PassphraseModal
+                mode="unlock"
+                title="Enter passphrase to remove the lock"
+                error={lockError}
+                onSubmit={handleLockRemoveSubmit}
+                onCancel={() => setRemoveLockFor(null)}
+              />
+            )}
             <AnimatePresence>
               {selectedNoteId && (
-                <NoteEditor
-                  key={selectedNoteId}
-                  note={notes.find(n => n.id === selectedNoteId) || null}
-                  onSave={handleSaveNote}
-                  onClose={() => setSelectedNoteId(null)}
-                  allTags={allTags}
-                  customTags={customTags}
-                />
+                <Suspense fallback={<SeasonalLoading />}>
+                  <NoteEditor
+                    key={selectedNoteId}
+                    note={(() => {
+                      const raw = notes.find(n => n.id === selectedNoteId) || null;
+                      const session = raw && unlockedNotes[raw.id];
+                      return raw && session ? { ...raw, content: session.plain } : raw;
+                    })()}
+                    onSave={handleSaveFromEditor}
+                    onClose={() => setSelectedNoteId(null)}
+                    allTags={allTags}
+                    customTags={customTags}
+                    notes={notes}
+                    onOpenNote={handleSelectNote}
+                    onCreateLinkedNote={handleCreateLinkedNote}
+                  />
+                </Suspense>
               )}
               {isProfileModalOpen && (
                 <Suspense fallback={null}>

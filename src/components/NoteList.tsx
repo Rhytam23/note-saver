@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Note, Tag, PriorityFilter } from "../types";
 import NoteCard from "./NoteCard";
-import { motion, AnimatePresence, Variants } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useSeason } from "../contexts/SeasonalContext";
 
 interface NoteListProps {
@@ -13,6 +13,7 @@ interface NoteListProps {
   onSelectNote: (id: string) => void;
   onDeleteNote: (id: string) => void;
   onTogglePin: (id: string) => void;
+  onToggleLock?: (note: Note) => void;
 }
 
 const containerVariants: any = {
@@ -64,7 +65,7 @@ const getEmptyStateMessage = (activeTag: string | null, activePriority: Priority
 };
 
 
-const NoteList: React.FC<NoteListProps> = ({ pinnedNotes, unpinnedNotes, customTags, activeTag, activePriority, onSelectNote, onDeleteNote, onTogglePin }) => {
+const NoteList: React.FC<NoteListProps> = ({ pinnedNotes, unpinnedNotes, customTags, activeTag, activePriority, onSelectNote, onDeleteNote, onTogglePin, onToggleLock }) => {
   const { colors } = useSeason();
   if (pinnedNotes.length === 0 && unpinnedNotes.length === 0) {
     const { title, subtitle } = getEmptyStateMessage(activeTag, activePriority);
@@ -94,7 +95,7 @@ const NoteList: React.FC<NoteListProps> = ({ pinnedNotes, unpinnedNotes, customT
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6"
             >
               {pinnedNotes.map(note => (
-                <NoteCard key={note.id} note={note} customTags={customTags} onSelectNote={onSelectNote} onDeleteNote={onDeleteNote} onTogglePin={onTogglePin} />
+                <NoteCard key={note.id} note={note} customTags={customTags} onSelectNote={onSelectNote} onDeleteNote={onDeleteNote} onTogglePin={onTogglePin} onToggleLock={onToggleLock} />
               ))}
             </motion.div>
           </motion.section>
@@ -113,7 +114,7 @@ const NoteList: React.FC<NoteListProps> = ({ pinnedNotes, unpinnedNotes, customT
           >
             <AnimatePresence>
               {unpinnedNotes.map(note => (
-                <NoteCard key={note.id} note={note} customTags={customTags} onSelectNote={onSelectNote} onDeleteNote={onDeleteNote} onTogglePin={onTogglePin} />
+                <NoteCard key={note.id} note={note} customTags={customTags} onSelectNote={onSelectNote} onDeleteNote={onDeleteNote} onTogglePin={onTogglePin} onToggleLock={onToggleLock} />
               ))}
             </AnimatePresence>
           </motion.div>

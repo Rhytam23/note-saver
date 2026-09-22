@@ -1,6 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { User } from '../types';
 import { supabase } from '../services/supabase';
+import { clearUserLocalData, getQueue } from '../services/localDb';
+import { processSyncQueue } from '../services/syncEngine';
+import { detectPlatform } from '../services/platform/platformAdapterFactory';
+
+const PUBLIC_WEB_ORIGIN = 'https://notenirman.vercel.app';
+const LOGOUT_FLUSH_TIMEOUT_MS = 5000;
+
 
 export interface AuthContextType {
   user: User | null;
@@ -36,7 +43,7 @@ const getInitialCachedUser = (): User | null => {
         }
       }
     }
-  } catch (e) {
+  } catch {
     // Ignore storage parse errors
   }
   return null;
@@ -89,11 +96,14 @@ export function useAuth(): AuthContextType {
     };
   }, []);
 
+  // The desktop and Android apps run on tauri.localhost / capacitor localhost, which
+  // an email link opened on another device or browser can never reach.
   const getSafeOrigin = (): string => {
+    if (detectPlatform() !== 'web') return PUBLIC_WEB_ORIGIN;
     if (typeof window !== 'undefined' && window.location.origin && window.location.origin !== 'null') {
       return window.location.origin;
     }
-    return 'https://notenirman.vercel.app';
+    return PUBLIC_WEB_ORIGIN;
   };
 
   const login = useCallback(async (): Promise<void> => {
@@ -111,6 +121,7 @@ export function useAuth(): AuthContextType {
       console.error("Google Login failed:", error);
       throw error;
     } finally {
+      setIsSubmitting(false);
     }
   }, []);
 
@@ -154,12 +165,33 @@ export function useAuth(): AuthContextType {
 
   const logout = useCallback(async () => {
     try {
+      const userIdToClean = user?.id;
+
+      // Push unsynced notes while the session is still valid, so signing out
+      // never throws away work that only exists on this device.
+      if (userIdToClean) {
+        await Promise.race([
+          processSyncQueue(userIdToClean),
+          new Promise<void>(resolve => setTimeout(resolve, LOGOUT_FLUSH_TIMEOUT_MS)),
+        ]).catch(() => undefined);
+      }
+      const hasUnsyncedWork = userIdToClean ? (await getQueue(userIdToClean).catch(() => [])).length > 0 : false;
+
       await supabase.auth.signOut();
       setUser(null);
+
+      // SECURITY: wipe this user's local data on shared devices, but never while
+      // unsynced changes remain; they stay on disk until the next sign-in syncs them.
+      if (userIdToClean && !hasUnsyncedWork) {
+        await clearUserLocalData(userIdToClean).catch(err =>
+          console.warn('[useAuth] IndexedDB cleanup after logout failed (non-fatal):', err)
+        );
+      }
     } catch (error) {
       console.error("Logout failed:", error);
     }
-  }, []);
+  }, [user]);
+
 
   const updateUser = useCallback(async (updatedFields: Partial<User>): Promise<void> => {
     if (user) {
@@ -193,7 +225,7 @@ export function useAuth(): AuthContextType {
     setIsSubmitting(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin,
+        redirectTo: getSafeOrigin(),
       });
       if (error) throw error;
     } catch (error) {

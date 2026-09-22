@@ -2,23 +2,21 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-const ALLOWED_ORIGIN_PATTERNS = [
-  /^https:\/\/notenirman\.vercel\.app$/,
-  /^https:\/\/.*\.vercel\.app$/,
-  /^http:\/\/localhost:(3000|5173)$/,
-  /^http:\/\/localhost$/,
-  /^tauri:\/\/localhost$/,
-  /^http:\/\/tauri\.localhost$/,
-  /^capacitor:\/\/localhost$/
-]
+// SECURITY: Explicit origin allowlist only. No wildcard patterns.
+const ALLOWED_ORIGINS: ReadonlySet<string> = new Set([
+  'https://notenirman.vercel.app',
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'http://localhost',
+  'tauri://localhost',
+  'http://tauri.localhost',
+  'capacitor://localhost',
+])
 
 function getCorsHeaders(requestOrigin: string | null): Record<string, string> {
   let allowOrigin = 'https://notenirman.vercel.app'
-  if (requestOrigin) {
-    const isAllowed = ALLOWED_ORIGIN_PATTERNS.some((pattern) => pattern.test(requestOrigin))
-    if (isAllowed) {
-      allowOrigin = requestOrigin
-    }
+  if (requestOrigin && ALLOWED_ORIGINS.has(requestOrigin)) {
+    allowOrigin = requestOrigin
   }
   return {
     'Access-Control-Allow-Origin': allowOrigin,
@@ -26,6 +24,7 @@ function getCorsHeaders(requestOrigin: string | null): Record<string, string> {
     'Access-Control-Allow-Methods': 'POST, OPTIONS'
   }
 }
+
 
 const GEMINI_COPILOT_MODEL = 'gemini-2.5-flash'
 
@@ -57,14 +56,47 @@ serve(async (req: Request) => {
       return new Response(JSON.stringify({ error: 'Unauthorized - Invalid Session' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
+    const redisUrl = Deno.env.get('UPSTASH_REDIS_REST_URL')
+    const redisToken = Deno.env.get('UPSTASH_REDIS_REST_TOKEN')
+
+    if (redisUrl && redisToken) {
+      const { Ratelimit } = await import('https://esm.sh/@upstash/ratelimit@1.1.3')
+      const { Redis } = await import('https://esm.sh/@upstash/redis@1.28.0')
+
+      const ratelimit = new Ratelimit({
+        redis: new Redis({ url: redisUrl, token: redisToken }),
+        limiter: Ratelimit.slidingWindow(10, '1 m'), // 10 copilot requests per minute per user
+      })
+
+      const { success } = await ratelimit.limit(`copilot:${user.id}`)
+      if (!success) {
+        return new Response(JSON.stringify({ error: 'Rate limit exceeded. Please try again in a minute.' }), { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      }
+    } else {
+      console.error('[gemini-copilot] Upstash Redis credentials are not configured. Rejecting request fail-closed.')
+      return new Response(JSON.stringify({ error: 'Service Unavailable: Rate limiting service unconfigured' }), { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+
     const geminiApiKey = Deno.env.get('GEMINI_API_KEY')
     if (!geminiApiKey) {
       return new Response(JSON.stringify({ error: 'Service Unavailable: AI configuration error' }), { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
+    // SECURITY: Body size limit prevents resource exhaustion and AI cost abuse
+    const contentLength = req.headers.get('content-length')
+    if (contentLength && parseInt(contentLength, 10) > 524_288) { // 512 KB
+      return new Response(JSON.stringify({ error: 'Request body too large' }), { status: 413, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+
     const { prompt, taskType, systemInstruction, contextItems } = await req.json()
     if (!prompt || typeof prompt !== 'string') {
       return new Response(JSON.stringify({ error: 'Missing or invalid "prompt"' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+
+    // SECURITY: Prompt length cap — prevents AI token cost exhaustion
+    const MAX_PROMPT_LENGTH = 100_000
+    if (prompt.length > MAX_PROMPT_LENGTH) {
+      return new Response(JSON.stringify({ error: 'Prompt exceeds maximum length' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
     // Build untrusted context block formatted with XML delimiters
@@ -79,6 +111,7 @@ serve(async (req: Request) => {
         }).join('\n---\n\n') +
         '</user_note_context>\n'
     }
+
 
     const fullPrompt = `${prompt}${formattedContext}`
     const baseSystemPrompt = (systemInstruction || 'You are NoteNirman Copilot, a helpful AI assistant for notes.') +

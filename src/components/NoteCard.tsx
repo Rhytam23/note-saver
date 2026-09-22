@@ -1,8 +1,8 @@
 import React, { useState, useRef } from 'react';
 import type { Note, Tag, NotePriority } from '../types';
-import { DeleteIcon, TagIcon, ExportIcon, PinIcon, FlagIcon } from './Icons';
+import { DeleteIcon, TagIcon, ExportIcon, PinIcon, FlagIcon, LockIcon, UnlockIcon } from './Icons';
+import { isNoteLocked } from '../services/noteLock';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { Variants } from 'framer-motion';
 import { exportNote, stripHtml } from '../services/exportService';
 import { useClickOutside } from '../hooks/useClickOutside';
 import { getTagColorClasses, getSafeCoverStyle } from '../services/colorService';
@@ -14,6 +14,7 @@ interface NoteCardProps {
   onSelectNote: (id: string) => void;
   onDeleteNote: (id: string) => void;
   onTogglePin: (id: string) => void;
+  onToggleLock?: (note: Note) => void;
 }
 
 const cardVariants: any = {
@@ -29,7 +30,7 @@ const priorityStyles: Record<NotePriority, { iconClass: string; title: string }>
   none: { iconClass: 'hidden', title: '' },
 };
 
-const NoteCard: React.FC<NoteCardProps> = ({ note, customTags, onSelectNote, onDeleteNote, onTogglePin }) => {
+const NoteCard: React.FC<NoteCardProps> = ({ note, customTags, onSelectNote, onDeleteNote, onTogglePin, onToggleLock }) => {
   const { colors } = useSeason();
   const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
   const exportMenuRef = useRef<HTMLDivElement>(null);
@@ -69,10 +70,17 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, customTags, onSelectNote, onD
     });
   };
 
+  const locked = isNoteLocked(note);
+
   const plainContent = React.useMemo(() => {
-    if (!note.content) return "";
+    if (locked || !note.content) return "";
     return stripHtml(note.content);
-  }, [note.content]);
+  }, [locked, note.content]);
+
+  const handleToggleLock = (e: any) => {
+    e.stopPropagation();
+    onToggleLock?.(note);
+  };
 
   return (
     <motion.div
@@ -103,7 +111,11 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, customTags, onSelectNote, onD
           )}
           <span className="truncate">{note.title}</span>
         </h3>
-        {plainContent && (
+        {locked ? (
+          <p className={`${colors.secondaryText} mt-2 text-xs sm:text-sm italic flex items-center gap-1.5`}>
+            <LockIcon className="h-3.5 w-3.5" /> Locked note
+          </p>
+        ) : plainContent && (
           <p className={`${colors.secondaryText} mt-2 text-xs sm:text-sm leading-relaxed line-clamp-3 sm:line-clamp-4`}>
             {plainContent}
           </p>
@@ -129,6 +141,16 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, customTags, onSelectNote, onD
             </div>
           </div>
           <div className="relative flex items-center space-x-1 sm:space-x-0">
+            {onToggleLock && (
+              <button
+                onClick={handleToggleLock}
+                className={`p-2 sm:p-1 rounded-full ${colors.secondaryText} hover:bg-accent/10 hover:text-accent transition-colors duration-200`}
+                aria-label={locked ? 'Unlock note' : 'Lock note'}
+                title={locked ? 'Unlock note' : 'Lock note with a passphrase'}
+              >
+                {locked ? <UnlockIcon className="h-5 w-5" /> : <LockIcon className="h-5 w-5" />}
+              </button>
+            )}
             <button
               onClick={handleTogglePin}
               className={`p-2 sm:p-1 rounded-full ${colors.secondaryText} transition-colors duration-200 ${note.isPinned ? 'text-accent' : 'hover:bg-accent/10 hover:text-accent'}`}

@@ -1,6 +1,7 @@
 import path from 'path';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import pkg from './package.json';
 
 export default defineConfig(() => {
   return {
@@ -13,13 +14,15 @@ export default defineConfig(() => {
     },
     envPrefix: ['VITE_', 'TAURI_'],
     plugins: [react()],
+    define: {
+      'import.meta.env.VITE_APP_VERSION': JSON.stringify(pkg.version),
+    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
       },
     },
     build: {
-      chunkSizeWarningLimit: 1600,
       rollupOptions: {
         output: {
           manualChunks: {
@@ -30,7 +33,12 @@ export default defineConfig(() => {
               '@tiptap/starter-kit',
               '@tiptap/extension-task-list',
               '@tiptap/extension-task-item',
+              '@tiptap/extension-table',
+              '@tiptap/extension-mathematics',
             ],
+            // Equation rendering is only needed once the editor (already a lazy chunk) opens,
+            // and it's large enough (fonts + render engine) to deserve its own cacheable chunk.
+            'katex-vendor': ['katex'],
           },
         },
       },

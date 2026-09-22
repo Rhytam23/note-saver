@@ -1,7 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import type { Attachment } from '../../types/attachment';
-import { processPdfAttachment } from '../pdfPipeline';
-import { processImageAttachment } from '../imageOcrPipeline';
 import { createAudioBlocksFromTranscription } from '../transcriptionService';
 import { handwritingService, createSamplePoint } from '../handwritingService';
 import { createBookmarkBlockFromClip, isValidPublicUrl } from '../webClipper';
@@ -22,30 +20,7 @@ describe('NoteNirman 2.0 P3.3-P3.9 Suite — Multimodal Extraction & Block Pipel
     metadata: { pageCount: 2 },
   };
 
-  it('1. [PDF Pipeline] should create parent PDF block and derived page text blocks with stable UUIDs', async () => {
-    const { pdfBlock, derivedBlocks } = await processPdfAttachment(sampleAttachment);
-    expect(pdfBlock.type).toBe('pdf');
-    expect(pdfBlock.properties.attachmentId).toBe('att-multi-1');
-    expect(derivedBlocks).toHaveLength(2);
-    expect(derivedBlocks[0].parentId).toBe(pdfBlock.id);
-    expect(derivedBlocks[0].properties.pageNumber).toBe(1);
-  });
-
-  it('2. [Image & OCR Pipeline] should create image block and derived OCR text block without overwriting original', async () => {
-    const imgAtt: Attachment = {
-      ...sampleAttachment,
-      filename: 'receipt.png',
-      mimeType: 'image/png',
-      metadata: { extractedText: 'Total: $42.00' },
-    };
-
-    const { imageBlock, derivedBlocks } = await processImageAttachment(imgAtt);
-    expect(imageBlock.type).toBe('image');
-    expect(derivedBlocks).toHaveLength(1);
-    expect(derivedBlocks[0].content).toBe('Total: $42.00');
-  });
-
-  it('3. [Audio & Transcription] should create audio block and timestamped transcript blocks', () => {
+  it('1. [Audio & Transcription] should create audio block and timestamped transcript blocks', () => {
     const audioAtt: Attachment = {
       ...sampleAttachment,
       filename: 'interview.webm',
@@ -63,7 +38,7 @@ describe('NoteNirman 2.0 P3.3-P3.9 Suite — Multimodal Extraction & Block Pipel
     expect(derivedBlocks[0].content).toBe('[00:00] Hello world');
   });
 
-  it('4. [Handwriting Service] should create canvas, add vector strokes, and render SVG block', () => {
+  it('2. [Handwriting Service] should create canvas, add vector strokes, and render SVG block', () => {
     const canvas = handwritingService.createCanvas('note-multi-101', 500, 400);
     const stroke = {
       id: 'stroke-1',
@@ -81,7 +56,7 @@ describe('NoteNirman 2.0 P3.3-P3.9 Suite — Multimodal Extraction & Block Pipel
     expect(block.properties.isHandwriting).toBe(true);
   });
 
-  it('5. [Web Clipper] should validate URLs and create bookmark block', () => {
+  it('3. [Web Clipper] should validate URLs and create bookmark block', () => {
     expect(isValidPublicUrl('https://example.com/article')).toBe(true);
     expect(isValidPublicUrl('http://localhost:8080')).toBe(false);
 

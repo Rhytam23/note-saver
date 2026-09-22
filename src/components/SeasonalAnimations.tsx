@@ -636,28 +636,6 @@ const Pongal: React.FC = () => (
     </div>
 );
 
-const LunarNewYear: React.FC = () => (
-    <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-red-900 via-red-800 to-yellow-900"></div>
-        {Array.from({ length: 15 }).map((_, i) => (
-            <div
-                key={i}
-                className="seasonal-element text-5xl"
-                style={{
-                    top: `${random(5, 60)}vh`,
-                    left: `${random(5, 95)}vw`,
-                    opacity: random(0.7, 1),
-                    animation: `lunar-lantern-sway ${random(8, 15)}s ease-in-out infinite`,
-                    animationDelay: `${random(0, 8)}s`,
-                    filter: `drop-shadow(0 0 20px #FFD700)`,
-                }}
-            >
-                🏮
-            </div>
-        ))}
-    </div>
-);
-
 const IndependenceDayIndia: React.FC = () => {
     return (
         <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">

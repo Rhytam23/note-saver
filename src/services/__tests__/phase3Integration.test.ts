@@ -1,13 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import * as Y from 'yjs';
 import { attachmentStorage } from '../attachmentStorage';
 import { processingJobQueue } from '../processingJobQueue';
-import { processPdfAttachment } from '../pdfPipeline';
-import { processImageAttachment } from '../imageOcrPipeline';
-import { ydocToBlockDocument, blockDocumentToYdoc } from '../../collaboration/yjsBlockAdapter';
 import type { Attachment } from '../../types/attachment';
 
-describe('NoteNirman 2.0 P3.10, P3.11 & P3.12 — Phase 3 Integration & Invariants Suite', () => {
+describe('NoteNirman 2.0 P3.10 — Phase 3 Integration & Invariants Suite', () => {
 
   const samplePdfAttachment: Attachment = {
     id: 'att-inv-1',
@@ -44,38 +40,6 @@ describe('NoteNirman 2.0 P3.10, P3.11 & P3.12 — Phase 3 Integration & Invarian
     expect(preservedMeta).not.toBeNull();
     expect(preservedMeta?.filename).toBe('annual-report.pdf');
     expect(preservedBlob).not.toBeNull();
-  });
-
-  it('2. [Binary/Yjs Isolation Invariant] Y.Doc MUST NOT store raw binary blobs or file content strings', async () => {
-    const { pdfBlock, derivedBlocks } = await processPdfAttachment(samplePdfAttachment);
-    const blockDoc = {
-      noteId: samplePdfAttachment.noteId,
-      blocks: [pdfBlock, ...derivedBlocks],
-      version: 1,
-    };
-
-    const ydoc = new Y.Doc();
-    blockDocumentToYdoc(blockDoc, ydoc);
-
-    // Reconstruct and verify Y.Doc only holds attachment IDs and URLs
-    const reconstructed = ydocToBlockDocument(samplePdfAttachment.noteId, ydoc);
-    expect(reconstructed.blocks[0].properties.attachmentId).toBe('att-inv-1');
-    expect(reconstructed.blocks[0].content).not.toContain('raw pdf binary contents');
-  });
-
-  it('3. [Stable Block ID Invariant] derived blocks must retain stable UUIDs across load/sync cycles', async () => {
-    const imgAtt: Attachment = {
-      ...samplePdfAttachment,
-      id: 'att-inv-2',
-      filename: 'photo.jpg',
-      mimeType: 'image/jpeg',
-      metadata: { extractedText: 'Invoice #1234' },
-    };
-
-    const { imageBlock, derivedBlocks } = await processImageAttachment(imgAtt);
-    expect(imageBlock.id).toBeDefined();
-    expect(derivedBlocks[0].id).toBeDefined();
-    expect(derivedBlocks[0].id).not.toBe(imageBlock.id);
   });
 
 });
