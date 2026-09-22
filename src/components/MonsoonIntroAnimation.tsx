@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { LightningBoltIcon } from './Icons';
 
 interface IntroAnimationProps {
     onAnimationComplete: () => void;

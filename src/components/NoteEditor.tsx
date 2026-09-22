@@ -17,6 +17,18 @@ import EmojiMenu from "./EmojiMenu";
 import SlashCommand from "../extensions/SlashCommand";
 import EmojiSuggestion from "../extensions/EmojiSuggestion";
 import Callout from "../extensions/Callout";
+import FindInNote from "../extensions/FindInNote";
+import { Table, TableRow, TableHeader, TableCell } from '@tiptap/extension-table';
+import { InlineMath, BlockMath } from '@tiptap/extension-mathematics';
+import FindBar from "./editor/FindBar";
+import TableControls from "./editor/TableControls";
+import MathDialog, { type MathDialogState } from "./editor/MathDialog";
+import EditorStats from "./editor/EditorStats";
+import PomodoroTimer from "./editor/PomodoroTimer";
+import LinkedNotes from "./editor/LinkedNotes";
+import { extractPdfText, pdfTextToHtml } from "../services/pdfTextImport";
+import { extractImageText, ocrTextToHtml } from "../services/imageTextImport";
+import 'katex/dist/katex.min.css';
 import { useSeason } from "../contexts/SeasonalContext";
 import { getTagColorClasses, getSafeCoverStyle } from "../services/colorService";
 import { useClickOutside } from "../hooks/useClickOutside";
@@ -31,9 +43,13 @@ interface NoteEditorProps {
   onClose: () => void;
   allTags: string[];
   customTags: Tag[];
+  /** All notes, used for [[wiki links]] and backlinks. Optional so existing callers keep working. */
+  notes?: Note[];
+  onOpenNote?: (id: string) => void;
+  onCreateLinkedNote?: (title: string) => void;
 }
 
-const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onClose, allTags, customTags }) => {
+const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onClose, allTags, customTags, notes, onOpenNote, onCreateLinkedNote }) => {
   const { colors } = useSeason();
   const [editedNote, setEditedNote] = useState<Note | null>(note);
   const [tagInput, setTagInput] = useState('');
@@ -57,6 +73,15 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onClose, allTags,
     filterText: string;
     range: any;
   } | null>(null);
+
+  // Find-in-note, equation dialog and focus mode
+  const [showFind, setShowFind] = useState(false);
+  const [mathDialog, setMathDialog] = useState<MathDialogState | null>(null);
+  const [focusMode, setFocusMode] = useState(false);
+  const [pdfImportState, setPdfImportState] = useState<'idle' | 'reading' | 'error'>('idle');
+  const pdfInputRef = useRef<HTMLInputElement>(null);
+  const [ocrState, setOcrState] = useState<{ status: 'idle' | 'reading' | 'error'; progress: number }>({ status: 'idle', progress: 0 });
+  const ocrInputRef = useRef<HTMLInputElement>(null);
 
   // Tiptap Editor Initialization
   const editor = useEditor({
@@ -150,6 +175,19 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onClose, allTags,
         },
       }),
       Callout,
+      FindInNote,
+      Table.configure({ resizable: false }),
+      TableRow,
+      TableHeader,
+      TableCell,
+      InlineMath.configure({
+        katexOptions: { throwOnError: false },
+        onClick: (node, pos) => setMathDialog({ latex: node.attrs.latex, block: false, pos }),
+      }),
+      BlockMath.configure({
+        katexOptions: { throwOnError: false },
+        onClick: (node, pos) => setMathDialog({ latex: node.attrs.latex, block: true, pos }),
+      }),
     ],
     content: note?.content || '',
     onUpdate: ({ editor }) => {
@@ -182,6 +220,22 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onClose, allTags,
       editor.commands.setContent(note.content);
     }
   }, [note?.id, editor]);
+
+  // The open note was changed from another device. Show it, but only if the user has typed
+  // nothing since the editor last matched the note, so in-progress typing is never replaced.
+  const lastSyncedHtmlRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!editor || !note) return;
+    const html = editor.getHTML();
+    if (note.content === html) {
+      lastSyncedHtmlRef.current = html;
+      return;
+    }
+    if (lastSyncedHtmlRef.current !== null && html === lastSyncedHtmlRef.current) {
+      editor.commands.setContent(note.content, { emitUpdate: false });
+      lastSyncedHtmlRef.current = editor.getHTML();
+    }
+  }, [note?.content, editor]);
 
   const tagInputContainerRef = useRef<HTMLDivElement>(null);
   const priorityContainerRef = useRef<HTMLDivElement>(null);
@@ -227,10 +281,6 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onClose, allTags,
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEditedNote(prev => prev ? { ...prev, title: e.target.value } : null);
-  };
-
-  const handleContentChange = (content: string) => {
-    setEditedNote(prev => prev ? { ...prev, content } : null);
   };
 
   const handleCoverSelect = (coverImage: string) => {
@@ -297,13 +347,85 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onClose, allTags,
       case 'code': editor.chain().focus().toggleCodeBlock().run(); break;
       case 'divider': editor.chain().focus().setHorizontalRule().run(); break;
       case 'callout': editor.chain().focus().insertContent({ type: 'callout', attrs: { emoji: '💡' }, content: [{ type: 'paragraph', content: [{ type: 'text', text: ' ' }] }] }).run(); break;
-      case 'ai':
+      case 'table': editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run(); break;
+      case 'math': setMathDialog({ latex: '', block: false }); break;
+      case 'blockmath': setMathDialog({ latex: '', block: true }); break;
+      case 'ai': {
         // Trigger AI Assistant (could be a focus or a specific mode)
         const aiButton = document.getElementById('ai-assistant-trigger');
         if (aiButton) aiButton.click();
         break;
+      }
     }
     setSlashMenuProps(null);
+  };
+
+  const handlePdfFileChosen = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !editor) return;
+
+    setPdfImportState('reading');
+    try {
+      const result = await extractPdfText(file);
+      const html = pdfTextToHtml(result, file.name);
+      editor.chain().focus().insertContent(html).run();
+      setPdfImportState('idle');
+    } catch (err) {
+      console.error('PDF import failed', err);
+      setPdfImportState('error');
+      window.setTimeout(() => setPdfImportState('idle'), 4000);
+    }
+  };
+
+  const handleImageFileChosen = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !editor) return;
+
+    setOcrState({ status: 'reading', progress: 0 });
+    try {
+      const text = await extractImageText(file, p => setOcrState({ status: 'reading', progress: p.progress }));
+      const html = ocrTextToHtml(text, file.name);
+      editor.chain().focus().insertContent(html).run();
+      setOcrState({ status: 'idle', progress: 0 });
+    } catch (err) {
+      console.error('Image scan failed', err);
+      setOcrState({ status: 'error', progress: 0 });
+      window.setTimeout(() => setOcrState({ status: 'idle', progress: 0 }), 4000);
+    }
+  };
+
+  const submitMath = (latex: string) => {
+    if (!editor || !mathDialog) return;
+    const chain = editor.chain().focus();
+    if (mathDialog.pos === undefined) {
+      (mathDialog.block ? chain.insertBlockMath({ latex }) : chain.insertInlineMath({ latex })).run();
+    } else {
+      (mathDialog.block ? chain.updateBlockMath({ latex, pos: mathDialog.pos }) : chain.updateInlineMath({ latex, pos: mathDialog.pos })).run();
+    }
+    setMathDialog(null);
+  };
+
+  const removeMath = () => {
+    if (!editor || !mathDialog || mathDialog.pos === undefined) return;
+    const chain = editor.chain().focus();
+    (mathDialog.block ? chain.deleteBlockMath({ pos: mathDialog.pos }) : chain.deleteInlineMath({ pos: mathDialog.pos })).run();
+    setMathDialog(null);
+  };
+
+  // Leaving for another note remounts the editor, so save what was typed first.
+  const saveThen = (go: () => void) => {
+    if (editedNote && note && (
+      editedNote.title !== note.title ||
+      editedNote.content !== note.content ||
+      editedNote.coverImage !== note.coverImage ||
+      editedNote.priority !== note.priority ||
+      JSON.stringify(editedNote.tags) !== JSON.stringify(note.tags)
+    )) {
+      onSave(editedNote);
+    }
+    go();
   };
 
   if (!editedNote) return null;
@@ -347,6 +469,14 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onClose, allTags,
               </button>
             )}
 
+            <button
+              onClick={() => setFocusMode(f => !f)}
+              className={`hidden md:flex px-3 py-2 text-sm rounded-lg border ${colors.border} ${focusMode ? 'bg-accent/20 text-accent' : colors.hover}`}
+              title="Hide the side panel and write without distractions"
+              aria-pressed={focusMode}
+            >
+              Focus
+            </button>
             <button
               onClick={handleSave}
               className="px-3 sm:px-4 py-2 text-sm bg-accent text-primary-bg font-semibold rounded-lg flex items-center disabled:opacity-50"
@@ -449,9 +579,71 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onClose, allTags,
                 >
                   <ListCheckIcon className="h-5 w-5" />
                 </button>
+                <div className={`w-px h-6 mx-1 ${colors.border}`} />
+                <button
+                  onClick={() => editor?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
+                  className={`px-2 py-1.5 text-sm rounded-lg transition-colors ${editor?.isActive('table') ? 'bg-accent/20 text-accent' : colors.hover}`}
+                  title="Insert table"
+                >
+                  Table
+                </button>
+                <button
+                  onClick={() => setMathDialog({ latex: '', block: false })}
+                  className={`px-2 py-1.5 text-sm rounded-lg transition-colors ${colors.hover}`}
+                  title="Insert equation"
+                >
+                  {'\u2211'}
+                </button>
+                <button
+                  onClick={() => setShowFind(v => !v)}
+                  className={`px-2 py-1.5 text-sm rounded-lg transition-colors ${showFind ? 'bg-accent/20 text-accent' : colors.hover}`}
+                  title="Find in note (Ctrl+F)"
+                  aria-pressed={showFind}
+                >
+                  Find
+                </button>
+                <button
+                  onClick={() => pdfInputRef.current?.click()}
+                  disabled={pdfImportState === 'reading'}
+                  className={`px-2 py-1.5 text-sm rounded-lg transition-colors ${colors.hover} disabled:opacity-50`}
+                  title="Import text from a PDF"
+                >
+                  {pdfImportState === 'reading' ? 'Reading…' : 'Import PDF'}
+                </button>
+                <input ref={pdfInputRef} type="file" accept="application/pdf,.pdf" className="hidden" onChange={handlePdfFileChosen} />
+                <button
+                  onClick={() => ocrInputRef.current?.click()}
+                  disabled={ocrState.status === 'reading'}
+                  className={`px-2 py-1.5 text-sm rounded-lg transition-colors ${colors.hover} disabled:opacity-50`}
+                  title="Scan text from a photo or screenshot (needs internet the first time)"
+                >
+                  {ocrState.status === 'reading' ? `Scanning ${Math.round(ocrState.progress * 100)}%…` : 'Scan Image'}
+                </button>
+                <input ref={ocrInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageFileChosen} />
               </div>
+              {pdfImportState === 'error' && (
+                <p className="text-xs text-red-500 -mt-3 mb-3">
+                  Could not read that PDF. It may be password-protected or corrupted.
+                </p>
+              )}
+              {ocrState.status === 'error' && (
+                <p className="text-xs text-red-500 -mt-3 mb-3">
+                  Could not scan that image. Check your connection and try again.
+                </p>
+              )}
 
-              <div className="flex-1 min-h-0 flex flex-col relative overflow-y-auto custom-editor">
+              {editor && showFind && <FindBar editor={editor} onClose={() => { setShowFind(false); editor.commands.focus(); }} />}
+              {editor && <TableControls editor={editor} />}
+
+              <div
+                className="flex-1 min-h-0 flex flex-col relative overflow-y-auto custom-editor"
+                onKeyDown={e => {
+                  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') {
+                    e.preventDefault();
+                    setShowFind(true);
+                  }
+                }}
+              >
                 {editor && (
                   <BubbleMenu editor={editor} className={`flex items-center gap-1 p-1 rounded-lg border shadow-xl backdrop-blur-md ${colors.surface} ${colors.border}`}>
                     <button
@@ -536,7 +728,20 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onClose, allTags,
             </div>
           </main>
 
+          {!focusMode && (
           <aside className={`w-full md:w-80 flex-shrink-0 border-t md:border-t-0 md:border-l p-4 sm:p-6 space-y-6 overflow-y-auto ${colors.border} ${colors.bgSimple}`}>
+            <div>
+              <EditorStats text={editor?.getText() ?? ''} />
+            </div>
+            {notes && onOpenNote && onCreateLinkedNote && (
+              <LinkedNotes
+                note={editedNote}
+                notes={notes}
+                onOpenNote={id => saveThen(() => onOpenNote(id))}
+                onCreateNote={title => saveThen(() => onCreateLinkedNote(title))}
+              />
+            )}
+            <PomodoroTimer />
             <div>
               <h3 className={`text-sm font-semibold mb-2 ${colors.secondaryText}`}>AI Assistant</h3>
               <AiAssistant noteContent={editedNote.content} onApply={handleAIAssist} />
@@ -620,8 +825,17 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onClose, allTags,
             </div>
 
           </aside>
+          )}
         </div>
       </motion.div>
+      {mathDialog && (
+        <MathDialog
+          state={mathDialog}
+          onSubmit={submitMath}
+          onDelete={mathDialog.pos !== undefined ? removeMath : undefined}
+          onCancel={() => setMathDialog(null)}
+        />
+      )}
     </div>
   );
 };

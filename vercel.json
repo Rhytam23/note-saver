@@ -20,6 +20,18 @@
                 {
                     "key": "Strict-Transport-Security",
                     "value": "max-age=31536000; includeSubDomains"
+                },
+                {
+                    "key": "Referrer-Policy",
+                    "value": "strict-origin-when-cross-origin"
+                },
+                {
+                    "key": "Permissions-Policy",
+                    "value": "camera=(), microphone=(self), geolocation=(self), payment=(), usb=(), serial=(), bluetooth=()"
+                },
+                {
+                    "key": "Content-Security-Policy",
+                    "value": "default-src 'self'; script-src 'self' https://accounts.google.com 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://generativelanguage.googleapis.com https://accounts.google.com https://www.googleapis.com https://api.github.com https://ipwho.is https://ipapi.co https://get.geojs.io; worker-src 'self' blob:; media-src 'self' blob: data: https://*.supabase.co; frame-src https://accounts.google.com; frame-ancestors 'none'; object-src 'none'; base-uri 'self';"
                 }
             ]
         }

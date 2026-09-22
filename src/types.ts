@@ -1,5 +1,3 @@
-import { MotionStyle } from 'framer-motion';
-
 export type NotePriority = 'high' | 'medium' | 'low' | 'none';
 
 export type PriorityFilter = 'high' | 'medium' | 'low' | null;

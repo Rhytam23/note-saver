@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useSeason } from '../contexts/SeasonalContext';
 import { useRouter } from '../contexts/RouterContext';
-import { ChevronLeftIcon, MailIcon, CheckCircleIcon } from './Icons';
+import { ChevronLeftIcon, CheckCircleIcon } from './Icons';
 import FAQ from './FAQ';
 
 const Support: React.FC = () => {

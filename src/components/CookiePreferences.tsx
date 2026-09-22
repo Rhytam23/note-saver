@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSeason } from '../contexts/SeasonalContext';
 import { useRouter } from '../contexts/RouterContext';
@@ -23,7 +23,7 @@ const CookiePreferences: React.FC = () => {
     try {
       const saved = localStorage.getItem('cookie_preferences');
       return saved ? JSON.parse(saved) : DEFAULT_COOKIES;
-    } catch (e) {
+    } catch {
       return DEFAULT_COOKIES;
     }
   });

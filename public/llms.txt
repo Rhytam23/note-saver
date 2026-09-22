@@ -1,0 +1,23 @@
+# NoteNirman
+
+> Offline-first notes app for students, for Windows, Android and the web. Notes save to the device first and sync when back online. Free to use.
+
+NoteNirman is a notes application aimed at students. Key facts, kept accurate as of 2026-09-22:
+
+- **Offline-first**: every note is written to local storage first; sync to the cloud happens in the background when a connection is available. The web app also works offline after the first visit (installable as a PWA).
+- **Editor**: a rich block-style editor (TipTap-based) supporting headings, lists, checklists, tables, LaTeX equations, code blocks, callouts, cover images and voice dictation.
+- **Study features**: flashcards with spaced repetition (write "Question:: Answer" in any note), five starter templates (class notes, Cornell notes, exam revision plan, assignment tracker, daily planner), notebooks grouped by subject/chapter, and notes linked with `[[wiki links]]` plus a visual connections graph.
+- **Import**: real on-device text extraction from PDF files, and real on-device OCR (photo/screenshot to text) — neither uploads the file to a server.
+- **AI**: an optional assistant powered by Google Gemini for summarizing, proofreading, idea generation and AI-content detection. The app works fully without it.
+- **Themes**: seasonal visual themes tied to the four seasons and to Indian festivals (Diwali, Holi, Navratri, Pongal, Independence Day, and more), switchable automatically or manually.
+- **Security**: notes sync to a private Supabase-backed account over an encrypted connection; any individual note can additionally be locked with its own passphrase (AES-256-GCM). A forgotten note passphrase cannot be recovered.
+- **Data control**: export any note as PDF, Markdown or plain text; back up the whole workspace to one file and restore it later; import Markdown, HTML, text or CSV from other note apps.
+- **Platforms**: web (notenirman.vercel.app), Windows (installer), Android (APK).
+- **Pricing**: free.
+
+## Pages
+
+- Homepage: https://notenirman.vercel.app/
+- FAQ / Support: https://notenirman.vercel.app/support
+- Privacy Policy: https://notenirman.vercel.app/privacy
+- Terms of Service: https://notenirman.vercel.app/terms

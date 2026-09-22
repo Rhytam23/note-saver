@@ -23,11 +23,8 @@ export const NoteNirmanLogo: React.FC<NoteNirmanLogoProps> = ({
   return (
     <div className={`flex items-center space-x-2.5 ${className}`}>
       <img
-        src="/app-icon.png"
-        onError={(e) => {
-          (e.currentTarget as HTMLImageElement).src = '/pwa-icon.png';
-        }}
-        alt="NoteNirman Symbol"
+        src="/logo.svg"
+        alt="NoteNirman"
         className={`${sizeMap[size]} rounded-lg object-contain drop-shadow-sm select-none`}
       />
       {showText && (

@@ -53,7 +53,8 @@ This document outlines the phased roadmap for **NoteNirman 2.0**. Development ha
 
 ### Phase 3 — Rich Capture & Multimodal Pipeline (CLOSED)
 - [x] Attachment storage (`attachmentStorage.ts`) with SHA-256 deduplication.
-- [x] PDF text extraction (`pdfPipeline.ts`), Tesseract OCR (`imageOcrPipeline.ts`), audio recording/transcription (`audioRecorder.ts`, `transcriptionService.ts`), handwriting (`handwritingService.ts`), and web clipping (`webClipper.ts`).
+- [x] Audio recording/transcription (`audioRecorder.ts`, `transcriptionService.ts`), handwriting (`handwritingService.ts`), and web clipping (`webClipper.ts`).
+- Superseded: `pdfPipeline.ts` and `imageOcrPipeline.ts` were block-editor scaffolding that returned placeholder text instead of real extraction. Removed 2026-09-22 and replaced with real, live-wired implementations: `services/pdfTextImport.ts` (pdfjs-dist) and `services/imageTextImport.ts` (tesseract.js), both used directly by the TipTap editor's "Import PDF" / "Scan Image" toolbar buttons.
 - [x] Off-main-thread background processing job queue (`processingJobQueue.ts`).
 
 ### Phase 4 — Search, RAG & Gemini Copilot (LOCALLY IMPLEMENTED)
