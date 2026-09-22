@@ -1,3 +1,11 @@
+> **⚠ Superseded / historical record only — do not treat this as current.**
+>
+> A running log from the original mobile-refactor pass. Superseded by [docs/DECISIONS.md](../DECISIONS.md), which continues the same idea (a dated log of what changed and why) going forward.
+>
+> Moved here unmodified on 2026-09-22 so the reasoning trail isn't lost.
+
+---
+
 # Mobile Refactoring Log
 
 ## UI Optimization

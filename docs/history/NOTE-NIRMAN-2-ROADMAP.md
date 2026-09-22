@@ -1,3 +1,11 @@
+> **⚠ Superseded / historical record only — do not treat this as current.**
+>
+> Tracks the same rejected block-editor/CRDT/RAG initiative as NOTE-NIRMAN-2-ARCHITECTURE.md, using its own P0-P5 phase numbering. This is a *different* roadmap from the one in [docs/ROADMAP.md](../ROADMAP.md) (which uses Phase 0-3 numbering for the student-focused features that actually shipped) — the two numbering schemes are unrelated, which is exactly the kind of thing worth flagging for a future reader. See [docs/DORMANT-CODE.md](../DORMANT-CODE.md) for what of this is actually present in the code today.
+>
+> Moved here unmodified on 2026-09-22 so the reasoning trail isn't lost.
+
+---
+
 # NoteNirman 2.0 — Implementation Roadmap
 
 This document outlines the phased roadmap for **NoteNirman 2.0**. Development has proceeded strictly incrementally, ensuring every phase undergoes full type-checking, linting, testing, cross-platform builds, and safety verification.

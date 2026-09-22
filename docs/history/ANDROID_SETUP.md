@@ -1,3 +1,11 @@
+> **⚠ Superseded / historical record only — do not treat this as current.**
+>
+> Superseded by [docs/SETUP.md](../SETUP.md), which has the same steps kept up to date. Kept here as-is for history.
+>
+> Moved here unmodified on 2026-09-22 so the reasoning trail isn't lost.
+
+---
+
 # Android Deployment Guide: NoteNirman
 
 This guide outlines the steps to build, test, and deploy the NoteNirman Android application using Capacitor and Android Studio.

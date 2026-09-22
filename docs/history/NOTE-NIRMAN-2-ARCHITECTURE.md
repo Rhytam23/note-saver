@@ -1,3 +1,11 @@
+> **⚠ Superseded / historical record only — do not treat this as current.**
+>
+> This was the *proposed* architecture for an ambitious rewrite (block editor, Yjs CRDT collaboration, infinite canvas, AI agents). On 2026-09-22 the user reviewed it and explicitly rejected the redesign in favor of an additive, TipTap-preserving roadmap (see [docs/DECISIONS.md](../DECISIONS.md)). Most of what this document describes as future work was actually built anyway (as inert, feature-flagged-off scaffolding — see [docs/DORMANT-CODE.md](../DORMANT-CODE.md)), but almost none of it is wired into the live app. Do not treat this document as a description of the current app — see [docs/ARCHITECTURE.md](../ARCHITECTURE.md) instead.
+>
+> Moved here unmodified on 2026-09-22 so the reasoning trail isn't lost.
+
+---
+
 # NoteNirman 2.0 — Architecture & Technical Audit
 
 ## Executive Summary
