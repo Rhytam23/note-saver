@@ -4,9 +4,35 @@ import { supabase } from '../services/supabase';
 import { clearUserLocalData, getQueue } from '../services/localDb';
 import { processSyncQueue } from '../services/syncEngine';
 import { detectPlatform } from '../services/platform/platformAdapterFactory';
+import {
+  isNativeAuthPlatform,
+  getNativeAuthRedirectUrl,
+  openInSystemBrowser,
+  listenForAuthCallback,
+} from '../services/platform/nativeAuthBridge';
 
 const PUBLIC_WEB_ORIGIN = 'https://notenirman.vercel.app';
 const LOGOUT_FLUSH_TIMEOUT_MS = 5000;
+
+/**
+ * Supabase's OAuth redirect puts the session tokens in the URL fragment
+ * (notenirman://auth-callback#access_token=...&refresh_token=...), but
+ * parses them from the query string defensively too, in case a future
+ * Supabase config or platform quirk delivers them there instead.
+ */
+function parseAuthTokensFromUrl(url: string): { access_token: string; refresh_token: string } | null {
+  try {
+    const fragment = url.split('#')[1] ?? '';
+    const query = url.includes('?') ? url.split('?')[1].split('#')[0] : '';
+    const params = new URLSearchParams(fragment || query);
+    const access_token = params.get('access_token');
+    const refresh_token = params.get('refresh_token');
+    if (access_token && refresh_token) return { access_token, refresh_token };
+  } catch {
+    // Malformed callback URL - treated as "no tokens found" by the caller.
+  }
+  return null;
+}
 
 
 export interface AuthContextType {
@@ -96,6 +122,43 @@ export function useAuth(): AuthContextType {
     };
   }, []);
 
+  // Desktop/Android Google sign-in finishes in the system browser, then the OS
+  // hands the callback back to the app as a notenirman:// (or
+  // com.notenirman.app://) URL instead of a normal page load. Catch that here
+  // and hand the tokens it carries to Supabase - onAuthStateChange above then
+  // picks up the new session exactly as it would for any other sign-in.
+  useEffect(() => {
+    if (!isNativeAuthPlatform()) return;
+
+    let unlisten: (() => void) | undefined;
+    let cancelled = false;
+
+    listenForAuthCallback(async callbackUrl => {
+      const tokens = parseAuthTokensFromUrl(callbackUrl);
+      if (!tokens) {
+        console.warn('[useAuth] Auth callback received but no tokens found in it:', callbackUrl);
+        return;
+      }
+      try {
+        const { error } = await supabase.auth.setSession({
+          access_token: tokens.access_token,
+          refresh_token: tokens.refresh_token,
+        });
+        if (error) throw error;
+      } catch (error) {
+        console.error('[useAuth] Failed to complete native Google sign-in:', error);
+      }
+    }).then(fn => {
+      if (cancelled) fn();
+      else unlisten = fn;
+    });
+
+    return () => {
+      cancelled = true;
+      unlisten?.();
+    };
+  }, []);
+
   // The desktop and Android apps run on tauri.localhost / capacitor localhost, which
   // an email link opened on another device or browser can never reach.
   const getSafeOrigin = (): string => {
@@ -109,6 +172,25 @@ export function useAuth(): AuthContextType {
   const login = useCallback(async (): Promise<void> => {
     setIsSubmitting(true);
     try {
+      if (isNativeAuthPlatform()) {
+        // Desktop/Android: get the OAuth URL without letting supabase-js
+        // navigate this window to it (that would strand the app - see
+        // nativeAuthBridge.ts), then open it in the system browser instead.
+        // The session gets established later by the useEffect above once
+        // the OS hands the notenirman:// callback back to the app.
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: getNativeAuthRedirectUrl(),
+            scopes: 'https://www.googleapis.com/auth/calendar.readonly',
+            skipBrowserRedirect: true,
+          }
+        });
+        if (error) throw error;
+        if (data?.url) await openInSystemBrowser(data.url);
+        return;
+      }
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {

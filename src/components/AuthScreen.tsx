@@ -300,24 +300,25 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onBackToHome, mode }) => {
 
         {!isForgotPasswordView && (
           <>
-            {/* Google sign-in redirects through the website, which cannot hand the session back to the installed apps. */}
-            {detectPlatform() === 'web' && (
-              <>
-                <div className="my-6 flex items-center">
-                  <div className={`flex-grow border-t ${colors.border}`}></div>
-                  <span className={`mx-4 text-xs ${colors.secondaryText}`}>OR</span>
-                  <div className={`flex-grow border-t ${colors.border}`}></div>
-                </div>
+            {/* Web: same-window redirect through Supabase. Desktop/Android: opens
+                the system browser and completes via a notenirman:// deep-link
+                callback instead - see src/services/platform/nativeAuthBridge.ts. */}
+            <div className="my-6 flex items-center">
+              <div className={`flex-grow border-t ${colors.border}`}></div>
+              <span className={`mx-4 text-xs ${colors.secondaryText}`}>OR</span>
+              <div className={`flex-grow border-t ${colors.border}`}></div>
+            </div>
 
-                <button
-                  onClick={handleGoogleAuth}
-                  className="w-full py-3 px-4 flex items-center justify-center gap-3 bg-white text-gray-700 font-semibold rounded-full hover:bg-gray-50 transition-colors shadow-md border border-gray-200"
-                >
-                  <GoogleIcon className="h-5 w-5" />
-                  <span>Continue with Google</span>
-                </button>
-              </>
-            )}
+            <button
+              onClick={handleGoogleAuth}
+              className="w-full py-3 px-4 flex items-center justify-center gap-3 bg-white text-gray-700 font-semibold rounded-full hover:bg-gray-50 transition-colors shadow-md border border-gray-200"
+            >
+              <GoogleIcon className="h-5 w-5" />
+              <span>Continue with Google</span>
+              {detectPlatform() !== 'web' && (
+                <span className={`text-xs ${colors.secondaryText}`}>(opens your browser)</span>
+              )}
+            </button>
 
             <p className="mt-8 text-center text-sm">
               <span className={colors.secondaryText}>{isLoginView ? "Don't have an account?" : "Already have an account?"}</span>

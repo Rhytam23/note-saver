@@ -41,5 +41,12 @@
         "installMode": "currentUser"
       }
     }
+  },
+  "plugins": {
+    "deep-link": {
+      "desktop": {
+        "schemes": ["notenirman"]
+      }
+    }
   }
 }

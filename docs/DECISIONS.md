@@ -11,6 +11,61 @@ archived.
 
 ---
 
+## 2026-09-22 — Native Google sign-in on desktop and Android
+
+**Decision:** Google sign-in was previously web-only (`detectPlatform() === 'web'`
+gated the button in `AuthScreen.tsx`), because the existing flow
+(`supabase.auth.signInWithOAuth` with same-window redirect) navigates the
+current window to Google and back — inside a Tauri window or an Android
+WebView, that redirect has nowhere sensible to land back on and would
+strand the user outside the app shell. Built the standard fix instead of
+just re-enabling a broken button: open the OAuth URL in the device's real
+system browser (`@tauri-apps/plugin-shell`'s `open()` /
+`@capacitor/browser`'s `Browser.open()`), and catch Supabase's redirect
+back via a custom URL scheme deep link instead of a normal page load
+(`notenirman://auth-callback` on desktop via `@tauri-apps/plugin-deep-link`,
+`com.notenirman.app://auth-callback` on Android via `@capacitor/app`'s
+`appUrlOpen` — reusing an intent-filter that was already declared in
+`AndroidManifest.xml` but never wired to anything).
+
+New `src/services/platform/nativeAuthBridge.ts` holds this, deliberately
+kept separate from the existing `PlatformAdapters` bundle
+(`platformInterfaces.ts`/`platformAdapterFactory.ts`) rather than folded
+into it — auth is a narrow, one-off concern, and this way it can't
+regress that already-tested filesystem/notification/storage bundle.
+
+**Real caveat found while building this**: that existing `PlatformAdapters`
+bundle's Tauri/Capacitor implementations (`tauriAdapter.ts`,
+`capacitorAdapter.ts`) dynamically `import()` packages like
+`@tauri-apps/plugin-fs` and `@capacitor/local-notifications` that were
+**never actually added to `package.json`** — meaning on a real Tauri/Android
+build those dynamic imports always fail and silently fall back to the Web
+adapter, so the "native" filesystem/notification code paths documented as
+live in `ARCHITECTURE.md` are likely dead in practice today too. Not fixed
+here (out of scope for this task) — worth its own pass. For *this* feature
+the packages were genuinely `npm install`ed for real, not just referenced.
+
+**Manual step only the account owner can do:** add both redirect URLs to
+the Supabase project's **Authentication → URL Configuration → Redirect
+URLs** allowlist:
+- `notenirman://auth-callback`
+- `com.notenirman.app://auth-callback`
+
+Supabase rejects a redirect to anything not on that list, so native Google
+sign-in will fail with a redirect error until this is done. No dashboard
+API access was available to do this from here.
+
+**Verified:** `tsc --noEmit`, `eslint`, and the full `vitest` suite (463
+tests) all clean; production build shows the new platform-bridge code
+split into its own small lazy chunk (~8KB), not bloating the main bundle;
+`npx cap sync android` picked up both new Capacitor plugins correctly. Not
+yet verified end-to-end on a real device/desktop install (needs the
+Supabase redirect URLs added first, then a real OAuth round-trip) — that's
+the next real-world check once the account owner does the manual step
+above.
+
+---
+
 ## 2026-09-22 — Microsoft Store packaging pipeline built, submission not started
 
 **Decision:** Added an MSIX packaging pipeline (`src-tauri/msix/`) that
