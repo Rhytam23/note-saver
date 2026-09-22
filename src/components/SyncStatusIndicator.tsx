@@ -29,7 +29,11 @@ const SyncStatusIndicator: React.FC<SyncStatusIndicatorProps> = ({ status, pendi
   const isWarning = status === 'conflict' || status === 'sync-failed' || status === 'backend-unavailable' || status === 'auth-expired';
 
   return (
-    <div className="fixed bottom-4 right-4 z-30 flex flex-col items-end gap-2 pointer-events-none">
+    // Bottom-left, not bottom-right: the "+ New note" FloatingActionButton
+    // sits fixed bottom-right at nearly the same offset/z-index, so sharing
+    // that corner made this pill visually collide with (and get partly
+    // hidden behind) the FAB button.
+    <div className="fixed bottom-4 left-4 z-30 flex flex-col items-start gap-2 pointer-events-none">
       <AnimatePresence>
         {conflicts.length > 0 && (
           <motion.div
