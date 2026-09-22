@@ -12,7 +12,8 @@ import { v4 as uuidv4 } from 'uuid';
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
 import NoteList from "./components/NoteList";
-const NoteEditor = React.lazy(() => import("./components/NoteEditor"));
+import { lazyWithRetry } from "./utils/lazyWithRetry";
+const NoteEditor = lazyWithRetry(() => import("./components/NoteEditor"));
 import FloatingActionButton from "./components/FloatingActionButton";
 import TemplatePicker from "./components/TemplatePicker";
 import TrashModal from "./components/TrashModal";
@@ -46,22 +47,22 @@ import { checkForUpdates, type UpdateInfo } from './services/updateService';
 import UpdateModal from './components/UpdateModal';
 import { detectPlatform } from './services/platform/platformAdapterFactory';
 
-const ProfileModal = React.lazy(() => import('./components/ProfileModal'));
-const TutorialModal = React.lazy(() => import('./components/TutorialModal'));
-const WelcomeIntroAnimation = React.lazy(() => import('./components/WelcomeIntroAnimation'));
+const ProfileModal = lazyWithRetry(() => import('./components/ProfileModal'));
+const TutorialModal = lazyWithRetry(() => import('./components/TutorialModal'));
+const WelcomeIntroAnimation = lazyWithRetry(() => import('./components/WelcomeIntroAnimation'));
 
-const IndependenceDayIntro = React.lazy(() => import('./components/IndependenceDayIntro'));
-const SummerIntroAnimation = React.lazy(() => import('./components/SummerIntroAnimation'));
-const WinterIntroAnimation = React.lazy(() => import('./components/WinterIntroAnimation'));
-const ChristmasIntroAnimation = React.lazy(() => import('./components/ChristmasIntroAnimation'));
-const MonsoonIntroAnimation = React.lazy(() => import('./components/MonsoonIntroAnimation'));
-const AutumnIntroAnimation = React.lazy(() => import('./components/AutumnIntroAnimation'));
-const SpringIntroAnimation = React.lazy(() => import('./components/SpringIntroAnimation'));
-const DiwaliIntroAnimation = React.lazy(() => import('./components/DiwaliIntroAnimation'));
-const HoliIntroAnimation = React.lazy(() => import('./components/HoliIntroAnimation'));
-const PongalIntroAnimation = React.lazy(() => import('./components/PongalIntroAnimation'));
-const NavratriIntroAnimation = React.lazy(() => import('./components/NavratriIntroAnimation'));
-const NewYearIntroAnimation = React.lazy(() => import('./components/NewYearIntroAnimation'));
+const IndependenceDayIntro = lazyWithRetry(() => import('./components/IndependenceDayIntro'));
+const SummerIntroAnimation = lazyWithRetry(() => import('./components/SummerIntroAnimation'));
+const WinterIntroAnimation = lazyWithRetry(() => import('./components/WinterIntroAnimation'));
+const ChristmasIntroAnimation = lazyWithRetry(() => import('./components/ChristmasIntroAnimation'));
+const MonsoonIntroAnimation = lazyWithRetry(() => import('./components/MonsoonIntroAnimation'));
+const AutumnIntroAnimation = lazyWithRetry(() => import('./components/AutumnIntroAnimation'));
+const SpringIntroAnimation = lazyWithRetry(() => import('./components/SpringIntroAnimation'));
+const DiwaliIntroAnimation = lazyWithRetry(() => import('./components/DiwaliIntroAnimation'));
+const HoliIntroAnimation = lazyWithRetry(() => import('./components/HoliIntroAnimation'));
+const PongalIntroAnimation = lazyWithRetry(() => import('./components/PongalIntroAnimation'));
+const NavratriIntroAnimation = lazyWithRetry(() => import('./components/NavratriIntroAnimation'));
+const NewYearIntroAnimation = lazyWithRetry(() => import('./components/NewYearIntroAnimation'));
 
 let appSessionIntroEvaluated = false;
 
