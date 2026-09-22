@@ -140,7 +140,13 @@ jobs:
         # and install the exact, still-valid packages this project needs.
         shell: bash
         run: |
-          SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -maxdepth 2 -name sdkmanager | sort -V | tail -1)
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          SDKMANAGER=$(find "$ANDROID_HOME" -name sdkmanager -type f 2>/dev/null | sort -V | tail -1)
+          if [ -z "$SDKMANAGER" ]; then
+            echo "::error::sdkmanager not found anywhere under \$ANDROID_HOME ($ANDROID_HOME)"
+            ls -la "$ANDROID_HOME" || true
+            exit 1
+          fi
           echo "Using sdkmanager: $SDKMANAGER"
           yes | "$SDKMANAGER" --licenses > /dev/null || true
           "$SDKMANAGER" "platform-tools" "platforms;android-36" "build-tools;36.0.0"
