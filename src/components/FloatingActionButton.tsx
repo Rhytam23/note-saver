@@ -1,6 +1,6 @@
 import React from 'react';
 import { PlusIcon } from './Icons';
-import { motion, Variants } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 interface FloatingActionButtonProps {
   onClick: () => void;

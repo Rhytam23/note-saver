@@ -1,5 +1,48 @@
 import React from 'react';
+import DOMPurify from 'dompurify';
 import type { Block } from '../../types/block';
+
+/**
+ * SECURITY: All block HTML content MUST pass through sanitizeBlockHtml before
+ * being set via dangerouslySetInnerHTML. This prevents stored XSS from
+ * malicious note content reaching any viewer's browser.
+ *
+ * DOMPurify strips:
+ *  - <script>, <iframe>, <object>, <embed>, <form>, <svg> tags
+ *  - javascript:, vbscript:, data: URLs in href/src
+ *  - inline event handlers (onerror, onload, onclick, etc.)
+ *  - SVG/MathML script vectors
+ */
+const BLOCK_DOMPURIFY_CONFIG = {
+  ALLOWED_TAGS: [
+    'p', 'br', 'b', 'i', 'strong', 'em', 'u', 's', 'span', 'code', 'pre',
+    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    'ul', 'ol', 'li', 'blockquote', 'table', 'thead', 'tbody', 'tr', 'td', 'th',
+    'a', 'img', 'hr',
+  ] as string[],
+  ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'data-block-id', 'data-type', 'checked', 'class'] as string[],
+  ALLOW_DATA_ATTR: false as const,
+  FORBID_TAGS: ['script', 'style', 'iframe', 'object', 'embed', 'form', 'input', 'button', 'svg', 'math', 'link'] as string[],
+  FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur', 'onchange'] as string[],
+} as const;
+
+function sanitizeBlockHtml(html: string | null | undefined): string {
+  if (!html) return '';
+  return DOMPurify.sanitize(html, BLOCK_DOMPURIFY_CONFIG) as string;
+}
+
+/**
+ * SECURITY: Validate that a URL is safe to use as an img/audio/pdf src or href.
+ * Blocks javascript:, data:, vbscript: and other dangerous protocols.
+ */
+function isSafeUrl(url: string | null | undefined): boolean {
+  if (!url) return false;
+  const trimmed = url.trim().toLowerCase();
+  if (trimmed.startsWith('javascript:')) return false;
+  if (trimmed.startsWith('data:') && !trimmed.startsWith('data:image/')) return false;
+  if (trimmed.startsWith('vbscript:')) return false;
+  return true;
+}
 
 interface BlockItemProps {
   block: Block;
@@ -46,10 +89,11 @@ function renderBlockContent(
   block: Block,
   handleInput: (e: React.FormEvent<HTMLElement>) => void
 ): React.ReactNode {
+  // SECURITY: rawHtml must always be sanitized before rendering
   if (block.properties && block.properties.rawHtml) {
     return (
       <div
-        dangerouslySetInnerHTML={{ __html: block.properties.rawHtml }}
+        dangerouslySetInnerHTML={{ __html: sanitizeBlockHtml(block.properties.rawHtml) }}
         className="prose dark:prose-invert max-w-none"
       />
     );
@@ -72,7 +116,7 @@ function renderBlockContent(
           contentEditable
           suppressContentEditableWarning
           onInput={handleInput}
-          dangerouslySetInnerHTML={{ __html: block.content || '' }}
+          dangerouslySetInnerHTML={{ __html: sanitizeBlockHtml(block.content) }}
           className={`${sizes[level]} outline-none`}
         />
       );
@@ -84,7 +128,7 @@ function renderBlockContent(
           contentEditable
           suppressContentEditableWarning
           onInput={handleInput}
-          dangerouslySetInnerHTML={{ __html: block.content || '' }}
+          dangerouslySetInnerHTML={{ __html: sanitizeBlockHtml(block.content) }}
           className="border-l-4 border-accent pl-4 italic opacity-90 outline-none my-1"
         />
       );
@@ -97,7 +141,7 @@ function renderBlockContent(
             contentEditable
             suppressContentEditableWarning
             onInput={handleInput}
-            dangerouslySetInnerHTML={{ __html: block.content || '' }}
+            dangerouslySetInnerHTML={{ __html: sanitizeBlockHtml(block.content) }}
             className="flex-1 outline-none text-sm"
           />
         </div>
@@ -111,7 +155,7 @@ function renderBlockContent(
             contentEditable
             suppressContentEditableWarning
             onInput={handleInput}
-            dangerouslySetInnerHTML={{ __html: block.content || '' }}
+            dangerouslySetInnerHTML={{ __html: sanitizeBlockHtml(block.content) }}
             className="flex-1 outline-none"
           />
         </div>
@@ -125,7 +169,7 @@ function renderBlockContent(
             contentEditable
             suppressContentEditableWarning
             onInput={handleInput}
-            dangerouslySetInnerHTML={{ __html: block.content || '' }}
+            dangerouslySetInnerHTML={{ __html: sanitizeBlockHtml(block.content) }}
             className="flex-1 outline-none"
           />
         </div>
@@ -145,7 +189,7 @@ function renderBlockContent(
             contentEditable
             suppressContentEditableWarning
             onInput={handleInput}
-            dangerouslySetInnerHTML={{ __html: block.content || '' }}
+            dangerouslySetInnerHTML={{ __html: sanitizeBlockHtml(block.content) }}
             className={`flex-1 outline-none ${block.properties.checked ? 'line-through opacity-50' : ''}`}
           />
         </div>
@@ -161,7 +205,7 @@ function renderBlockContent(
             contentEditable
             suppressContentEditableWarning
             onInput={handleInput}
-            dangerouslySetInnerHTML={{ __html: block.content || '' }}
+            dangerouslySetInnerHTML={{ __html: sanitizeBlockHtml(block.content) }}
             className="outline-none"
           />
         </div>
@@ -170,26 +214,35 @@ function renderBlockContent(
     case 'table':
       return (
         <div
-          dangerouslySetInnerHTML={{ __html: block.content }}
+          dangerouslySetInnerHTML={{ __html: sanitizeBlockHtml(block.content) }}
           className="my-2 overflow-x-auto border border-white/20 rounded-lg p-2"
         />
       );
 
-    case 'image':
+    case 'image': {
+      // SECURITY: validate src URL to block javascript:/data: injection
+      const imgSrc = block.content || block.properties.url;
       return (
         <div className="my-2 text-center">
-          <img
-            src={block.content || block.properties.url}
-            alt={block.properties.caption || 'Image'}
-            className="max-h-96 mx-auto rounded-lg shadow-md object-contain"
-          />
+          {isSafeUrl(imgSrc) ? (
+            <img
+              src={imgSrc}
+              alt={block.properties.caption || 'Image'}
+              className="max-h-96 mx-auto rounded-lg shadow-md object-contain"
+            />
+          ) : (
+            <div className="text-xs text-red-400 font-mono p-2">[Image blocked: unsafe URL]</div>
+          )}
           {block.properties.caption && (
             <p className="text-xs opacity-60 mt-1 italic">{block.properties.caption}</p>
           )}
         </div>
       );
+    }
 
-    case 'pdf':
+    case 'pdf': {
+      // SECURITY: validate href to block javascript: injection
+      const pdfHref = block.content;
       return (
         <div className="my-2 p-3 rounded-lg border border-accent/30 bg-accent/5 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -199,29 +252,36 @@ function renderBlockContent(
               <p className="text-[10px] opacity-60 font-mono">{block.properties.pageCount ? `${block.properties.pageCount} pages` : 'Document'}</p>
             </div>
           </div>
-          {block.content && (
-            <a href={block.content} target="_blank" rel="noreferrer" className="text-xs text-accent underline">View PDF</a>
+          {pdfHref && isSafeUrl(pdfHref) && (
+            <a href={pdfHref} target="_blank" rel="noreferrer" className="text-xs text-accent underline">View PDF</a>
           )}
         </div>
       );
+    }
 
-    case 'audio':
+    case 'audio': {
+      // SECURITY: validate src URL
+      const audioSrc = block.content;
       return (
         <div className="my-2 p-3 rounded-lg border border-accent/30 bg-accent/5 space-y-2">
           <div className="flex items-center justify-between text-xs">
             <span className="font-mono font-bold text-accent">AUDIO NOTE</span>
             <span className="opacity-60 font-mono">{block.properties.durationSec ? `${block.properties.durationSec}s` : ''}</span>
           </div>
-          {block.content && (
-            <audio controls src={block.content} className="w-full h-8" />
+          {audioSrc && isSafeUrl(audioSrc) && (
+            <audio controls src={audioSrc} className="w-full h-8" />
           )}
         </div>
       );
+    }
 
-    case 'bookmark':
+    case 'bookmark': {
+      // SECURITY: validate bookmark URL to prevent javascript: href injection
+      const bookmarkUrl = block.properties.url || block.content;
+      const safeBookmarkUrl = isSafeUrl(bookmarkUrl) ? bookmarkUrl : '#';
       return (
         <div className="my-2 p-3 rounded-lg border border-accent/30 bg-black/10 dark:bg-white/5 space-y-1">
-          <a href={block.properties.url || block.content} target="_blank" rel="noreferrer" className="text-xs font-bold text-accent hover:underline block truncate">
+          <a href={safeBookmarkUrl} target="_blank" rel="noreferrer" className="text-xs font-bold text-accent hover:underline block truncate">
             {block.properties.title || block.content}
           </a>
           {block.properties.excerpt && (
@@ -230,12 +290,14 @@ function renderBlockContent(
           <span className="text-[10px] opacity-50 font-mono block">{block.properties.siteName || block.content}</span>
         </div>
       );
+    }
 
     case 'diagram':
       if (block.properties.isHandwriting && block.content.startsWith('<svg')) {
+        // SECURITY: SVG content must be sanitized — SVG can contain <script> elements
         return (
           <div className="my-2 p-2 rounded-lg border border-accent/20 bg-white dark:bg-black/40 text-center">
-            <div dangerouslySetInnerHTML={{ __html: block.content }} className="max-h-80 mx-auto overflow-hidden" />
+            <div dangerouslySetInnerHTML={{ __html: sanitizeBlockHtml(block.content) }} className="max-h-80 mx-auto overflow-hidden" />
             <span className="text-[10px] opacity-50 font-mono block mt-1">Vector Handwriting Canvas</span>
           </div>
         );
@@ -260,7 +322,7 @@ function renderBlockContent(
             contentEditable
             suppressContentEditableWarning
             onInput={handleInput}
-            dangerouslySetInnerHTML={{ __html: block.content || '' }}
+            dangerouslySetInnerHTML={{ __html: sanitizeBlockHtml(block.content) }}
             className="mt-2 pl-4 outline-none"
           />
         </details>
@@ -289,7 +351,7 @@ function renderBlockContent(
           contentEditable
           suppressContentEditableWarning
           onInput={handleInput}
-          dangerouslySetInnerHTML={{ __html: block.content || '' }}
+          dangerouslySetInnerHTML={{ __html: sanitizeBlockHtml(block.content) }}
           className="outline-none min-h-[1.5em]"
         />
       );

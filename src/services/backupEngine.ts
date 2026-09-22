@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
 import type { Note } from '../types';
 import type { Attachment } from '../types/attachment';
 import type { PortabilityAST } from '../types/portability';
@@ -6,7 +5,10 @@ import * as localDb from './localDb';
 import { attachmentStorage } from './attachmentStorage';
 import { getBlockDocumentFromHtml } from './editorBlockAdapter';
 import { noteContentToPortabilityAST } from './portabilityCore';
+// SECURITY: sanitizeImportHtml used to re-sanitize restored note HTML content
+import { sanitizeImportHtml } from './importPipeline';
 import * as Y from 'yjs';
+
 
 /**
  * NoteNirman 2.0 Phase 5 — Workspace Backup & Restoration Engine (P5.2)
@@ -173,11 +175,28 @@ export function computePackageChecksum(notes: BackupNoteItem[], attachments: Bac
 
 /**
  * Path Traversal & Security Sanitizer Helper
+ * 
+ * SECURITY: Blocks null bytes, percent-encoded separators, Windows drive letters,
+ * UNC paths, and directory traversal sequences from note/attachment IDs.
  */
 export function sanitizePathOrId(pathOrId: string): string {
   if (!pathOrId) return '';
-  return pathOrId.replace(/(\.\.[\/\\])+/g, '').replace(/[\/\\]/g, '_');
+  return pathOrId
+    // Decode percent-encoded separators before analysis
+    .replace(/%2[fF]/g, '/')
+    .replace(/%5[cC]/g, '\\')
+    // Null-byte removal (intentional: strips a null-byte injection vector, e.g. "a.txt\x00.exe")
+    // eslint-disable-next-line no-control-regex
+    .replace(/\x00/g, '')
+    // Strip path traversal sequences
+    .replace(/(\.\.[\\/])+/g, '')
+    .replace(/^\.\.$/g, '')
+    // Strip separator characters
+    .replace(/[\\/]/g, '_')
+    // Strip Windows drive letters
+    .replace(/^[a-zA-Z]:/, '');
 }
+
 
 /**
  * Export complete authoritative workspace state as an NNPackage backup container.
@@ -433,7 +452,9 @@ export async function restoreWorkspaceBackup(
       const noteToRestore: Note = {
         id: noteItem.id,
         title: noteItem.title,
-        content: noteItem.content, // Canonical Note.content HTML
+        // SECURITY: Re-sanitize restored HTML content to block XSS from malicious .nnpackage files.
+        // Note.content is the canonical HTML field and MUST be clean before storage.
+        content: sanitizeImportHtml(noteItem.content || ''),
         tags: noteItem.tags || [],
         isPinned: noteItem.isPinned || false,
         priority: noteItem.priority || 'none',
@@ -445,6 +466,7 @@ export async function restoreWorkspaceBackup(
         deleted: noteItem.deleted || false,
         deletedAt: noteItem.deletedAt || null,
       };
+
 
       // Verify TipTap AST reconstruction from Note.content
       getBlockDocumentFromHtml(noteToRestore.content, noteToRestore.id);

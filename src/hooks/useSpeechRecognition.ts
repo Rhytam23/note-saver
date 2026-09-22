@@ -28,13 +28,10 @@ export const useSpeechRecognition = (): UseSpeechRecognitionReturn => {
     recognitionRef.current.lang = 'en-US';
 
     recognitionRef.current.onresult = (event: any) => {
-      let currentTranscript = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcriptSegment = event.results[i][0].transcript;
         if (event.results[i].isFinal) {
+          const transcriptSegment = event.results[i][0].transcript;
           setTranscript((prev) => prev + transcriptSegment + ' ');
-        } else {
-          currentTranscript += transcriptSegment;
         }
       }
     };

@@ -2,23 +2,23 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-const ALLOWED_ORIGIN_PATTERNS = [
-  /^https:\/\/notenirman\.vercel\.app$/,
-  /^https:\/\/.*\.vercel\.app$/,
-  /^http:\/\/localhost:(3000|5173)$/,
-  /^http:\/\/localhost$/,
-  /^tauri:\/\/localhost$/,
-  /^http:\/\/tauri\.localhost$/,
-  /^capacitor:\/\/localhost$/
-]
+// SECURITY: Explicit origin allowlist only. No wildcard patterns.
+// The *.vercel.app wildcard is intentionally removed — it allowed any
+// attacker-controlled Vercel deployment to make authenticated API requests.
+const ALLOWED_ORIGINS: ReadonlySet<string> = new Set([
+  'https://notenirman.vercel.app',
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'http://localhost',
+  'tauri://localhost',
+  'http://tauri.localhost',
+  'capacitor://localhost',
+])
 
 function getCorsHeaders(requestOrigin: string | null): Record<string, string> {
   let allowOrigin = 'https://notenirman.vercel.app'
-  if (requestOrigin) {
-    const isAllowed = ALLOWED_ORIGIN_PATTERNS.some((pattern) => pattern.test(requestOrigin))
-    if (isAllowed) {
-      allowOrigin = requestOrigin
-    }
+  if (requestOrigin && ALLOWED_ORIGINS.has(requestOrigin)) {
+    allowOrigin = requestOrigin
   }
   return {
     'Access-Control-Allow-Origin': allowOrigin,
@@ -79,15 +79,28 @@ serve(async (req: Request) => {
       return new Response(JSON.stringify({ error: 'Service Unavailable: Rate limiting service unconfigured' }), { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
+    // SECURITY: Body size limit prevents resource exhaustion and AI cost abuse
+    const contentLength = req.headers.get('content-length')
+    if (contentLength && parseInt(contentLength, 10) > 524_288) { // 512 KB
+      return new Response(JSON.stringify({ error: 'Request body too large' }), { status: 413, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+
     const { prompt, systemInstruction } = await req.json()
     if (!prompt || typeof prompt !== 'string') {
       return new Response(JSON.stringify({ error: 'Missing or invalid "prompt"' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+
+    // SECURITY: Prompt length cap — prevents AI token cost exhaustion
+    const MAX_PROMPT_LENGTH = 100_000 // ~25K tokens
+    if (prompt.length > MAX_PROMPT_LENGTH) {
+      return new Response(JSON.stringify({ error: 'Prompt exceeds maximum length' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
     const geminiApiKey = Deno.env.get('GEMINI_API_KEY')
     if (!geminiApiKey) {
       console.error("Gemini API Key configuration is missing in Edge Function environment.")
       return new Response(JSON.stringify({ error: 'Service Unavailable: AI configuration error' }), { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+
     }
 
     const requestBody: Record<string, unknown> = {

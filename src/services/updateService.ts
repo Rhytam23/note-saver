@@ -8,7 +8,8 @@ export interface UpdateInfo {
   publishedAt?: string;
 }
 
-export const CURRENT_APP_VERSION = '1.0.3';
+// Injected from package.json at build time; the release workflow syncs it from the git tag.
+export const CURRENT_APP_VERSION: string = import.meta.env.VITE_APP_VERSION || '0.0.0';
 
 function cleanVersion(ver: string): string {
   return ver.replace(/^v/i, '').trim();

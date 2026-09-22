@@ -24,7 +24,9 @@ export const ImportSecurityPolicy = {
     'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
     'ul', 'ol', 'li', 'blockquote', 'table', 'thead', 'tbody',
     'tr', 'td', 'th', 'a', 'span', 'b', 'i',
-    'strong', 'em', 'img', 'code', 'pre', 'hr'
+    'strong', 'em', 'img', 'code', 'pre', 'hr',
+    // Editor content: block equations and callouts are <div>s, tables carry column groups.
+    'div', 'colgroup', 'col'
   ],
   STRIP_ELEMENTS: [
     'script', 'iframe', 'object', 'embed',

@@ -41,7 +41,8 @@ const getLocationFallback = async (): Promise<UserLocation> => {
     if (tz && (tz === 'Asia/Kolkata' || tz === 'Asia/Calcutta')) {
       return { country: 'IN', latitude: 20.5937 };
     }
-  } catch (e) {
+  } catch {
+    // Timezone detection unsupported; fall through to IP-based lookup below.
   }
 
   for (const service of ipServices) {
@@ -54,7 +55,8 @@ const getLocationFallback = async (): Promise<UserLocation> => {
       }
       const data = await response.json();
       return service.parser(data);
-    } catch (error) {
+    } catch {
+      // This IP geolocation service failed; try the next one.
     }
   }
 
@@ -82,7 +84,7 @@ export const getUserLocation = async (): Promise<UserLocation> => {
       country: fallbackLocation.country,
       latitude: position.coords.latitude,
     };
-  } catch (error: any) {
+  } catch {
     return getLocationFallback();
   }
 };

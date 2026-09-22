@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useSeason } from "../contexts/SeasonalContext";
 import {
     H1Icon, H2Icon, H3Icon,
@@ -33,6 +32,9 @@ const COMMANDS: SlashCommand[] = [
     { id: 'code', label: 'Code Block', subLabel: 'Capture a code snippet', icon: <CodeBracketIcon className="h-4 w-4" />, action: 'format-code' },
     { id: 'divider', label: 'Divider', subLabel: 'Horizontal line', icon: <MinusIcon className="h-4 w-4" />, action: 'format-divider' },
     { id: 'callout', label: 'Callout', subLabel: 'Highlighted tip or info', icon: <LightBulbIcon className="h-4 w-4" />, action: 'format-callout' },
+    { id: 'table', label: 'Table', subLabel: 'Rows and columns', icon: <MinusIcon className="h-4 w-4" />, action: 'format-table' },
+    { id: 'math', label: 'Equation', subLabel: 'Inline maths (LaTeX)', icon: <CodeBracketIcon className="h-4 w-4" />, action: 'format-math' },
+    { id: 'blockmath', label: 'Equation block', subLabel: 'Display maths on its own line', icon: <CodeBracketIcon className="h-4 w-4" />, action: 'format-blockmath' },
     { id: 'ai', label: 'Ask AI', subLabel: 'Generate content with AI', icon: <SparklesIcon className="h-4 w-4" />, action: 'trigger-ai' },
 ];
 

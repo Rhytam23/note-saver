@@ -28,19 +28,46 @@ export class SecuritySanitizer {
       ALLOWED_TAGS: [...ImportSecurityPolicy.ALLOWED_HTML_TAGS],
       FORBID_TAGS: [...ImportSecurityPolicy.STRIP_ELEMENTS],
       ADD_ATTR: ['data-block-id'], // Preserve stable block UUIDs
-    });
+      // SECURITY: Explicitly restrict allowed URI protocols.
+      // Blocks javascript:, vbscript:, and data: URIs in href/src attributes.
+      // Only http, https, and data-image URLs (for inline images) are permitted.
+      ALLOWED_URI_REGEXP: /^(?:https?:|data:image\/(?:png|jpg|jpeg|gif|webp|svg\+xml);base64)/i,
+      // SECURITY: Forbid style attribute to block CSS expression() injection and
+      // CSS-based data exfiltration attacks. Note content does not require inline styles.
+      FORBID_ATTR: ['style', 'onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur', 'onchange'],
+    }) as string;
   }
 
   /**
    * Prevents directory traversal attacks in filenames / paths.
+   * 
+   * SECURITY: Blocks:
+   *   - ../  and ..\  (literal and URL-encoded %2F, %5C variants)
+   *   - Absolute paths (/, \, C:\)
+   *   - Windows UNC paths (\\server\share)
+   *   - Null bytes (\x00) which truncate paths on some systems
+   *   - Colons in names (Windows drive letter prefix C:)
    */
   static sanitizePath(filepath: string): string {
     if (!filepath) return '';
-    // Strip leading slashes, backslashes, and path traversal sequences (../ or ..\)
     return filepath
+      // Decode any percent-encoded separators before analysis
+      .replace(/%2[fF]/g, '/')
+      .replace(/%5[cC]/g, '\\')
+      // Null-byte removal (intentional: strips a null-byte injection vector, e.g. "a.txt\x00.exe")
+      // eslint-disable-next-line no-control-regex
+      .replace(/\x00/g, '')
+      // Normalize to forward slashes
       .replace(/\\/g, '/')
-      .replace(/(\.\.\/)+/g, '')
-      .replace(/^\/+/, '');
+      // Strip path traversal sequences (../ and ..\ variants)
+      .replace(/(\.\.[/\\])+/g, '')
+      .replace(/^\.\.$/g, '')
+      // Strip leading slashes (absolute path protection)
+      .replace(/^\/+/, '')
+      // Strip Windows drive letters (e.g. C:)
+      .replace(/^[a-zA-Z]:/, '')
+      // Strip UNC prefix
+      .replace(/^\/\//, '');
   }
 
   /**

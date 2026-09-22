@@ -5,8 +5,6 @@ interface IntroAnimationProps {
     onAnimationComplete: () => void;
 }
 
-const random = (min: number, max: number) => Math.random() * (max - min) + min;
-
 const Firework = ({ delay, left, top, color, scale }: { delay: number, left: string, top: string, color: string, scale: number }) => {
     const particles = useMemo(() => Array.from({ length: 12 }).map((_, i) => ({
         id: i,
