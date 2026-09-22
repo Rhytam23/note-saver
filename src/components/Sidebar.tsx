@@ -293,16 +293,16 @@ const SidebarContent: React.FC<Omit<SidebarProps, 'isOpen' | 'setIsOpen'> & { se
                         );
                     })}
                 </div>
-            </div>
 
-            <div className="space-y-1 mt-4 flex-shrink-0">
-                <SectionHeader isCollapsed={isCollapsed} icon={<PlusIcon className="h-5 w-5" />} text="Tools" />
-                <NavItem isCollapsed={isCollapsed} icon={<PlusIcon className="h-6 w-6 text-accent" />} text="Templates" onClick={onOpenTemplates} />
-                <NavItem isCollapsed={isCollapsed} icon={<TagIcon className="h-6 w-6 text-indigo-500" />} text="Notebooks" onClick={onOpenNotebooks} />
-                <NavItem isCollapsed={isCollapsed} icon={<ImageIcon className="h-6 w-6 text-teal-500" />} text="Note Connections" onClick={onOpenGraph} />
-                <NavItem isCollapsed={isCollapsed} icon={<FlagIcon className="h-6 w-6 text-amber-500" />} text="Flashcards" onClick={onOpenFlashcards} />
-                <NavItem isCollapsed={isCollapsed} icon={<QuestionMarkCircleIcon className="h-6 w-6 text-sky-500" />} text="Reminders" onClick={onOpenReminders} />
-                <NavItem isCollapsed={isCollapsed} icon={<LockIcon className="h-6 w-6 text-rose-500" />} text="Trash" onClick={onOpenTrash} />
+                <div className="space-y-1 mt-4">
+                    <SectionHeader isCollapsed={isCollapsed} icon={<PlusIcon className="h-5 w-5" />} text="Tools" />
+                    <NavItem isCollapsed={isCollapsed} icon={<PlusIcon className="h-6 w-6 text-accent" />} text="Templates" onClick={onOpenTemplates} />
+                    <NavItem isCollapsed={isCollapsed} icon={<TagIcon className="h-6 w-6 text-indigo-500" />} text="Notebooks" onClick={onOpenNotebooks} />
+                    <NavItem isCollapsed={isCollapsed} icon={<ImageIcon className="h-6 w-6 text-teal-500" />} text="Note Connections" onClick={onOpenGraph} />
+                    <NavItem isCollapsed={isCollapsed} icon={<FlagIcon className="h-6 w-6 text-amber-500" />} text="Flashcards" onClick={onOpenFlashcards} />
+                    <NavItem isCollapsed={isCollapsed} icon={<QuestionMarkCircleIcon className="h-6 w-6 text-sky-500" />} text="Reminders" onClick={onOpenReminders} />
+                    <NavItem isCollapsed={isCollapsed} icon={<LockIcon className="h-6 w-6 text-rose-500" />} text="Trash" onClick={onOpenTrash} />
+                </div>
             </div>
 
             <footer className="mt-auto flex-shrink-0">
