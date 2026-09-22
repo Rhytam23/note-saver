@@ -131,7 +131,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       className="flex-1 flex flex-col w-full cursor-default relative bg-transparent text-gray-900 dark:text-gray-100 overflow-x-hidden min-h-screen"
     >
       <header className="sticky top-0 z-40 backdrop-blur-md bg-white/80 dark:bg-[#090b10]/80 border-b border-gray-200/70 dark:border-gray-800/70">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+        <div className="max-w-6xl 2xl:max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <button
             type="button"
             className="flex items-center"
@@ -226,13 +226,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
       <main className="w-full">
         {/* Hero */}
-        <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-14 pb-16 sm:pt-20 sm:pb-24">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
-            <div className="lg:col-span-5">
-              <h1 className="text-4xl sm:text-5xl font-serif font-bold tracking-tight leading-[1.1] text-gray-900 dark:text-gray-50">
+        <section className="max-w-6xl 2xl:max-w-7xl mx-auto px-4 sm:px-6 pt-14 pb-16 sm:pt-20 sm:pb-24">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
+            <motion.div
+              initial={{ opacity: 0, x: -16 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              className="lg:col-span-5 lg:pt-6 2xl:pt-10"
+            >
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl 2xl:text-7xl font-serif font-bold tracking-tight leading-[1.1] text-gray-900 dark:text-gray-50">
                 Notes that keep working when your connection doesn&rsquo;t.
               </h1>
-              <p className="mt-5 text-lg leading-relaxed text-gray-600 dark:text-gray-300 max-w-md">
+              <p className="mt-5 text-lg 2xl:text-xl leading-relaxed text-gray-600 dark:text-gray-300 max-w-md 2xl:max-w-lg">
                 NoteNirman is a notes app for Windows, Android and the web. Write anywhere, sync when you can, and ask Gemini for help only when you want it.
               </p>
 
@@ -252,12 +257,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </button>
               </div>
               <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">Free to use. No credit card.</p>
-            </div>
+            </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
+              transition={{ duration: 0.6, delay: 0.15 }}
               className="lg:col-span-7"
             >
               <HeroProductPreview activeSeason={activeSeason} />
@@ -267,19 +272,32 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
         {/* Features */}
         <section id="features" className={`border-y ${colors.border} ${colors.surface}`}>
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
-            <div className="max-w-2xl">
+          <div className="max-w-6xl 2xl:max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-80px' }}
+              transition={{ duration: 0.5 }}
+              className="max-w-2xl"
+            >
               <h2 className={`text-3xl sm:text-4xl font-serif font-bold tracking-tight ${colors.primaryText}`}>
                 Built around not losing your notes
               </h2>
               <p className={`mt-4 text-lg ${colors.secondaryText}`}>
                 Most of what is in NoteNirman exists for one reason: what you wrote should still be there tomorrow, on every device.
               </p>
-            </div>
+            </motion.div>
 
             <dl className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-x-14 gap-y-10">
               {FEATURES.map((feature, index) => (
-                <div key={feature.title} className="flex gap-5">
+                <motion.div
+                  key={feature.title}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-80px' }}
+                  transition={{ duration: 0.4, delay: (index % 2) * 0.08 }}
+                  className="flex gap-5"
+                >
                   <span
                     className="font-mono text-sm pt-1 tabular-nums select-none"
                     style={{ color: accent }}
@@ -291,25 +309,32 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     <dt className={`text-lg font-semibold ${colors.primaryText}`}>{feature.title}</dt>
                     <dd className={`mt-1.5 leading-relaxed ${colors.secondaryText}`}>{feature.body}</dd>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </dl>
           </div>
         </section>
 
-        {/* Themes: the seasonal system, shown as a choice rather than decoration */}
-        <section id="themes" className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+        {/* Themes: the seasonal system. Automatic by default - this picker is a live preview,
+            not a persisted account setting (that lives in Profile & Settings once signed in). */}
+        <section id="themes" className="max-w-6xl 2xl:max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-80px' }}
+            transition={{ duration: 0.5 }}
+            className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start"
+          >
             <div className="lg:col-span-5">
               <h2 className={`text-3xl sm:text-4xl font-serif font-bold tracking-tight ${colors.primaryText}`}>
                 A workspace that follows the calendar
               </h2>
               <p className={`mt-4 text-lg ${colors.secondaryText}`}>
-                NoteNirman changes its colours and background with the season and the festivals. Pick one here and the whole page, and the app after you sign in, follows.
+                NoteNirman picks a theme automatically based on today&rsquo;s date and Indian festivals &mdash; no setup needed. Tap a swatch to preview it right here, and once you&rsquo;re signed in, set a favourite permanently from Profile &amp; Settings.
               </p>
             </div>
             <div className="lg:col-span-7">
-              <div role="radiogroup" aria-label="Choose a theme" className="flex flex-wrap gap-2">
+              <div role="radiogroup" aria-label="Preview a theme" className="flex flex-wrap gap-2">
                 {ALL_SEASONAL_THEMES.map(s => {
                   const isActive = activeSeason === s.id;
                   const swatch = HERO_THEMES[s.id].accentHex;
@@ -336,8 +361,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   );
                 })}
               </div>
+              <p className={`mt-3 text-sm ${colors.secondaryText}`}>Just previewing this page &mdash; it doesn&rsquo;t change your account.</p>
             </div>
-          </div>
+          </motion.div>
         </section>
 
         <GetTheApp accent={accent} onOpenWebApp={onGetStarted} />

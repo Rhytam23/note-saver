@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { useSeason } from '../contexts/SeasonalContext';
 import { WindowsIcon, AndroidIcon } from './Icons';
 
@@ -46,19 +47,31 @@ const GetTheApp: React.FC<GetTheAppProps> = ({ accent, onOpenWebApp }) => {
 
   return (
     <section id="get-the-app" className={`border-t ${colors.border} ${colors.surface}`}>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
-        <div className="max-w-2xl">
+      <div className="max-w-6xl 2xl:max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-80px' }}
+          transition={{ duration: 0.5 }}
+          className="max-w-2xl"
+        >
           <h2 className={`text-3xl sm:text-4xl font-serif font-bold tracking-tight ${colors.primaryText}`}>
             Use it where you work
           </h2>
           <p className={`mt-4 text-lg ${colors.secondaryText}`}>
             The web app and the installed apps share the same account, so a note started on your phone is waiting on your desktop.
           </p>
-        </div>
+        </motion.div>
 
         <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-5">
-          {platforms.map(platform => (
-            <div key={platform.key} className={`flex flex-col p-6 rounded-lg border ${colors.border} ${colors.bgSimple}`}>
+          {platforms.map((platform, index) => (
+            <motion.div
+              key={platform.key}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-80px' }}
+              transition={{ duration: 0.4, delay: index * 0.08 }}
+              className={`flex flex-col p-6 rounded-lg border ${colors.border} ${colors.bgSimple}`}>
               <div className="flex items-center gap-3" style={{ color: accent }}>
                 {platform.icon}
                 <div className={colors.primaryText}>
@@ -84,10 +97,16 @@ const GetTheApp: React.FC<GetTheAppProps> = ({ accent, onOpenWebApp }) => {
                   Coming soon
                 </span>
               )}
-            </div>
+            </motion.div>
           ))}
 
-          <div className={`flex flex-col p-6 rounded-lg border ${colors.border} ${colors.bgSimple}`}>
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-80px' }}
+            transition={{ duration: 0.4, delay: platforms.length * 0.08 }}
+            className={`flex flex-col p-6 rounded-lg border ${colors.border} ${colors.bgSimple}`}
+          >
             <div className={colors.primaryText}>
               <h3 className="font-semibold leading-tight">Web</h3>
               <p className={`text-sm ${colors.secondaryText}`}>Nothing to install</p>
@@ -101,7 +120,7 @@ const GetTheApp: React.FC<GetTheAppProps> = ({ accent, onOpenWebApp }) => {
             >
               Open the web app
             </button>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>
