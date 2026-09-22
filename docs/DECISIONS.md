@@ -11,6 +11,40 @@ archived.
 
 ---
 
+## 2026-09-22 — Every `React.lazy()` chunk load gets a timeout + retry
+
+**Decision:** Added `src/utils/lazyWithRetry.ts` and routed every
+`React.lazy()` call in `App.tsx` (NoteEditor, ProfileModal, TutorialModal,
+and all the seasonal intro animations) through it instead of calling
+`React.lazy()` directly.
+
+**Why:** reported bug - clicking a note in the web app sometimes just spun
+forever instead of opening the editor. Plain `React.lazy()` has no
+recovery path if the dynamic `import()` never settles, and that's more
+common than it sounds: a backgrounded browser tab can have its network
+I/O suspended mid-fetch (Chrome's `ERR_NETWORK_IO_SUSPENDED`, which showed
+up in this session's own test console while investigating), a connection
+can just hang, or a tab left open across a redeploy can reference a chunk
+hash that no longer exists on the server. In every one of those cases the
+promise doesn't reject, it just never resolves - so the `Suspense`
+fallback spins forever with nothing to catch it. This was a latent gap
+introduced back when `NoteEditor` was first made lazy (see the bundle-size
+entry below) and never revisited.
+
+**Fix:** a 15s timeout plus one automatic retry on every lazy import. On
+repeated failure it now rejects for real, which the existing top-level
+`ErrorBoundary` (`App.tsx:736`) catches and turns into a visible "Reload
+NoteNirman" screen instead of an infinite spinner.
+
+**Note for next time:** I could not reproduce the exact trigger locally
+(plain note, locked note, and a full reload all opened correctly in
+testing) - this fixes the gap that *would* cause the reported symptom
+regardless of which specific network hiccup triggered it, rather than a
+root-caused single trigger. If it recurs, the next thing to check is
+whether it's tied to backgrounding the tab specifically.
+
+---
+
 ## 2026-09-22 — Repo stays private; GitHub release history deleted
 
 **Decision:** Deleted the two existing GitHub releases (`v1.0.1`,
