@@ -46,9 +46,12 @@
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png"
         BackgroundColor="#1B1B1F">
+        <!-- Square310x310Logo (large tile) is deliberately omitted: MSIX
+             validation requires a Wide310x150Logo whenever Square310x310Logo
+             is present, and there's no wide asset yet (see
+             docs/MICROSOFT-STORE.md). Add both together later if wanted. -->
         <uap:DefaultTile
-          Square71x71Logo="Assets\Square71x71Logo.png"
-          Square310x310Logo="Assets\Square310x310Logo.png" />
+          Square71x71Logo="Assets\Square71x71Logo.png" />
       </uap:VisualElements>
     </Application>
   </Applications>

@@ -70,10 +70,15 @@ listing screenshots that don't match the submitted binary.
 - **Icons**: already generated (`src-tauri/icons/Square44x44Logo.png`
   through `Square310x310Logo.png`, `StoreLogo.png`), from the same
   `npx tauri icon` run that produced the app's other platform icons.
-  There's no `Wide310x150Logo.png` (the wide Start tile image) — the
-  manifest simply omits the wide tile rather than requiring one; add that
-  asset and the `Wide310x150Logo` attribute on `<uap:DefaultTile>` later
-  if you want a wide tile.
+  There's no `Wide310x150Logo.png` (the wide Start tile image). The
+  manifest only references `Square71x71Logo` on `<uap:DefaultTile>`, not
+  `Square310x310Logo` — MSIX validation actually *requires*
+  `Wide310x150Logo` whenever `Square310x310Logo` is present (confirmed by
+  a real `makeappx` failure: "The DefaultTile element must specify the
+  Wide310x150Logo attribute if the Square310x310Logo attribute is
+  specified"), so it's left out entirely for now rather than shipping a
+  package that fails to build. Add a `Wide310x150Logo.png` asset and both
+  attributes together later if you want a larger/wide Start tile.
 - **CI**: `.github/workflows/release.yml`'s `build-windows` job now also
   builds an MSIX on every tagged release and uploads it as a separate
   `msix-package` workflow artifact (not attached to the public GitHub
