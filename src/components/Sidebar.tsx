@@ -198,6 +198,7 @@ const SidebarContent: React.FC<Omit<SidebarProps, 'isOpen' | 'setIsOpen'> & { se
                 </button>
             </header>
 
+            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
             <nav className="space-y-1">
                 <NavItem
                     isCollapsed={isCollapsed}
@@ -249,7 +250,7 @@ const SidebarContent: React.FC<Omit<SidebarProps, 'isOpen' | 'setIsOpen'> & { se
                 ))}
             </div>
 
-            <div className="flex-1 mt-4 overflow-y-auto overscroll-contain">
+            <div className="mt-4">
                 <SectionHeader isCollapsed={isCollapsed} icon={<TagIcon className="h-5 w-5" />} text="Tags" onAdd={() => setIsAddingTag(!isAddingTag)} />
                 <AnimatePresence>
                     {isAddingTag && !isCollapsed && (
@@ -303,6 +304,7 @@ const SidebarContent: React.FC<Omit<SidebarProps, 'isOpen' | 'setIsOpen'> & { se
                     <NavItem isCollapsed={isCollapsed} icon={<QuestionMarkCircleIcon className="h-6 w-6 text-sky-500" />} text="Reminders" onClick={onOpenReminders} />
                     <NavItem isCollapsed={isCollapsed} icon={<LockIcon className="h-6 w-6 text-rose-500" />} text="Trash" onClick={onOpenTrash} />
                 </div>
+            </div>
             </div>
 
             <footer className="mt-auto flex-shrink-0">
