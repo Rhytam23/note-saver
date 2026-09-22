@@ -18,6 +18,13 @@ const root = ReactDOM.createRoot(
 const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'dummy-google-client-id';
 const isWeb = detectPlatform() === 'web';
 
+// Offline app shell for the website. The installed apps already ship their files.
+if (isWeb && import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(err => console.warn('Service worker not registered:', err));
+  });
+}
+
 root.render(
   <ErrorBoundary>
     <GoogleOAuthProvider clientId={clientId}>

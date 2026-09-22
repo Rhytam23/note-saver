@@ -1,15 +1,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { AshokaChakraIcon } from './Icons';
-import { useSeason } from '../contexts/SeasonalContext';
 
 interface IndependenceDayIntroProps {
     onAnimationComplete: () => void;
 }
 
 const IndependenceDayIntro: React.FC<IndependenceDayIntroProps> = ({ onAnimationComplete }) => {
-    const { colors } = useSeason();
-
     return (
         <motion.div
             key="independence-day-intro"

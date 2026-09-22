@@ -1,0 +1,159 @@
+# Decision log
+
+A dated record of *why*, not just *what*. Code and commit messages tell you
+what changed; this is for the reasoning that doesn't survive in either of
+those. Add to the top of this file (newest first) when you make a decision
+future-you will otherwise have to reconstruct from scratch.
+
+This continues the idea started in `docs/history/REFACTORING_LOG.md`, which
+was a similar running log for the original mobile-refactor pass and is now
+archived.
+
+---
+
+## 2026-09-22 — Repo stays private; GitHub release history deleted
+
+**Decision:** Deleted the two existing GitHub releases (`v1.0.1`,
+`v1.0.0`) from `Rhytam23/note-saver`, and changed the landing page's
+download buttons to serve a real installer file directly from the site
+instead of linking to GitHub Releases.
+
+**Why:** The repository is private, so both the release-listing links and
+the GitHub API calls the download page relied on were dead ends for any
+real visitor — they'd hit a 404/auth wall. Rather than leave a broken
+"View downloads on GitHub" button, Windows now downloads
+`public/downloads/NoteNirman-Setup.exe` (a real, already-built v0.1.0
+installer) directly. Android shows "Coming soon" — see the next entry.
+
+**Status this leaves open:** the repo being private is still the root
+blocker for this app being reachable by real users, or for any of the SEO
+work below actually getting indexed. Making it public (or moving releases
+to a separate public repo) is a decision only the repo owner can make.
+
+## 2026-09-22 — No fake Android APK
+
+**Decision:** Did not fabricate or stub an Android APK for the download
+page, even though it was asked for directly. Confirmed first, and
+documented here so it isn't re-litigated: no Java/Android SDK is available
+in the environment this was worked in, and neither of the two past GitHub
+releases (nor any local build) ever actually contained a real `.apk` file
+— the CI Android build job likely never succeeded, most plausibly because
+the signing secrets below were never set.
+
+**Why:** a broken or fake download is worse than an honest "not yet."
+
+**To actually produce one:** set `ANDROID_KEYSTORE_BASE64`,
+`ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD` as
+GitHub Actions secrets (see [SETUP.md](./SETUP.md#7-android-build-capacitor)),
+then push a `v*` tag or run the release workflow manually.
+
+## 2026-09-22 — Real PDF/OCR extraction replaces placeholder stubs
+
+**Decision:** Deleted `src/services/pdfPipeline.ts` and
+`imageOcrPipeline.ts`, which were scaffolding for the dormant block editor
+(see [DORMANT-CODE.md](./DORMANT-CODE.md)) and returned hardcoded
+placeholder text instead of doing anything real. Replaced them with
+`pdfTextImport.ts` (pdfjs-dist) and `imageTextImport.ts` (tesseract.js),
+both wired directly into the TipTap editor's toolbar and doing genuine
+on-device extraction.
+
+**Why:** the landing/FAQ copy claimed real PDF import and OCR; the code
+behind those claims was fake. Fixed the code to match the claim rather than
+softening the claim.
+
+## 2026-09-22 — Student-focused roadmap, additive only, existing app preserved
+
+**Decision:** When asked to plan a feature roadmap drawing on Google Docs,
+Notion, Obsidian and similar tools for a student audience, the plan was
+reviewed and explicitly constrained before implementation:
+
+> "Preserve the existing NoteNirman architecture, 13 seasonal themes,
+> UI/UX, TipTap editor, and working features. Do not redesign or replace
+> anything unless required. First inspect the existing code, then
+> implement the roadmap incrementally without breaking existing
+> functionality."
+
+**Why this matters going forward:** this is the second time in this
+project's history that a rewrite was proposed (block editor / CRDT
+collaboration in 2026-09-06 was the first — see
+[DORMANT-CODE.md](./DORMANT-CODE.md)) and the second time it was rejected
+in favor of incremental, additive change on the existing TipTap +
+IndexedDB + Supabase foundation. If you're a future contributor tempted to
+propose a third rewrite, know that this has a track record: the additive
+approach is the one that's actually shipped features. That doesn't mean
+never rewrite — it means the bar for doing so should be "the current
+approach concretely can't do X," not "this would be architecturally
+cleaner."
+
+**What shipped as a result** (full detail in [ROADMAP.md](./ROADMAP.md)):
+sync-freshness fixes (pull on focus + every 30s), Trash with 30-day
+recovery, tables, LaTeX equations, find-in-note, focus mode, Pomodoro
+timer, flashcards with spaced repetition, notebooks (built on the existing
+tag system), wiki links + backlinks + a graph view, starter templates,
+reminders, backup/restore, multi-format import, per-note passphrase lock,
+a PWA service worker, share-to-app, and a new logo.
+
+**On the side:** dead code and dead files were removed, the main JS bundle
+was cut from 1.46MB to 462KB (lazy-loading the editor and dynamically
+importing PDF-export libraries), all 65 ESLint findings were fixed, and
+`FAQ.tsx` was corrected — it had claimed the app requires internet access
+and only supports Google sign-in, both false.
+
+**What was explicitly kept but not deleted:** a large "2.0" subsystem
+(block editor, Yjs collaboration, RAG/semantic search) that predates this
+decision and was already built, tested, but never wired into the app. When
+asked how aggressively to clean up dead code, the choice made was
+conservative: delete only the parts that had just been replaced with real
+implementations (the fake PDF/OCR stubs above), not this larger unused-but-
+intentional subsystem. See [DORMANT-CODE.md](./DORMANT-CODE.md) for the
+full inventory and reasoning for why it's still here.
+
+## 2026-09-22 — SEO / "answer engine" discoverability added
+
+**Decision:** Added `robots.txt` (with an explicit allowlist for AI
+crawlers — GPTBot, ClaudeBot, PerplexityBot, etc.), `sitemap.xml`,
+`llms.txt`, structured data (`SoftwareApplication` and `FAQPage`
+schema.org JSON-LD) and static crawlable fallback content inside
+`index.html`'s `#root`, so non-JS-executing crawlers see real content
+instead of an empty shell.
+
+**Why now, not earlier:** doing this before fixing `FAQ.tsx`'s factual
+errors would have baked false claims into structured data that search
+engines and AI answer engines treat as authoritative. Content accuracy was
+fixed first, then encoded into the structured data.
+
+**Known limitation:** none of this helps until the site is actually
+deployed somewhere public and the repo (or a hosted build) is reachable —
+see the repo-visibility entry above.
+
+## 2026-09-06 — "NoteNirman 2.0": block editor, CRDT collaboration, RAG search
+
+**Decision:** A prior pass at this project (not the same session as the
+entries above) set out to rebuild the editor around a block-based document
+model with Yjs CRDT real-time collaboration and a semantic-search/RAG "ask
+your notes" AI feature, tracked in
+`docs/history/NOTE-NIRMAN-2-ARCHITECTURE.md` and
+`docs/history/NOTE-NIRMAN-2-ROADMAP.md`. A large amount of it was built and
+tested.
+
+**What happened to it:** none of it was ever wired into the live app —
+every feature flag controlling it defaults to `false`
+(`src/config/featureFlags.ts`), and nothing in `App.tsx` or `NoteEditor.tsx`
+imports it. On 2026-09-22, when planning the next round of features, this
+direction was reviewed and explicitly not continued (see the entry above).
+The code was kept rather than deleted, in case it's picked back up later.
+Full inventory: [DORMANT-CODE.md](./DORMANT-CODE.md).
+
+## 2026-09-01 — Offline-first sync engine, v1
+
+**Decision:** Built the original `syncEngine.ts` — local IndexedDB as the
+write-ahead store, a sync queue, optimistic per-note versioning for
+conflict detection. This is the foundation everything above still sits on;
+the 2026-09-22 changes extended it (pull-on-focus, periodic pull, Trash)
+rather than replacing it.
+
+## 2026-01-06 — Project genesis
+
+The earliest commits in this repository's history. If you need anything
+from before this file existed, the git log itself is the only remaining
+record — there was no decision log kept this early on.

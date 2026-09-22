@@ -5,20 +5,133 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="referrer" content="no-referrer-when-downgrade">
-  <title>Notenirman</title>
+  <meta name="robots" content="index, follow">
+
+  <title>NoteNirman — Offline Notes App for Students | Windows, Android &amp; Web</title>
+  <meta name="description" content="NoteNirman is an offline-first notes app for Windows, Android and the web. Tables, equations, flashcards, linked notes and an optional Gemini AI assistant, with seasonal themes tied to Indian festivals. Free to use.">
+  <link rel="canonical" href="https://notenirman.vercel.app/">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="NoteNirman">
+  <meta property="og:url" content="https://notenirman.vercel.app/">
+  <meta property="og:title" content="NoteNirman — Offline Notes App for Students">
+  <meta property="og:description" content="An offline-first notes app for Windows, Android and the web, with tables, equations, flashcards, linked notes, seasonal Indian-festival themes and an optional Gemini AI assistant. Free to use.">
+  <meta property="og:image" content="https://notenirman.vercel.app/app-icon.png">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="NoteNirman — Offline Notes App for Students">
+  <meta name="twitter:description" content="An offline-first notes app for Windows, Android and the web, with tables, equations, flashcards, linked notes and an optional Gemini AI assistant.">
+  <meta name="twitter:image" content="https://notenirman.vercel.app/app-icon.png">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
     href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=JetBrains+Mono:wght@700&display=swap"
     rel="stylesheet">
   <link rel="manifest" href="/manifest.json">
-  <link rel="icon" type="image/png" href="/pwa-icon.png">
+  <link rel="icon" type="image/svg+xml" href="/logo.svg">
+  <link rel="apple-touch-icon" href="/pwa-icon.png">
   <meta name="theme-color" content="#1B1B1F">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "NoteNirman",
+    "url": "https://notenirman.vercel.app/",
+    "image": "https://notenirman.vercel.app/app-icon.png",
+    "description": "NoteNirman is an offline-first notes app for Windows, Android and the web, with a block-style editor (tables, equations, flashcards, templates), notes linked with [[wiki links]], seasonal themes tied to Indian festivals, and an optional Gemini AI assistant.",
+    "applicationCategory": "ProductivityApplication",
+    "operatingSystem": "Windows, Android, Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is Notenirman?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Notenirman is an offline-first notes app for Windows, Android and the web. It has a block-style editor with tables, equations, flashcards and templates, seasonal themes tied to Indian festivals, and an optional Gemini AI assistant. Notes are written to your device first and sync when you're back online." }
+      },
+      {
+        "@type": "Question",
+        "name": "Does Notenirman work offline?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes. Every note is saved to your device first, so you can keep reading and writing with no connection at all. Changes sync automatically once you're back online, and the web version keeps working offline after your first visit." }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I add tables and equations to my notes?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes. Type / and choose Table to insert rows and columns, or choose Equation to write LaTeX math that renders inline or as its own block." }
+      },
+      {
+        "@type": "Question",
+        "name": "Does Notenirman have flashcards?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes. Write a line as \"Question:: Answer\" in any note and it becomes a flashcard, reviewed with spaced repetition." }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I link notes to each other?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes. Type [[Note title]] inside a note to link to another one, and each note shows which other notes link back to it." }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I import a PDF or scan a photo of my notes?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes. The editor can extract the real text from a PDF, or run on-device OCR on a photo or screenshot. Both run in your browser; the file is not uploaded to a server for this." }
+      },
+      {
+        "@type": "Question",
+        "name": "Is Notenirman free to use?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes, Notenirman is free to use." }
+      }
+    ]
+  }
+  </script>
 </head>
 
 <body>
-  <div id="root"></div>
+  <div id="root">
+    <!--
+      Static fallback content for crawlers and bots that don't execute JavaScript
+      (many AI/search crawlers fetch raw HTML only). React replaces this entirely
+      on load for real browsers — this text matches the live app's own content,
+      it isn't shown only to bots.
+    -->
+    <main>
+      <h1>NoteNirman — an offline-first notes app for Windows, Android and the web</h1>
+      <p>
+        NoteNirman is a notes app built for students. Notes save to your device first and sync when
+        you're back online, so a lost connection never costs you your work. It has a block-style editor
+        with tables, equations, flashcards, templates and notes linked with [[wiki links]], seasonal
+        themes tied to Indian festivals, and an optional Gemini AI assistant. It's free to use, and
+        available for Windows, Android and the web.
+      </p>
+      <h2>Frequently asked questions</h2>
+      <dl>
+        <dt>What is Notenirman?</dt>
+        <dd>An offline-first notes app for Windows, Android and the web, with a block-style editor,
+          seasonal Indian-festival themes, and an optional Gemini AI assistant.</dd>
+        <dt>Does Notenirman work offline?</dt>
+        <dd>Yes. Every note is saved to your device first and syncs automatically once you're back
+          online.</dd>
+        <dt>Can I add tables and equations to my notes?</dt>
+        <dd>Yes, from the editor's slash (/) menu.</dd>
+        <dt>Does Notenirman have flashcards?</dt>
+        <dd>Yes. Write "Question:: Answer" in a note and it becomes a spaced-repetition flashcard.</dd>
+        <dt>Is Notenirman free to use?</dt>
+        <dd>Yes.</dd>
+      </dl>
+    </main>
+  </div>
   <script type="module" src="/src/index.tsx"></script>
 </body>
 

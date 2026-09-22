@@ -13,6 +13,11 @@ function notifyChange(userId: string) {
   changeListeners.get(userId)?.forEach(cb => cb());
 }
 
+/** For code that writes to local storage directly (e.g. backup restore) and needs the UI to refresh. */
+export function announceLocalChange(userId: string): void {
+  notifyChange(userId);
+}
+
 export function subscribeLocalChanges(userId: string, cb: () => void): () => void {
   if (!changeListeners.has(userId)) changeListeners.set(userId, new Set());
   changeListeners.get(userId)!.add(cb);
@@ -104,6 +109,7 @@ export async function loadLocal(userId: string): Promise<{ notes: Note[]; tags: 
 export async function bootstrap(userId: string): Promise<void> {
   activeUsers.add(userId);
   await migrateLegacyLocalStorageIfNeeded(userId);
+  await purgeExpiredTrash(userId).catch(err => console.warn('Trash cleanup skipped:', err));
   const lastSync = await localDb.getMeta<string>(`${userId}:lastSync`);
   await pullRemoteChanges(userId, lastSync ?? null).catch(err => console.warn('Initial pull failed (will retry):', err));
   await processSyncQueue(userId);
@@ -119,19 +125,25 @@ export async function pullRemoteChanges(userId: string, sinceIso: string | null)
   const { data: remoteNotes, error: notesErr } = await noteQuery;
   if (notesErr) throw notesErr;
 
-  const queue = await localDb.getQueue(userId);
-  const pendingByEntity = new Map(queue.map(op => [`${op.entity}:${op.entityId}`, op]));
-
+  let changed = false;
   let latestSeen = sinceIso;
   for (const row of remoteNotes || []) {
     const remote = dbToNote(row);
-    const pendingOp = pendingByEntity.get(`note:${remote.id}`);
+    // Re-read the queue per row: the user may have edited this note since the pull started.
+    const queue = await localDb.getQueue(userId);
+    const pendingOp = queue.find(op => op.entity === 'note' && op.entityId === remote.id);
     const local = await localDb.getLocalNote(userId, remote.id);
+    const localIsDirty = local?.syncStatus === 'pending' || local?.syncStatus === 'conflict';
 
-    if (!pendingOp) {
-      await localDb.putLocalNote(userId, remote);
-    } else if (local && (remote.version ?? 0) > pendingOp.baseVersion) {
+    if (!pendingOp && !localIsDirty) {
+      const alreadyCurrent = local && (local.version ?? 0) === (remote.version ?? 0) && local.updatedAt === remote.updatedAt && !!local.deleted === !!remote.deleted;
+      if (!alreadyCurrent) {
+        await localDb.putLocalNote(userId, remote);
+        changed = true;
+      }
+    } else if (local && local.syncStatus !== 'conflict' && (remote.version ?? 0) > Math.max(pendingOp?.baseVersion ?? 0, local.version ?? 0)) {
       await localDb.putLocalNote(userId, { ...local, syncStatus: 'conflict', conflictServerData: remote });
+      changed = true;
     }
 
     if (!latestSeen || row.updated_at > latestSeen) latestSeen = row.updated_at;
@@ -139,17 +151,23 @@ export async function pullRemoteChanges(userId: string, sinceIso: string | null)
 
   const { data: remoteTags, error: tagsErr } = await supabase.from('tags').select('*').eq('user_id', userId);
   if (!tagsErr) {
+    const queue = await localDb.getQueue(userId);
+    const pendingTags = new Set(queue.filter(op => op.entity === 'tag').map(op => op.entityId));
+    const localTags = await localDb.getLocalTags(userId, true);
     for (const row of remoteTags || []) {
       const remote = dbToTag(row);
-      const pendingOp = pendingByEntity.get(`tag:${remote.name}`);
-      if (!pendingOp) {
+      if (pendingTags.has(remote.name)) continue;
+      const local = localTags.find(t => t.name === remote.name);
+      const alreadyCurrent = local && sameTag(local, remote);
+      if (!alreadyCurrent) {
         await localDb.putLocalTag(userId, remote);
+        changed = true;
       }
     }
   }
 
   if (latestSeen) await localDb.setMeta(`${userId}:lastSync`, latestSeen);
-  notifyChange(userId);
+  if (changed) notifyChange(userId);
 }
 
 export async function writeNote(userId: string, note: Note, action: 'upsert' | 'delete'): Promise<void> {
@@ -168,6 +186,40 @@ export async function writeNote(userId: string, note: Note, action: 'upsert' | '
   void processSyncQueue(userId);
 }
 
+export const TRASH_RETENTION_DAYS = 30;
+
+/** Notes the user deleted, newest deletion first. */
+export async function getTrash(userId: string): Promise<Note[]> {
+  const all = await localDb.getLocalNotes(userId, true);
+  return all
+    .filter(n => n.deleted)
+    .sort((a, b) => String(b.deletedAt ?? '').localeCompare(String(a.deletedAt ?? '')));
+}
+
+/** Bring a deleted note back. It syncs like any other edit. */
+export async function restoreNote(userId: string, id: string): Promise<void> {
+  const note = await localDb.getLocalNote(userId, id);
+  if (!note || !note.deleted) return;
+  await writeNote(userId, { ...note, deleted: false, deletedAt: null }, 'upsert');
+}
+
+/** Remove a note from Trash for good on this device. */
+export async function purgeNote(userId: string, id: string): Promise<void> {
+  await localDb.deleteLocalNoteHard(userId, id);
+  notifyChange(userId);
+}
+
+/** Drop trash older than the retention period. Returns how many notes were removed. */
+export async function purgeExpiredTrash(userId: string, now: number = Date.now()): Promise<number> {
+  const cutoff = now - TRASH_RETENTION_DAYS * 24 * 60 * 60 * 1000;
+  const trash = await getTrash(userId);
+  const expired = trash.filter(n => n.deletedAt && new Date(n.deletedAt).getTime() < cutoff);
+  for (const note of expired) {
+    await localDb.deleteLocalNoteHard(userId, note.id);
+  }
+  return expired.length;
+}
+
 export async function writeTag(userId: string, tag: Tag, action: 'upsert' | 'delete'): Promise<void> {
   const existing = (await localDb.getLocalTags(userId, true)).find(t => t.name === tag.name);
   const baseVersion = existing?.version ?? 0;
@@ -184,6 +236,17 @@ export async function writeTag(userId: string, tag: Tag, action: 'upsert' | 'del
   void processSyncQueue(userId);
 }
 
+function sameTag(a: Tag, b: Tag): boolean {
+  return (
+    a.name === b.name &&
+    (a.color ?? null) === (b.color ?? null) &&
+    (a.imageUrl ?? null) === (b.imageUrl ?? null) &&
+    (a.defaultPriority ?? null) === (b.defaultPriority ?? null) &&
+    (a.version ?? 0) === (b.version ?? 0) &&
+    !!a.deleted === !!b.deleted
+  );
+}
+
 function nextBackoff(attempts: number): number {
   const base = Math.min(60000, 1000 * 2 ** attempts);
   return Date.now() + base + Math.floor(Math.random() * 500);
@@ -192,6 +255,7 @@ function nextBackoff(attempts: number): number {
 export async function processSyncQueue(userId: string): Promise<void> {
   if (syncingUsers.has(userId)) return;
   syncingUsers.add(userId);
+  let attemptedAny = false;
   try {
     const status = await checkConnectivityNow();
     if (status !== 'online') return;
@@ -201,6 +265,7 @@ export async function processSyncQueue(userId: string): Promise<void> {
 
     for (const op of queue) {
       if (op.nextRetryAt > now) continue;
+      attemptedAny = true;
       try {
         await processOp(userId, op);
       } catch (err) {
@@ -212,7 +277,8 @@ export async function processSyncQueue(userId: string): Promise<void> {
     }
   } finally {
     syncingUsers.delete(userId);
-    notifyChange(userId);
+    // A refresh hands the open editor a new note object, so only announce real work.
+    if (attemptedAny) notifyChange(userId);
   }
 }
 
@@ -226,12 +292,28 @@ async function processOp(userId: string, op: SyncOp): Promise<void> {
   }
 }
 
+function sameNoteContent(a: Note, b: Note): boolean {
+  return (
+    a.title === b.title &&
+    a.content === b.content &&
+    a.isPinned === b.isPinned &&
+    a.priority === b.priority &&
+    a.coverImage === b.coverImage &&
+    JSON.stringify(a.tags ?? []) === JSON.stringify(b.tags ?? [])
+  );
+}
+
 async function processNoteOp(userId: string, op: SyncOp): Promise<void> {
   const local = await localDb.getLocalNote(userId, op.entityId);
   if (!local) {
     await localDb.removeOp(op.opId);
     return;
   }
+
+  // local.version is the last server version this device has seen. An op queued
+  // before an earlier save of the same note landed carries a stale baseVersion,
+  // which would flag the user's own earlier save as a conflict.
+  const baseVersion = Math.max(op.baseVersion, local.version ?? 0);
 
   const { data: serverRow, error: fetchErr } = await supabase
     .from('notes')
@@ -241,7 +323,7 @@ async function processNoteOp(userId: string, op: SyncOp): Promise<void> {
   if (fetchErr) throw fetchErr;
 
   if (op.action === 'delete') {
-    if (serverRow && (serverRow.version ?? 0) > op.baseVersion) {
+    if (serverRow && (serverRow.version ?? 0) > baseVersion) {
       const { data: fullServerRow } = await supabase.from('notes').select('*').eq('id', op.entityId).maybeSingle();
       if (fullServerRow) {
         await localDb.putLocalNote(userId, dbToNote(fullServerRow));
@@ -250,19 +332,24 @@ async function processNoteOp(userId: string, op: SyncOp): Promise<void> {
       notifyChange(userId);
       return;
     }
+    let serverVersion = local.version ?? 0;
     if (serverRow) {
-      const { error } = await supabase
+      const { data: updated, error } = await supabase
         .from('notes')
         .update({ deleted: true, deleted_at: new Date().toISOString(), updated_at: new Date().toISOString() })
-        .eq('id', op.entityId);
+        .eq('id', op.entityId)
+        .select('version')
+        .maybeSingle();
       if (error) throw error;
+      serverVersion = updated?.version ?? serverVersion + 1;
     }
-    await localDb.deleteLocalNoteHard(userId, op.entityId);
+    // Keep the deleted note on this device so it can be restored from Trash.
+    await localDb.putLocalNote(userId, { ...local, version: serverVersion, deleted: true, syncStatus: 'synced', conflictServerData: null });
     await localDb.removeOp(op.opId);
     return;
   }
 
-  if (serverRow && (serverRow.version ?? 0) > op.baseVersion) {
+  if (serverRow && (serverRow.version ?? 0) > baseVersion) {
     const { data: fullServerRow } = await supabase.from('notes').select('*').eq('id', op.entityId).maybeSingle();
     await localDb.putLocalNote(userId, {
       ...local,
@@ -278,13 +365,31 @@ async function processNoteOp(userId: string, op: SyncOp): Promise<void> {
   const { data: written, error: upsertErr } = await supabase.from('notes').upsert(row).select('version, updated_at').maybeSingle();
   if (upsertErr) throw upsertErr;
 
-  await localDb.putLocalNote(userId, {
-    ...local,
-    version: written?.version ?? optimisticVersion,
-    updatedAt: written?.updated_at ?? local.updatedAt,
-    syncStatus: 'synced',
-    conflictServerData: null,
-  });
+  const newVersion = written?.version ?? optimisticVersion;
+  const latest = await localDb.getLocalNote(userId, op.entityId);
+  const queue = await localDb.getQueue(userId);
+  const followUps = queue.filter(o => o.entity === 'note' && o.entityId === op.entityId && o.opId !== op.opId);
+
+  if (latest && (followUps.length > 0 || !sameNoteContent(latest, local))) {
+    // The user kept typing while this save was in flight. Keep their newer
+    // content, only advance the version, and rebase the follow-up save.
+    await localDb.putLocalNote(userId, { ...latest, version: newVersion, syncStatus: 'pending' });
+    for (const followUp of followUps) {
+      await localDb.updateOp(followUp.opId, { baseVersion: newVersion });
+    }
+    if (followUps.length === 0) {
+      const followUp = await localDb.enqueueOp({ userId, entity: 'note', entityId: op.entityId, action: 'upsert', baseVersion: newVersion });
+      await localDb.dropSupersededOps(userId, 'note', op.entityId, followUp.opId);
+    }
+  } else {
+    await localDb.putLocalNote(userId, {
+      ...local,
+      version: newVersion,
+      updatedAt: written?.updated_at ?? local.updatedAt,
+      syncStatus: 'synced',
+      conflictServerData: null,
+    });
+  }
   await localDb.removeOp(op.opId);
 }
 
@@ -316,7 +421,7 @@ async function processTagOp(userId: string, op: SyncOp): Promise<void> {
 }
 
 function stripSyncMeta<T extends { version?: number; syncStatus?: SyncStatus; deleted?: boolean; deletedAt?: string | null; conflictServerData?: any }>(obj: T) {
-  const { version, syncStatus, deleted, deletedAt, conflictServerData, ...rest } = obj;
+  const { version: _version, syncStatus: _syncStatus, deleted: _deleted, deletedAt: _deletedAt, conflictServerData: _conflictServerData, ...rest } = obj;
   return rest;
 }
 
@@ -344,18 +449,55 @@ export async function resolveNoteConflict(userId: string, noteId: string, choice
   void processSyncQueue(userId);
 }
 
+const pullingUsers = new Set<string>();
+
+/** Fetch changes made on other devices. Safe to call often; overlapping calls are dropped. */
+export async function pullNow(userId: string): Promise<void> {
+  if (pullingUsers.has(userId)) return;
+  pullingUsers.add(userId);
+  try {
+    if ((await checkConnectivityNow()) !== 'online') return;
+    const lastSync = await localDb.getMeta<string>(`${userId}:lastSync`);
+    await pullRemoteChanges(userId, lastSync ?? null);
+  } catch (err) {
+    console.warn('Background pull failed (will retry):', err);
+  } finally {
+    pullingUsers.delete(userId);
+  }
+}
+
+/** Push local changes first so they are never overwritten, then pull what changed elsewhere. */
+async function syncUser(userId: string): Promise<void> {
+  await processSyncQueue(userId);
+  await pullNow(userId);
+}
+
+const BACKGROUND_SYNC_INTERVAL_MS = 30000;
+
 let watcherStarted = false;
 export function startAutoSync(): void {
   if (watcherStarted) return;
   watcherStarted = true;
   subscribeConnectivity(status => {
     if (status === 'online') {
-      activeUsers.forEach(userId => void processSyncQueue(userId));
+      activeUsers.forEach(userId => void syncUser(userId));
     }
   });
   setInterval(() => {
-    activeUsers.forEach(userId => void processSyncQueue(userId));
-  }, 20000);
+    activeUsers.forEach(userId => void syncUser(userId));
+  }, BACKGROUND_SYNC_INTERVAL_MS);
+
+  if (typeof document !== 'undefined') {
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        // Back in the app: pick up what changed on the other device.
+        activeUsers.forEach(userId => void syncUser(userId));
+      } else {
+        // Leaving the app: get unsaved work to the server while we still can.
+        activeUsers.forEach(userId => void processSyncQueue(userId));
+      }
+    });
+  }
 }
 
 // ---------------------------------------------------------------------------

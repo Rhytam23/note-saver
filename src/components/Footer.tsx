@@ -89,7 +89,7 @@ const Footer: React.FC<FooterProps> = ({ variant = 'simple', onPrivacyClick, onT
                 >Support Center</a></li>
                 <li><a
                     href="/support"
-                    onClick={(e) => { e.preventDefault(); onFAQClick ? onFAQClick() : pushPath('/support'); }}
+                    onClick={(e) => { e.preventDefault(); if (onFAQClick) onFAQClick(); else pushPath('/support'); }}
                     className="hover:text-accent"
                 >FAQs</a></li>
                 <li><a
@@ -105,12 +105,12 @@ const Footer: React.FC<FooterProps> = ({ variant = 'simple', onPrivacyClick, onT
             <ul className={`space-y-2 text-sm ${colors.secondaryText}`}>
                 <li><a
                     href="/privacy"
-                    onClick={(e) => { e.preventDefault(); onPrivacyClick ? onPrivacyClick() : pushPath('/privacy'); }}
+                    onClick={(e) => { e.preventDefault(); if (onPrivacyClick) onPrivacyClick(); else pushPath('/privacy'); }}
                     className="hover:text-accent"
                 >Privacy Policy</a></li>
                 <li><a
                     href="/terms"
-                    onClick={(e) => { e.preventDefault(); onTermsClick ? onTermsClick() : pushPath('/terms'); }}
+                    onClick={(e) => { e.preventDefault(); if (onTermsClick) onTermsClick(); else pushPath('/terms'); }}
                     className="hover:text-accent"
                 >Terms of Service</a></li>
                 <li><a

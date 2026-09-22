@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { motion, AnimatePresence, Variants } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { User, Tag, PriorityFilter, NotePriority } from "../types";
 import { useSeason } from "../contexts/SeasonalContext";
 import { useClickOutside } from "../hooks/useClickOutside";
@@ -13,7 +13,8 @@ import {
     QuestionMarkCircleIcon,
     PaletteIcon,
     ImageIcon,
-    CloseIcon
+    CloseIcon,
+    LockIcon,
 } from './Icons.tsx';
 import { getTextColorClass, tagColorOptions } from "../services/colorService";
 
@@ -35,6 +36,13 @@ interface SidebarProps {
     onAddTag: (tagName: string) => void;
     onDeleteCustomTag: (tagName: string) => void;
     onTutorialClick: () => void;
+    // Tools: each opens its own modal, rendered by App so it can sit above everything (including a mobile sidebar drawer).
+    onOpenTrash: () => void;
+    onOpenFlashcards: () => void;
+    onOpenReminders: () => void;
+    onOpenTemplates: () => void;
+    onOpenNotebooks: () => void;
+    onOpenGraph: () => void;
 }
 
 const sidebarVariants: any = {
@@ -58,12 +66,16 @@ const NavItem: React.FC<{
     className?: string;
 }> = ({ isCollapsed, icon, text, isActive, onClick, children, className }) => {
     const { colors } = useSeason();
-    const Component = onClick ? 'button' : 'div';
+    // Rendered as a div with role="button" rather than a real <button>: some rows (tags) nest
+    // their own action button (edit/delete) inside, and a <button> cannot contain a <button>.
     return (
-        <Component
+        <div
+            role={onClick ? 'button' : undefined}
+            tabIndex={onClick ? 0 : undefined}
             onClick={onClick}
+            onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } } : undefined}
             className={`group flex items-center w-full px-4 py-3 rounded-lg transition-colors duration-200 ${isActive ? `bg-accent/10 text-accent font-semibold` : `${colors.hover} ${colors.primaryText}`
-                } ${className}`}
+                } ${className} ${onClick ? 'cursor-pointer' : ''}`}
         >
             {icon}
             <AnimatePresence>
@@ -79,7 +91,7 @@ const NavItem: React.FC<{
                 )}
             </AnimatePresence>
             {!isCollapsed && children}
-        </Component>
+        </div>
     );
 };
 
@@ -134,7 +146,6 @@ const SidebarContent: React.FC<Omit<SidebarProps, 'isOpen' | 'setIsOpen'> & { se
         user,
         tags,
         customTags,
-        addOrUpdateCustomTag,
         activeTag,
         setActiveTag,
         activePriority,
@@ -144,9 +155,14 @@ const SidebarContent: React.FC<Omit<SidebarProps, 'isOpen' | 'setIsOpen'> & { se
         setIsCollapsed,
         onProfileClick,
         onAddTag,
-        onDeleteCustomTag,
         onTutorialClick,
         setTagToEdit,
+        onOpenTrash,
+        onOpenFlashcards,
+        onOpenReminders,
+        onOpenTemplates,
+        onOpenNotebooks,
+        onOpenGraph,
     } = props;
     const { colors } = useSeason();
     const { pushPath } = useRouter();
@@ -277,6 +293,16 @@ const SidebarContent: React.FC<Omit<SidebarProps, 'isOpen' | 'setIsOpen'> & { se
                         );
                     })}
                 </div>
+            </div>
+
+            <div className="space-y-1 mt-4 flex-shrink-0">
+                <SectionHeader isCollapsed={isCollapsed} icon={<PlusIcon className="h-5 w-5" />} text="Tools" />
+                <NavItem isCollapsed={isCollapsed} icon={<PlusIcon className="h-6 w-6 text-accent" />} text="Templates" onClick={onOpenTemplates} />
+                <NavItem isCollapsed={isCollapsed} icon={<TagIcon className="h-6 w-6 text-indigo-500" />} text="Notebooks" onClick={onOpenNotebooks} />
+                <NavItem isCollapsed={isCollapsed} icon={<ImageIcon className="h-6 w-6 text-teal-500" />} text="Note Connections" onClick={onOpenGraph} />
+                <NavItem isCollapsed={isCollapsed} icon={<FlagIcon className="h-6 w-6 text-amber-500" />} text="Flashcards" onClick={onOpenFlashcards} />
+                <NavItem isCollapsed={isCollapsed} icon={<QuestionMarkCircleIcon className="h-6 w-6 text-sky-500" />} text="Reminders" onClick={onOpenReminders} />
+                <NavItem isCollapsed={isCollapsed} icon={<LockIcon className="h-6 w-6 text-rose-500" />} text="Trash" onClick={onOpenTrash} />
             </div>
 
             <footer className="mt-auto flex-shrink-0">

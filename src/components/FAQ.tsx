@@ -10,43 +10,59 @@ interface FAQProps {
 const faqs = [
     {
         question: "What is Notenirman?",
-        answer: "Notenirman is an intelligent, seasonally-aware note-taking application designed to help you organize your thoughts with the power of Gemini AI. It changes its look and feel based on the current season or festival."
+        answer: "Notenirman is an offline-first notes app for Windows, Android and the web. It has a block-style editor with tables, equations, flashcards and templates, seasonal themes tied to Indian festivals, and an optional Gemini AI assistant. Notes are written to your device first and sync when you're back online."
+    },
+    {
+        question: "Does Notenirman work offline?",
+        answer: "Yes. Every note is saved to your device first (not just cached), so you can keep reading and writing with no connection at all. Changes sync automatically once you're back online, and the web version keeps working offline after your first visit."
     },
     {
         question: "How do I create my first note?",
-        answer: "Simply sign in with your Google account, and you'll be taken to your dashboard. Click the '+' floating button at the bottom right to open the editor and start writing!"
+        answer: "Sign in with your email or a Google account, then click the '+' button to open the editor and start writing. You can also start from a template — Cornell notes, class notes, an exam revision plan, an assignment tracker or a daily planner."
     },
     {
         question: "How do I use the AI features?",
-        answer: "In the note editor, type a forward slash (/) to open the AI command menu. From there, you can ask the AI to summarize, improve your writing, or generate ideas. You can also highlight any text to see AI formatting options."
+        answer: "Type a forward slash (/) in the editor to insert content or trigger AI, or open the AI Assistant panel beside the editor to summarize a note, proofread it, get ideas, or check for AI-generated text. AI features use Google's Gemini and are optional — the app works fully without them."
+    },
+    {
+        question: "Can I add tables and equations to my notes?",
+        answer: "Yes. Type / and choose Table to insert rows and columns, or choose Equation to write LaTeX math that renders inline or as its own block."
+    },
+    {
+        question: "Does Notenirman have flashcards?",
+        answer: "Yes. Write a line as \"Question:: Answer\" in any note and it becomes a flashcard, reviewed with spaced repetition so cards you know well come back less often."
+    },
+    {
+        question: "Can I link notes to each other?",
+        answer: "Yes. Type [[Note title]] inside a note to link to another one. Each note also shows which other notes link back to it, and a connections view lets you see the whole map of linked notes at a glance."
+    },
+    {
+        question: "Can I import a PDF or scan a photo of my notes?",
+        answer: "Yes. The editor can pull the real text out of a PDF, or run on-device OCR on a photo or screenshot to extract text from handwriting or a whiteboard. Both run in your browser; your file is never uploaded to a server for this."
     },
     {
         question: "What are 'Seasonal Themes'?",
-        answer: "Notenirman automatically detects the time of year and applies a unique theme. For example, in October you might see a Navratri theme, and in December, a Christmas theme. You can also manually switch between light and dark modes using the sun/moon icon in the header."
+        answer: "Notenirman changes its colours and background with the season and with Indian festivals — Diwali, Holi, Navratri, Pongal and more, alongside the usual four seasons. You can let it follow the calendar automatically or pick a theme yourself."
     },
     {
         question: "How do I organize my notes?",
-        answer: "You can add tags to your notes by clicking the 'Tags' button in the editor. You can also set priorities (High, Medium, Low) and 'Pin' important notes to the top of your list for quick access."
+        answer: "Tag notes with colours, set a priority (High, Medium, Low), and pin the ones you use most. You can also group notes into notebooks by subject and chapter, or link related notes to each other directly."
     },
     {
-        question: "Is my data secure?",
-        answer: "Yes! Your notes are stored securely in your private Supabase database. We use Google OAuth for secure login, ensuring only you can access your content."
+        question: "Is my data secure, and can I lock a note?",
+        answer: "Your notes sync to a private Supabase database tied to your account, reached over an encrypted connection. You can also lock any individual note with its own passphrase (AES-256 encryption) so its content is unreadable without it — note that a locked note cannot be recovered if you forget that passphrase."
     },
     {
-        question: "How does the AI work?",
-        answer: "Notenirman uses Google's Gemini AI to provide features like smart tagging, content summarization, and writing assistance. You can use slash commands (/) in the editor to trigger AI actions."
+        question: "What happens if I delete a note by accident?",
+        answer: "Deleted notes go to Trash, not straight to permanent deletion. They stay recoverable there for 30 days before being removed from your device."
     },
     {
-        question: "Does it work offline?",
-        answer: "Notenirman is a web application that requires an internet connection to sync your notes and use AI features. However, we are working on a PWA (Progressive Web App) version for basic offline viewing."
-    },
-    {
-        question: "Can I customize the themes?",
-        answer: "The app automatically updates its theme based on the current season (Summer, Monsoon, Winter, etc.) and major festivals (Diwali, Christmas, etc.). You can also manually toggle between Light and Dark modes."
+        question: "Can I get my notes out of Notenirman?",
+        answer: "Yes. Export any note as PDF, Markdown or plain text, or back up your entire workspace to a single file and restore it later. You can also import Markdown, HTML, text or CSV files from other note apps."
     },
     {
         question: "Is Notenirman free to use?",
-        answer: "Yes! Notenirman is currently free to use. Our goal is to provide a beautiful and intelligent space for everyone to capture their ideas."
+        answer: "Yes, Notenirman is free to use."
     }
 ];
 

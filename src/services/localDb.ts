@@ -164,6 +164,58 @@ export async function deleteLocalTagHard(userId: string, name: string): Promise<
   await db.delete('tags', tagKey(userId, name));
 }
 
+/**
+ * SECURITY: Clears all IndexedDB data scoped to a specific user.
+ * MUST be called on logout/account-switch to prevent cross-user data leakage
+ * on shared or multi-user devices (e.g., family PC, school computer).
+ *
+ * This removes only the specified user's rows — not other users' data.
+ */
+export async function clearUserLocalData(userId: string): Promise<void> {
+  const db = await getDb();
+
+  // Clear notes
+  const notes = await db.getAllFromIndex('notes', 'by-user', userId);
+  const noteTx = db.transaction('notes', 'readwrite');
+  await Promise.all(notes.map(n => noteTx.store.delete(n.localKey)));
+  await noteTx.done;
+
+  // Clear tags
+  const tags = await db.getAllFromIndex('tags', 'by-user', userId);
+  const tagTx = db.transaction('tags', 'readwrite');
+  await Promise.all(tags.map(t => tagTx.store.delete(t.localKey)));
+  await tagTx.done;
+
+  // Clear syncQueue
+  const queue = await db.getAllFromIndex('syncQueue', 'by-user', userId);
+  const queueTx = db.transaction('syncQueue', 'readwrite');
+  await Promise.all(queue.map(op => queueTx.store.delete(op.opId)));
+  await queueTx.done;
+
+  // Clear calendarEvents
+  const events = await db.getAllFromIndex('calendarEvents', 'by-user', userId);
+  const calTx = db.transaction('calendarEvents', 'readwrite');
+  await Promise.all(events.map(ev => calTx.store.delete(ev.id)));
+  await calTx.done;
+
+  // Clear workspaceSettings
+  const settings = await db.getAllFromIndex('workspaceSettings', 'by-user', userId);
+  const wsTx = db.transaction('workspaceSettings', 'readwrite');
+  await Promise.all(settings.map(s => wsTx.store.delete(s.workspaceId)));
+  await wsTx.done;
+
+  // Clear userId-prefixed meta entries (e.g., lastSync, legacyMigrated)
+  const allMeta = await db.getAll('meta');
+  const userMetaKeys = allMeta.filter(m => String(m.key).startsWith(`${userId}:`)).map(m => m.key);
+  if (userMetaKeys.length > 0) {
+    const metaTx = db.transaction('meta', 'readwrite');
+    await Promise.all(userMetaKeys.map(k => metaTx.store.delete(k)));
+    await metaTx.done;
+  }
+}
+
+
+
 function stripLocalFields<T extends { userId: string; localKey: string }>(row: T): Omit<T, 'userId' | 'localKey'> {
   const { userId: _userId, localKey: _localKey, ...rest } = row;
   return rest;

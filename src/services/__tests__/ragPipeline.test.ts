@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { RagPipeline, RAG_CONTEXT_TOKEN_BUDGET } from '../ragPipeline';
+import { RagPipeline } from '../ragPipeline';
 import { HybridSearchEngine } from '../hybridSearchEngine';
 import { GeminiEmbeddingAdapter } from '../geminiAdapter';
 import { HybridSearchResult } from '../../types/search';

@@ -1,7 +1,8 @@
 import type { Note } from '../types';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import DOMPurify from 'dompurify';
+// jsPDF and html2canvas are loaded on demand inside exportAsPdf: NoteCard renders an Export
+// menu on every note card, and pulling these in statically would ship both libraries (~4MB
+// combined, unminified) to every page load even for users who only ever export text/Markdown.
 
 export const stripHtml = (html: string): string => {
     const tempDiv = document.createElement('div');
@@ -56,23 +57,25 @@ const slugify = (text: string) => {
         .toLowerCase()
         .trim()
         .replace(/\s+/g, '-')
-        .replace(/[^\w\-]+/g, '')
-        .replace(/\-\-+/g, '-');
+        .replace(/[^\w-]+/g, '')
+        .replace(/--+/g, '-');
 }
 
 export const exportNote = (note: Note, format: 'txt' | 'md' | 'pdf') => {
   const filename = slugify(note.title) || 'untitled-note';
 
   switch (format) {
-    case 'txt':
+    case 'txt': {
       const txtContent = `Title: ${note.title}\nTags: ${note.tags.join(', ')}\n\n---\n\n${stripHtml(note.content)}`;
       downloadFile(txtContent, `${filename}.txt`, 'text/plain;charset=utf-8;');
       break;
+    }
 
-    case 'md':
+    case 'md': {
       const mdContent = `# ${note.title}\n\n**Tags:** ${note.tags.map(t => `\`${t}\``).join(', ')}\n\n---\n\n${htmlToMarkdown(note.content)}`;
       downloadFile(mdContent, `${filename}.md`, 'text/markdown;charset=utf-8;');
       break;
+    }
 
     case 'pdf':
       exportAsPdf(note);
@@ -81,6 +84,11 @@ export const exportNote = (note: Note, format: 'txt' | 'md' | 'pdf') => {
 };
 
 const exportAsPdf = async (note: Note) => {
+  const [{ default: jsPDF }, { default: html2canvas }] = await Promise.all([
+    import('jspdf'),
+    import('html2canvas'),
+  ]);
+
   const doc = new jsPDF({
     orientation: 'p',
     unit: 'px',
@@ -105,7 +113,6 @@ const exportAsPdf = async (note: Note) => {
   const imgData = canvas.toDataURL('image/png');
 
   const pdfWidth = doc.internal.pageSize.getWidth();
-  const pdfHeight = doc.internal.pageSize.getHeight();
   const imgWidth = canvas.width;
   const imgHeight = canvas.height;
   
