@@ -131,7 +131,19 @@ jobs:
           java-version: '21'
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        # android-actions/setup-android@v3 fails outright on current runner
+        # images: it unconditionally requests the legacy 'tools' package,
+        # which Google removed from the SDK repository years ago
+        # ("Warning: Failed to find package 'tools'" -> exit 1). ubuntu-latest
+        # already ships a pre-provisioned SDK (that's where the broken
+        # action's own sdkmanager binary came from), so just accept licenses
+        # and install the exact, still-valid packages this project needs.
+        shell: bash
+        run: |
+          SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -maxdepth 2 -name sdkmanager | sort -V | tail -1)
+          echo "Using sdkmanager: $SDKMANAGER"
+          yes | "$SDKMANAGER" --licenses > /dev/null || true
+          "$SDKMANAGER" "platform-tools" "platforms;android-36" "build-tools;36.0.0"
 
       - name: Install Dependencies
         run: npm ci
