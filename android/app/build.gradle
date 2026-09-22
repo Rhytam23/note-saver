@@ -7,7 +7,7 @@ android {
         applicationId "com.notenirman.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode (System.getenv("APP_VERSION_CODE") ?: "1").toInteger()
+        versionCode Integer.parseInt(System.getenv("APP_VERSION_CODE") ?: "1")
         versionName System.getenv("APP_VERSION_NAME") ?: "0.1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
