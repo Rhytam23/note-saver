@@ -11,6 +11,36 @@ archived.
 
 ---
 
+## 2026-09-22 — Microsoft Store packaging pipeline built, submission not started
+
+**Decision:** Added an MSIX packaging pipeline (`src-tauri/msix/`) that
+wraps the existing Tauri `.exe` for Microsoft Store submission
+("Desktop Bridge" style — no rewrite to native UWP), plus a CI step in
+`.github/workflows/release.yml` that builds one on every tagged release.
+Documented the full path in [MICROSOFT-STORE.md](./MICROSOFT-STORE.md).
+
+**Why now:** asked directly whether Store publishing was possible. It is,
+but it splits cleanly into two halves: creating a Microsoft Partner Center
+developer account and reserving the app's identity there (a one-time paid,
+identity-verified step only the account owner can do — not something that
+can be automated or done on someone's behalf), versus the technical
+packaging work (fully automatable, no identity required to build and test
+a package, only to submit one).
+
+**What shipped:** the manifest, build script, icon wiring (reused the
+Store tile icons already generated back when the new logo was applied
+site-wide), and CI integration — all built against a placeholder identity
+so nothing here is blocked on Partner Center. The placeholder package
+builds and can be sideload-tested locally right now.
+
+**What's still open, and can only be closed by the account owner:**
+creating the Partner Center account, reserving the app name, and doing the
+actual Store submission (listing content, screenshots, age rating,
+upload). Once that identity exists, it plugs in via three GitHub secrets
+(`MSIX_IDENTITY_NAME`, `MSIX_PUBLISHER`, `MSIX_PUBLISHER_DISPLAY_NAME`) —
+no code changes needed at that point, CI will start producing a
+submission-ready package automatically.
+
 ## 2026-09-22 — Every `React.lazy()` chunk load gets a timeout + retry
 
 **Decision:** Added `src/utils/lazyWithRetry.ts` and routed every

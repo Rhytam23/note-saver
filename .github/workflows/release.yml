@@ -81,6 +81,27 @@ jobs:
           name: windows-artifacts
           path: artifacts-windows/*
 
+      - name: Build Microsoft Store Package (MSIX)
+        shell: pwsh
+        # Uses placeholder identity until MSIX_IDENTITY_NAME etc. are set as
+        # repo secrets (see docs/MICROSOFT-STORE.md) - that placeholder
+        # package sideload-tests fine but is not submittable to the Store.
+        # Never fails the release: this is a separate, optional artifact.
+        continue-on-error: true
+        run: |
+          $params = @{}
+          if ("${{ secrets.MSIX_IDENTITY_NAME }}") { $params.IdentityName = "${{ secrets.MSIX_IDENTITY_NAME }}" }
+          if ("${{ secrets.MSIX_PUBLISHER }}") { $params.Publisher = "${{ secrets.MSIX_PUBLISHER }}" }
+          if ("${{ secrets.MSIX_PUBLISHER_DISPLAY_NAME }}") { $params.PublisherDisplayName = "${{ secrets.MSIX_PUBLISHER_DISPLAY_NAME }}" }
+          ./src-tauri/msix/build-msix.ps1 @params
+
+      - name: Upload MSIX Package
+        uses: actions/upload-artifact@v4
+        with:
+          name: msix-package
+          path: src-tauri/msix/dist/*.msix
+          if-no-files-found: warn
+
   build-android:
     name: Build Android Application
     runs-on: ubuntu-latest

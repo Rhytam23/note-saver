@@ -11,6 +11,7 @@ here for depth.
 | [DORMANT-CODE.md](./DORMANT-CODE.md) | The block editor / CRDT collaboration / RAG search subsystem that exists in the repo but isn't wired into the live app — what it is and why it's still here |
 | [SETUP.md](./SETUP.md) | Clone, install, env vars, dev commands, and how to build for Windows (Tauri) and Android (Capacitor) |
 | [ROADMAP.md](./ROADMAP.md) | Status of the student-focused feature roadmap (Phase 0–3), what shipped and what didn't |
+| [MICROSOFT-STORE.md](./MICROSOFT-STORE.md) | How the Windows build gets from `.exe` to a Microsoft Store submission — what's automated vs. what only the account owner can do |
 | [DECISIONS.md](./DECISIONS.md) | Dated log of *why* things are the way they are — read this when something looks like an odd choice |
 
 **`history/` — superseded documents, kept for the trail, not for current

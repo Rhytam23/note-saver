@@ -97,6 +97,13 @@ Build output lands in `src-tauri/target/release/bundle/`:
 The installer is not code-signed. Windows SmartScreen will warn on first
 run; users need to choose "More info" → "Run anyway."
 
+### Microsoft Store package (MSIX)
+
+A separate, optional packaging step wraps the same `.exe` into an MSIX for
+Store submission: `src-tauri/msix/build-msix.ps1`. Full walkthrough,
+including the Partner Center account/identity-reservation steps only the
+account owner can do, is in [MICROSOFT-STORE.md](./MICROSOFT-STORE.md).
+
 ## 7. Android build (Capacitor)
 
 ```bash
