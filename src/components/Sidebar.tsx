@@ -249,7 +249,7 @@ const SidebarContent: React.FC<Omit<SidebarProps, 'isOpen' | 'setIsOpen'> & { se
                 ))}
             </div>
 
-            <div className="flex-1 mt-4 overflow-y-auto">
+            <div className="flex-1 mt-4 overflow-y-auto overscroll-contain">
                 <SectionHeader isCollapsed={isCollapsed} icon={<TagIcon className="h-5 w-5" />} text="Tags" onAdd={() => setIsAddingTag(!isAddingTag)} />
                 <AnimatePresence>
                     {isAddingTag && !isCollapsed && (
