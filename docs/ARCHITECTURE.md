@@ -112,6 +112,39 @@ proofread, generate ideas, detect AI-written text) — it does **not** use
 the vector search / RAG pipeline described in
 [DORMANT-CODE.md](./DORMANT-CODE.md); that's a separate, unwired subsystem.
 
+## Telegram bot (fourth client)
+
+`supabase/functions/telegram-bot/` is a Telegram webhook that reads and writes
+the same `notes` table as the apps, so notes written in Telegram sync to the
+phone, desktop and web through the existing sync engine with no extra sync
+code. Setup is in [SETUP.md](./SETUP.md#telegram-bot-optional).
+
+- **Linking:** the app (Profile > Connect Telegram, `src/services/telegramLink.ts`)
+  inserts a single-use 10-minute code and opens `t.me/<bot>?start=<code>`. The
+  bot looks the code up and stores `telegram_links(user_id, chat_id)`. An
+  unlinked chat can do nothing. Only `/start` and `/help` work.
+- **Service role, so scoping is in code.** The function uses the service-role
+  key, which bypasses RLS. Every `notes` query is filtered by the linked
+  `user_id`; there is no code path that reads a note by id alone.
+- **Sync compatibility.** Inserts use `version: 1`. Updates never set
+  `version` or `updated_at`; the `notes_bump_version` trigger does, exactly as
+  for app writes. Content edits are guarded by the version that was read and
+  retried once, so they can't silently overwrite a concurrent app edit.
+  Deleting is the same soft delete the app uses (`deleted`, `deleted_at`).
+- **Locked notes are opaque to the bot.** Their content is ciphertext
+  (`NNLOCK1:`); the bot lists them by title with a lock icon and refuses to
+  show, edit, copy, export, search or summarise their content.
+- **Archive is a reserved tag** (`archived`), because the app has no archive
+  column. The bot hides those notes from its lists; the app shows the tag.
+- **One registry, no drift.** `supabase/functions/_shared/commands.ts` drives
+  `/help`, routing and Telegram's `setMyCommands` menu. Pure app logic the bot
+  needs (`flashcards`, `noteLinks`, `noteTemplates`, the lock prefix) is
+  mirrored into `_shared/generated/` by `scripts/sync-bot-shared.mjs`, and a
+  test fails if the mirror is stale.
+- **Conversation state** (`/title` then body, `/delete` then `/confirm`, the
+  numbered list behind `/get 3`) lives in `telegram_sessions`, service-role
+  only. Lists expire after 30 minutes so a stale number can't hit the wrong note.
+
 ## Real-content import features
 
 Two features do real, on-device processing rather than being wired to a

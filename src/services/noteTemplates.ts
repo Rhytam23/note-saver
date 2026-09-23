@@ -8,7 +8,8 @@ export interface NoteTemplate {
   content: string;
 }
 
-const taskList = (items: string[]): string =>
+/** Exported so the Telegram bot writes task lists in exactly the shape the editor expects. */
+export const taskList = (items: string[]): string =>
   `<ul data-type="taskList">${items
     .map(item => `<li data-type="taskItem" data-checked="false"><p>${item}</p></li>`)
     .join('')}</ul>`;

@@ -11,6 +11,65 @@ archived.
 
 ---
 
+## 2026-09-23 — Telegram bot as a fourth client
+
+**Decision:** A Telegram bot (Supabase Edge Function `telegram-bot`) that
+writes, lists, searches and manages notes, syncing through the existing
+`notes` table and sync engine. Notes are started explicitly with
+`/title <title>` and the next message is the body; plain messages with no
+command are ignored with a hint.
+
+**Why:** The user wanted to capture and look up notes from Telegram and have
+them appear on phone, desktop and web. Because the sync engine already pulls
+server changes by `version`/`updated_at`, the bot only has to write correct
+rows; it adds no sync logic.
+
+**Choices worth remembering:**
+- *Explicit commands, not "any text is a title".* The first design treated any
+  message as a title, so a typo or a stray "ok" became a note. Requiring
+  `/title` costs one word and removes that whole class of accident.
+- *Service-role key, scoped in code.* The bot has no user JWT (Telegram sends
+  none), so it must use the service role, which bypasses RLS. Safety is
+  therefore enforced by filtering every query on the linked `user_id` and by
+  the account-linking flow (single-use 10-minute codes, `telegram_links`).
+- *Locked notes stay locked.* Their content is client-side encrypted; the
+  server has no key, so the bot only shows a lock icon and the title.
+- *Archive is a reserved `archived` tag.* The app has no archive concept.
+  Adding a column would have meant changing the sync schema, local DB and every
+  client for a Telegram-side feature. Follow-up: a real archive view in the app.
+- *Reuse over rewrite.* `flashcards.ts`, `noteLinks.ts`, `noteTemplates.ts`
+  and the lock prefix are mirrored into the function by a script (the Supabase
+  bundler can't reliably import from `src/`); a parity test fails if stale.
+  `taskList` in `noteTemplates.ts` is now exported so the bot writes task
+  items in exactly the editor's markup.
+- *Reminders need a scheduler.* They use `pg_cron` + `pg_net` (manual SQL in
+  SETUP.md). Without it every other command still works.
+- *Not built:* photo/voice notes, ticking tasks from Telegram (editing task
+  HTML remotely is easy to corrupt), semantic Q&A over notes.
+
+**Manual steps:** create the bot with @BotFather, set secrets, deploy with
+`--no-verify-jwt`, run `npm run bot:register`, set `VITE_TELEGRAM_BOT_USERNAME`
+(see `docs/SETUP.md`). The desktop app's `shell:allow-open` scope gained
+`https://t.me/*` for the connect link.
+
+**Verified:** `tsc`, `lint`, `npm test` (569 tests) and `npm run build` pass.
+New suites cover the command registry, text helpers, list ordering and target
+resolution, reminder time parsing (incl. DST) and rate limiting. A 52-test
+integration suite (`telegramBot.integration.test.ts`) bundles the REAL
+`telegram-bot/index.ts` with esbuild and runs it against an in-memory fake
+Supabase and fake Telegram: linking, every multi-step flow, user isolation,
+locked notes, version/soft-delete rules, the reminder scheduler and the rate
+limit. It caught a real bug (the save confirmation printed `Saved "null"`).
+
+**Not verified (needs your Telegram + Supabase):** the function has not run on
+real Deno, real PostgREST, or real Telegram. The fake mirrors the query
+methods the bot uses, but real-world behaviour (e.g. `like` on very large
+tables, Telegram delivery) is only proven by the end-to-end checks in
+`docs/SETUP.md` once deployed. Limits worth knowing: list commands read up to
+1000 notes and content-searching commands up to 500 (newest first).
+
+---
+
 ## 2026-09-22 — Self-updating landing-page downloads + in-app update-check banner
 
 **Decision:** The release pipeline (`.github/workflows/release.yml`) now

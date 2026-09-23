@@ -83,6 +83,63 @@ just never leave the device). To get sync and the AI assistant working:
    ```
 5. Put the project's URL/anon key into `.env` as in step 2.
 
+### Telegram bot (optional)
+
+Adds a fourth way to use NoteNirman: write, read and manage notes from
+Telegram. It reads and writes the same `notes` table, so everything syncs to
+the phone, desktop and web apps through the existing sync engine. Commands are
+listed in `supabase/functions/_shared/commands.ts` (the bot's `/help` is
+generated from that file).
+
+**Nothing below is secret except the bot token and the two random strings.
+Never paste them into chat, a commit, or a `VITE_` variable.**
+
+1. In Telegram, message **@BotFather**, send `/newbot`, and keep the token.
+2. Generate two long random strings (16-256 characters of `A-Z a-z 0-9 _ -`),
+   e.g. `openssl rand -hex 32`, one for the webhook and one for the scheduler.
+3. Set the function secrets (the Gemini key from step 4 above is reused by `/summarize`):
+   ```bash
+   supabase secrets set TELEGRAM_BOT_TOKEN=... TELEGRAM_WEBHOOK_SECRET=... CRON_SECRET=...
+   ```
+4. Apply the migration and deploy. `--no-verify-jwt` is required: Telegram
+   does not send a Supabase login token; the function checks the webhook
+   secret itself.
+   ```bash
+   supabase db push
+   supabase functions deploy telegram-bot --no-verify-jwt
+   ```
+5. Register the webhook and the full `/` command menu (run on your own
+   machine, Node 22.18+):
+   ```bash
+   TELEGRAM_BOT_TOKEN=... TELEGRAM_WEBHOOK_SECRET=... \
+   TELEGRAM_FUNCTION_URL=https://<project-ref>.supabase.co/functions/v1/telegram-bot \
+   npm run bot:register
+   ```
+   Re-run it whenever you add or change a command. `npm run bot:register -- --dry-run`
+   prints the menu without calling Telegram.
+6. Set `VITE_TELEGRAM_BOT_USERNAME` (the username, no `@`) in your environment
+   and in Vercel, then redeploy. **Profile > Telegram > Connect Telegram** then
+   appears; it opens the bot with a one-time code that links the chat to the
+   signed-in account.
+7. **Reminders (optional).** `/remind` needs something to call the function
+   every minute. In the Supabase SQL editor (replace the two placeholders):
+   ```sql
+   create extension if not exists pg_cron;
+   create extension if not exists pg_net;
+   select cron.schedule('telegram-reminders', '* * * * *', $$
+     select net.http_post(
+       url := 'https://<project-ref>.supabase.co/functions/v1/telegram-bot',
+       headers := '{"Content-Type":"application/json","x-cron-secret":"<CRON_SECRET>"}'::jsonb,
+       body := '{}'::jsonb
+     );
+   $$);
+   ```
+   Without this, every other command works and reminders are stored but never sent.
+
+If you change `src/services/{flashcards,noteLinks,noteTemplates,noteLock}.ts`
+or `src/types.ts`, run `npm run bot:sync` to refresh the bot's generated
+copies (`supabase/functions/_shared/generated/`); a test fails until you do.
+
 ## 6. Windows desktop build (Tauri)
 
 ```bash

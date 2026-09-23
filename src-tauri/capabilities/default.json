@@ -12,7 +12,8 @@
       "identifier": "shell:allow-open",
       "allow": [
         { "url": "https://*.supabase.co/*" },
-        { "url": "https://accounts.google.com/*" }
+        { "url": "https://accounts.google.com/*" },
+        { "url": "https://t.me/*" }
       ]
     }
   ]
