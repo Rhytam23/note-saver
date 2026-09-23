@@ -53,6 +53,13 @@
         <uap:DefaultTile
           Square71x71Logo="Assets\Square71x71Logo.png" />
       </uap:VisualElements>
+      <!-- A packaged app cannot register a URL scheme at runtime, so it must be declared here.
+           Google sign-in comes back to the app through notenirman://auth-callback. -->
+      <Extensions>
+        <uap:Extension Category="windows.protocol">
+          <uap:Protocol Name="notenirman" />
+        </uap:Extension>
+      </Extensions>
     </Application>
   </Applications>
 

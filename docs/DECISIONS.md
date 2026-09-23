@@ -432,3 +432,11 @@ rather than replacing it.
 The earliest commits in this repository's history. If you need anything
 from before this file existed, the git log itself is the only remaining
 record — there was no decision log kept this early on.
+
+## 2026-09-24 - Store package: Google sign-in link, single instance, no update banner
+
+**Decision.** (1) The MSIX manifest declares the `notenirman` URL scheme. (2) The desktop app uses `tauri-plugin-single-instance` (with its deep-link feature). (3) The update banner is hidden when the app runs from the Microsoft Store (exe path contains `\WindowsApps\`, exposed as the `is_store_package` command). (4) `register_all()` failures are ignored.
+
+**Why.** A Store (MSIX) app cannot register a URL scheme at runtime, so Google sign-in would finish in the browser and never return. Separately, Windows starts a second copy of the app for every `notenirman://` link; without single-instance handling the sign-in result lands in that second copy (this also affected the plain .exe). The Store updates apps itself and its policy does not allow an app to offer its own installer download, so the banner is web/.exe/Android only.
+
+**Not verified locally.** No Rust toolchain on the dev machine; CI compiles it. The end-to-end Google sign-in inside an installed .msix needs a manual test (build-msix.ps1 -SignForTesting).

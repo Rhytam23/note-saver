@@ -30,6 +30,20 @@ function isNewer(a: string, b: string): boolean {
   return false;
 }
 
+/**
+ * The Microsoft Store updates its own apps, and its policy does not allow an app to offer its
+ * own installer download, so the Store build never shows the update banner.
+ */
+async function isStorePackage(): Promise<boolean> {
+  if (detectPlatform() !== 'tauri') return false;
+  try {
+    const { invoke } = await import('@tauri-apps/api/core');
+    return await invoke<boolean>('is_store_package');
+  } catch {
+    return false;
+  }
+}
+
 async function getCurrentAppVersion(): Promise<string | null> {
   const platform = detectPlatform();
   try {
@@ -73,6 +87,8 @@ export function useUpdateCheck(): { info: UpdateInfo | null; dismiss: () => void
     let cancelled = false;
 
     (async () => {
+      if (await isStorePackage()) return;
+      if (cancelled) return;
       const currentVersion = await getCurrentAppVersion();
       if (!currentVersion || cancelled) return;
 

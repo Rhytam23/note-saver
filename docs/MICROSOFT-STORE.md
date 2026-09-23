@@ -104,6 +104,10 @@ For developers → Developer Mode**, or trust the printed `.pfx` into
 Add-AppxPackage -Path .\src-tauri\msix\dist\NoteNirman_<version>_x64.msix
 ```
 
+## Google sign-in and updates in the Store build
+
+The manifest declares the `notenirman://` scheme (packaged apps cannot register it at runtime), the app runs as a single instance so the sign-in callback reaches the open window, and the in-app update banner is hidden (the Store updates apps itself). Before submitting, install the test-signed package and try Google sign-in once.
+
 ## Store listing content (draft, reuse when you get to the Store listings step)
 
 - **Short description**: "Offline-first notes app for students — write
