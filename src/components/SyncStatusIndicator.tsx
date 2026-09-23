@@ -28,6 +28,11 @@ const SyncStatusIndicator: React.FC<SyncStatusIndicatorProps> = ({ status, pendi
   const isSpinning = status === 'syncing' || status === 'saved-locally';
   const isWarning = status === 'conflict' || status === 'sync-failed' || status === 'backend-unavailable' || status === 'auth-expired';
 
+  // Everything is fine, so say nothing. The pill only appears when there is something to
+  // know (offline, syncing, failed, conflict); the conflict card below is still shown.
+  const showPill = status !== 'synced';
+  if (!showPill && conflicts.length === 0) return null;
+
   return (
     // Bottom-left, not bottom-right: the "+ New note" FloatingActionButton
     // sits fixed bottom-right at nearly the same offset/z-index, so sharing
@@ -70,15 +75,17 @@ const SyncStatusIndicator: React.FC<SyncStatusIndicatorProps> = ({ status, pendi
         )}
       </AnimatePresence>
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className={`pointer-events-auto flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-medium shadow-sm ${colors.surface} ${colors.border} ${isWarning ? 'text-amber-600 dark:text-amber-400' : colors.secondaryText}`}
-        title={pendingCount > 0 ? `${pendingCount} change${pendingCount > 1 ? 's' : ''} pending sync` : undefined}
-      >
-        <span className={isSpinning ? 'animate-spin inline-block' : 'inline-block'}>{copy.icon}</span>
-        <span>{copy.label}</span>
-      </motion.div>
+      {showPill && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className={`pointer-events-auto flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-medium shadow-sm ${colors.surface} ${colors.border} ${isWarning ? 'text-amber-600 dark:text-amber-400' : colors.secondaryText}`}
+          title={pendingCount > 0 ? `${pendingCount} change${pendingCount > 1 ? 's' : ''} pending sync` : undefined}
+        >
+          <span className={isSpinning ? 'animate-spin inline-block' : 'inline-block'}>{copy.icon}</span>
+          <span>{copy.label}</span>
+        </motion.div>
+      )}
     </div>
   );
 };
