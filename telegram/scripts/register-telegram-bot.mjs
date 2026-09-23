@@ -44,7 +44,7 @@ if (!dryRun) {
 const payloads = [
   ['setWebhook', { url: url ?? '<function url>', secret_token: secret ? '<hidden>' : '<secret>', allowed_updates: ['message'] }],
   ['setMyCommands', { commands: menu }],
-  ['setMyDescription', { description: 'Write, find and manage your NoteNirman notes from Telegram. Connect from NoteNirman > Profile > Connect Telegram.' }],
+  ['setMyDescription', { description: 'NoteNirman brings your notes to Telegram.\n\n• Write a note in seconds with /title\n• Browse, search, pin and prioritise with /notes\n• Add to-dos, flashcards and reminders\n• Everything syncs instantly with the NoteNirman app on your phone, computer and website\n\nLocked notes are never shown here.\n\nTo connect: send /start, then enter the code in NoteNirman under Profile > Telegram.' }],
   ['setMyShortDescription', { short_description: 'Your NoteNirman notes, in Telegram.' }],
 ];
 

@@ -51,6 +51,9 @@ const KEEP_STATE = new Set(['priority', 'help', 'confirm', 'cancel', 'status']);
 
 // ---------------------------------------------------------------- Telegram
 
+// Public web address of the app, so a brand-new user can find where to enter the code.
+const APP_URL = Deno.env.get('APP_URL') ?? 'https://notenirman.vercel.app';
+
 async function send(chatId, text) {
   for (const part of chunkText(text)) {
     const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
@@ -812,7 +815,12 @@ async function handleStart(chatId, from) {
     '',
     formatCode(code),
     '',
-    'Valid for 10 minutes. In NoteNirman, open Profile > Telegram, enter this code and confirm.',
+    'Valid for 10 minutes. To connect:',
+    '1. Open NoteNirman (web, Windows or Android): ' + APP_URL,
+    '2. Sign in, then open Profile > Telegram.',
+    '3. Enter this code and confirm.',
+    '',
+    'No account yet? Sign up free at ' + APP_URL + '/register',
     '',
     'Only enter it yourself. Never give this code to anyone else - whoever uses it can read your notes.',
   ].join('\n'));
@@ -887,7 +895,7 @@ serve(async (req) => {
 
     const { data: link } = await sb.from('telegram_links').select('user_id,timezone').eq('chat_id', chatId).maybeSingle();
     if (!link) {
-      await send(chatId, 'This chat is not connected to a NoteNirman account yet. Send /start to get a connect code, then enter it in NoteNirman > Profile > Telegram.');
+      await send(chatId, 'This chat is not connected to a NoteNirman account yet. Send /start to get a connect code, then enter it in NoteNirman (' + APP_URL + ') > Profile > Telegram.');
       return new Response('ok');
     }
 

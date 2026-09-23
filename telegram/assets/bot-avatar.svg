@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="NoteNirman bot">
+  <title>NoteNirman bot</title>
+  <!-- Full-bleed square: Telegram crops profile pictures to a circle -->
+  <rect width="512" height="512" fill="#14213D"/>
+  <g transform="translate(256 350) scale(1.05)">
+    <path d="M0 -158 C50 -98 58 -18 0 46 C-58 -18 -50 -98 0 -158Z" fill="#E8850C" transform="rotate(-70)"/>
+    <path d="M0 -158 C50 -98 58 -18 0 46 C-58 -18 -50 -98 0 -158Z" fill="#E8850C" transform="rotate(70)"/>
+    <path d="M0 -168 C58 -104 66 -18 0 50 C-66 -18 -58 -104 0 -168Z" fill="#FF9933" transform="rotate(-35)"/>
+    <path d="M0 -168 C58 -104 66 -18 0 50 C-66 -18 -58 -104 0 -168Z" fill="#FF9933" transform="rotate(35)"/>
+    <path d="M0 -196 C64 -122 72 -22 0 54 C-72 -22 -64 -122 0 -196Z" fill="#FFF8EC"/>
+    <g stroke="#14213D" stroke-width="11" stroke-linecap="round">
+      <line x1="-26" y1="-62" x2="26" y2="-62"/>
+      <line x1="-32" y1="-28" x2="32" y2="-28"/>
+      <line x1="-24" y1="6" x2="24" y2="6"/>
+    </g>
+  </g>
+  <path d="M140 424 Q256 456 372 424" fill="none" stroke="#138808" stroke-width="15" stroke-linecap="round"/>
+</svg>
