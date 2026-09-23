@@ -12,7 +12,7 @@
     "tauri:build": "tauri build",
     "test": "vitest run",
     "bot:sync": "node telegram/scripts/sync-bot-shared.mjs",
-    "bot:register": "node telegram/scripts/register-telegram-bot.mjs",
+    "bot:register": "node --env-file-if-exists=telegram/.env.telegram telegram/scripts/register-telegram-bot.mjs",
     "lint": "eslint src telegram/app telegram/tests telegram/bot/_shared --ext .ts,.tsx"
   },
   "dependencies": {

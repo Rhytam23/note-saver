@@ -54,12 +54,16 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || vars.VITE_SUPABASE_URL || 'https://tcisqeieyyhdlfwvvsec.supabase.co' }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY || vars.VITE_SUPABASE_ANON_KEY || 'sb_publishable_GgCh1LuEfnCuWnRjDccyWA_i4GRP8N5' }}
           VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID || vars.VITE_GOOGLE_CLIENT_ID || '699121691348-4rhtqociutiobvgfbq94udhre0b0tsq3.apps.googleusercontent.com' }}
+          VITE_TELEGRAM_BOT_USERNAME: ${{ vars.VITE_TELEGRAM_BOT_USERNAME || 'notenirman_bot' }}
         run: npm run build
 
       - name: Build Tauri Desktop Application
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # tauri.conf.json's beforeBuildCommand rebuilds the web assets here, so
+          # the (public) bot username must be visible to this step as well.
+          VITE_TELEGRAM_BOT_USERNAME: ${{ vars.VITE_TELEGRAM_BOT_USERNAME || 'notenirman_bot' }}
         with:
           tagName: ${{ github.ref_name }}
           releaseName: 'NoteNirman ${{ github.ref_name }}'
@@ -159,6 +163,7 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || vars.VITE_SUPABASE_URL || 'https://tcisqeieyyhdlfwvvsec.supabase.co' }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY || vars.VITE_SUPABASE_ANON_KEY || 'sb_publishable_GgCh1LuEfnCuWnRjDccyWA_i4GRP8N5' }}
           VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID || vars.VITE_GOOGLE_CLIENT_ID || '699121691348-4rhtqociutiobvgfbq94udhre0b0tsq3.apps.googleusercontent.com' }}
+          VITE_TELEGRAM_BOT_USERNAME: ${{ vars.VITE_TELEGRAM_BOT_USERNAME || 'notenirman_bot' }}
         run: npm run build
 
       - name: Sync Capacitor Android
