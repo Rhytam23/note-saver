@@ -26,6 +26,10 @@ import {
   MAX_BODY, MAX_TITLE, chunkText, escapeHtml, escapeLike, htmlToMarkdown, htmlToText, maskEmail,
   sanitizeFilename, snippet, textToHtml, timingSafeEqual, titleFromText,
 } from './_shared/text.ts';
+import {
+  EMERGENCY_DAILY_LIMIT, EMERGENCY_TAG, EMERGENCY_TITLE, EMERGENCY_TTL_MS, isUnrenamedEmergency,
+  emergencyDeletedMessage, emergencyLimitMessage, emergencySavedMessage,
+} from './_shared/emergency.ts';
 import { formatLocal, isValidTimezone, parseWhen, startOfLocalDay } from './_shared/reminderTime.ts';
 import { checkRate } from './_shared/rateLimit.ts';
 import { PAIRING_TTL_MS, codeFromBytes, formatCode } from './_shared/pairing.ts';
@@ -774,7 +778,22 @@ async function handleFreeText(ctx, text) {
     return send(ctx.chatId, 'Send /confirm to delete the note, or /cancel.');
   }
 
-  return send(ctx.chatId, 'To write a note, send /title <title> first, then the body. /help lists everything.');
+  return saveEmergencyNote(ctx, text);
+}
+
+/** Plain text with no command: keep it as an "Emergency" note (max 3 per rolling day). */
+async function saveEmergencyNote(ctx, text) {
+  const since = new Date(Date.now() - EMERGENCY_TTL_MS).toISOString();
+  const { count, error } = await sb.from('notes').select('id', { count: 'exact', head: true })
+    .eq('user_id', ctx.userId).contains('tags', [EMERGENCY_TAG]).gte('created_at', since);
+  if (error) throw error;
+  if ((count ?? 0) >= EMERGENCY_DAILY_LIMIT) return send(ctx.chatId, emergencyLimitMessage());
+  await insertNote(ctx.userId, {
+    title: EMERGENCY_TITLE,
+    content: textToHtml(text.slice(0, MAX_BODY)),
+    tags: [EMERGENCY_TAG],
+  });
+  return send(ctx.chatId, emergencySavedMessage(APP_URL));
 }
 
 // ---------------------------------------------------------------- linking
@@ -844,12 +863,39 @@ async function runScheduledJobs() {
 Start a note with /title <title>, then send the body. /notes lists your notes, /get <title> reads one, /help shows everything.`);
   }
 
+  await expireEmergencyNotes();
+
   const { data } = await sb.from('telegram_reminders').select('id,chat_id,body')
     .eq('sent', false).lte('due_at', new Date().toISOString()).order('due_at', { ascending: true }).limit(50);
   for (const r of data ?? []) {
     // Claim first so two overlapping runs can never send the same reminder twice.
     const { data: claimed } = await sb.from('telegram_reminders').update({ sent: true }).eq('id', r.id).eq('sent', false).select('id');
     if (claimed?.length) await send(r.chat_id, `⏰ Reminder: ${r.body}`);
+  }
+}
+
+/**
+ * Emergency notes older than 24 hours: still titled "Emergency" -> soft-deleted (recoverable
+ * from the trash); renamed -> just drop the reserved tag so they look like normal notes.
+ */
+async function expireEmergencyNotes() {
+  const cutoff = new Date(Date.now() - EMERGENCY_TTL_MS).toISOString();
+  const { data } = await sb.from('notes').select('id,user_id,title,tags')
+    .eq('deleted', false).contains('tags', [EMERGENCY_TAG]).lt('created_at', cutoff).limit(100);
+  const deletedBy = new Map();
+  for (const n of data ?? []) {
+    if (isUnrenamedEmergency(n)) {
+      // Re-check the title in the UPDATE itself so a rename in the app a moment ago wins.
+      const { data: hit } = await sb.from('notes').update({ deleted: true, deleted_at: new Date().toISOString() })
+        .eq('id', n.id).eq('user_id', n.user_id).eq('title', n.title).eq('deleted', false).select('id');
+      if (hit?.length) deletedBy.set(n.user_id, (deletedBy.get(n.user_id) ?? 0) + 1);
+    } else {
+      await updateNote(n.user_id, n.id, { tags: (n.tags ?? []).filter((t) => t !== EMERGENCY_TAG) });
+    }
+  }
+  for (const [userId, count] of deletedBy) {
+    const { data: link } = await sb.from('telegram_links').select('chat_id').eq('user_id', userId).maybeSingle();
+    if (link) await send(link.chat_id, emergencyDeletedMessage(count));
   }
 }
 

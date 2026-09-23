@@ -61,6 +61,7 @@ class Query {
   lt(c: string, v: any) { this.filters.push((r) => r[c] < v); return this; }
   lte(c: string, v: any) { this.filters.push((r) => r[c] <= v); return this; }
   gte(c: string, v: any) { this.filters.push((r) => r[c] >= v); return this; }
+  contains(c: string, v: any[]) { this.filters.push((r) => Array.isArray(r[c]) && v.every((x) => r[c].includes(x))); return this; }
   order(col: string, o?: { ascending?: boolean }) { this.orders.push({ col, asc: o?.ascending !== false }); return this; }
   limit(n: number) { this.lim = n; return this; }
   maybeSingle() { this.single = true; return this; }
@@ -330,9 +331,17 @@ describe('telegram bot: writing notes', () => {
     expect(n.priority).toBe('none');
   });
 
-  it('ignores plain text with no command and saves nothing', async () => {
-    expect(await say(C1, 'hello there')).toContain('/title');
-    expect(notesOf(U1)).toHaveLength(0);
+  it('keeps plain text with no command as an "Emergency" note and explains what to do', async () => {
+    const reply = await say(C1, 'call the plumber\nbefore 5pm');
+    expect(reply).toContain('title "Emergency"');
+    expect(reply).toContain('https://notenirman.vercel.app');
+    expect(reply).toContain('within 24 hours');
+    expect(reply).toContain('only 3 emergency notes per day');
+    const notes = notesOf(U1);
+    expect(notes).toHaveLength(1);
+    expect(notes[0]).toMatchObject({
+      title: 'Emergency', tags: ['emergency'], content: '<p>call the plumber</p><p>before 5pm</p>', version: 1, deleted: false,
+    });
   });
 
   it('asks for the title when /title has no argument', async () => {
@@ -352,15 +361,16 @@ describe('telegram bot: writing notes', () => {
   it('discards an unfinished note when another command interrupts, and says so', async () => {
     await say(C1, '/title Half');
     expect(await say(C1, '/notes')).toContain('Discarded the unfinished note "Half"');
-    expect(await say(C1, 'stray text')).toContain('/title');
-    expect(notesOf(U1)).toHaveLength(0);
+    // The half-written note is gone; stray text afterwards is only an Emergency note.
+    expect(await say(C1, 'stray text')).toContain('title "Emergency"');
+    expect(notesOf(U1).map((n) => n.title)).toEqual(['Emergency']);
   });
 
   it('cancels', async () => {
     await say(C1, '/title Nope');
     expect(await say(C1, '/cancel')).toContain('Cancelled');
     await say(C1, 'body');
-    expect(notesOf(U1)).toHaveLength(0);
+    expect(notesOf(U1).map((n) => n.title)).toEqual(['Emergency']); // never saved as "Nope"
   });
 
   it('/quick saves in one message', async () => {
@@ -713,6 +723,57 @@ describe('telegram bot: reminders and time', () => {
   });
 
   const runCron = () => handler(new Request('https://x/functions/v1/telegram-bot', { method: 'POST', headers: { 'x-cron-secret': CRON }, body: '{}' }));
+
+  it('allows only three emergency notes per day, per user, and saves nothing beyond that', async () => {
+    for (const t of ['one', 'two', 'three']) expect(await say(C1, t)).toContain('Emergency');
+    expect(await say(C1, 'four')).toContain('already used your 3 emergency notes');
+    expect(notesOf(U1)).toHaveLength(3);
+    // Another user is unaffected.
+    link(U2, C2);
+    expect(await say(C2, 'mine')).toContain('Emergency');
+    expect(notesOf(U2)).toHaveLength(1);
+    // A day later the allowance is back.
+    vi.setSystemTime(new Date(Date.now() + 24 * 3_600_000 + 60_000));
+    expect(await say(C1, 'five')).toContain('Emergency');
+  });
+
+  it('a normal note does not use up the emergency allowance, and multi-step input still wins over emergency', async () => {
+    await say(C1, '/title Real note');
+    await say(C1, 'the body');
+    expect(byTitle(U1, 'Real note')).toBeTruthy();
+    expect(notesOf(U1).filter((n) => n.title === 'Emergency')).toHaveLength(0);
+  });
+
+  it('the scheduler trashes an emergency note nobody renamed within 24 hours, and tells the user', async () => {
+    await say(C1, 'urgent thing');
+    await runCron();
+    expect(notesOf(U1)[0].deleted).toBe(false); // still inside 24 hours
+    vi.setSystemTime(new Date(Date.now() + 24 * 3_600_000 + 60_000));
+    sent = [];
+    await runCron();
+    const n = notesOf(U1)[0];
+    expect(n.deleted).toBe(true);
+    expect(n.deleted_at).toBeTruthy();
+    expect(sent.map((m) => m.text).join('')).toContain('moved to the trash');
+    await runCron();
+    expect(sent).toHaveLength(1); // told once
+  });
+
+  it('an emergency note that was renamed survives, and loses the reserved tag', async () => {
+    await say(C1, 'keep me');
+    notesOf(U1)[0].title = 'Plumber';
+    vi.setSystemTime(new Date(Date.now() + 24 * 3_600_000 + 60_000));
+    await runCron();
+    const n = notesOf(U1)[0];
+    expect(n.deleted).toBe(false);
+    expect(n.tags).toEqual([]);
+  });
+
+  it('the scheduler never touches ordinary notes, even ones titled Emergency without the tag', async () => {
+    seedNote(U1, { title: 'Emergency', tags: [], created_at: new Date(Date.now() - 5 * 86_400_000).toISOString() });
+    await runCron();
+    expect(notesOf(U1)[0].deleted).toBe(false);
+  });
 
   it('the scheduler clears expired pairing codes and keeps live ones', async () => {
     db.t('telegram_pairing_codes').push({ code: 'STALE111', chat_id: 1, expires_at: new Date(Date.now() - 1000).toISOString() });

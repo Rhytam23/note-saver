@@ -11,6 +11,26 @@ archived.
 
 ---
 
+## 2026-09-24 - Telegram "Emergency" notes for plain messages
+
+**Decision.** A plain message with no command (and no multi-step input in progress) is saved as a note titled "Emergency" with the reserved tag `emergency`. The bot tells the user to rename it in the app within 24 hours. The scheduler (per-minute cron) moves notes that are still titled "Emergency" after 24 hours to the trash (soft delete, recoverable with /trash and /restore) and messages the user; renamed ones just lose the tag. Limit: 3 per rolling 24 hours per user.
+
+**Why.** Text typed in a hurry should not be lost, and the old "reply with a hint, save nothing" behaviour discarded it. The 24-hour rule and the daily cap stop the inbox from filling with untitled notes or being used as unlimited storage. Soft delete plus a notice keeps the auto-delete recoverable. Code: `telegram/bot/_shared/emergency.ts`.
+
+**Known trade-off.** The rule looks only at the title: if the user edits the body in the app but leaves the title "Emergency", it is still trashed after 24 hours (recoverable).
+
+---
+
+## 2026-09-24 - Store package: Google sign-in link, single instance, no update banner
+
+**Decision.** (1) The MSIX manifest declares the `notenirman` URL scheme. (2) The desktop app uses `tauri-plugin-single-instance` (with its deep-link feature). (3) The update banner is hidden when the app runs from the Microsoft Store (exe path contains `\WindowsApps\`, exposed as the `is_store_package` command). (4) `register_all()` failures are ignored.
+
+**Why.** A Store (MSIX) app cannot register a URL scheme at runtime, so Google sign-in would finish in the browser and never return. Separately, Windows starts a second copy of the app for every `notenirman://` link; without single-instance handling the sign-in result lands in that second copy (this also affected the plain .exe). The Store updates apps itself and its policy does not allow an app to offer its own installer download, so the banner is web/.exe/Android only.
+
+**Not verified locally.** No Rust toolchain on the dev machine; CI compiles it. The end-to-end Google sign-in inside an installed .msix needs a manual test (build-msix.ps1 -SignForTesting).
+
+---
+
 ## 2026-09-23 — Telegram pairing: the bot shows the code, the app takes it
 
 **Decision:** Linking now works in the direction *Telegram gives a code, the user
@@ -432,11 +452,3 @@ rather than replacing it.
 The earliest commits in this repository's history. If you need anything
 from before this file existed, the git log itself is the only remaining
 record — there was no decision log kept this early on.
-
-## 2026-09-24 - Store package: Google sign-in link, single instance, no update banner
-
-**Decision.** (1) The MSIX manifest declares the `notenirman` URL scheme. (2) The desktop app uses `tauri-plugin-single-instance` (with its deep-link feature). (3) The update banner is hidden when the app runs from the Microsoft Store (exe path contains `\WindowsApps\`, exposed as the `is_store_package` command). (4) `register_all()` failures are ignored.
-
-**Why.** A Store (MSIX) app cannot register a URL scheme at runtime, so Google sign-in would finish in the browser and never return. Separately, Windows starts a second copy of the app for every `notenirman://` link; without single-instance handling the sign-in result lands in that second copy (this also affected the plain .exe). The Store updates apps itself and its policy does not allow an app to offer its own installer download, so the banner is web/.exe/Android only.
-
-**Not verified locally.** No Rust toolchain on the dev machine; CI compiles it. The end-to-end Google sign-in inside an installed .msix needs a manual test (build-msix.ps1 -SignForTesting).

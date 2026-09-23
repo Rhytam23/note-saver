@@ -325,7 +325,7 @@ export function renderHelpOverview(): string {
     if (!groups.has(c.group)) groups.set(c.group, []);
     groups.get(c.group)!.push(c);
   }
-  const lines = ['NoteNirman bot', '', 'Start a note with /title, then send the body. Plain messages are ignored.', ''];
+  const lines = ['NoteNirman bot', '', 'Start a note with /title, then send the body. A plain message with no command is kept as an "Emergency" note (rename it in the app within 24 hours or it is deleted; 3 per day).', ''];
   for (const [group, cmds] of groups) {
     lines.push(group);
     for (const c of cmds) lines.push(`  /${c.name} - ${c.description}`);

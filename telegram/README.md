@@ -43,7 +43,7 @@ drift apart. In short:
 - **Export and AI:** `/export`, `/backup`, `/summarize`
 - **Account:** `/status`, `/cancel`, `/unlink`, `/help [command]`
 
-Plain messages with no command are ignored (the bot replies with a hint).
+A plain message with no command is saved as a note titled **Emergency** (reserved tag `emergency`) and the bot tells the user to rename it in the app within 24 hours, or the scheduler moves it to the trash (recoverable with `/trash` and `/restore`). Limit: 3 per rolling 24 hours per user. Renamed notes lose the tag and are never touched. Multi-step input (`/title`, `/append`, ...) always takes priority.
 
 ## Setup
 
