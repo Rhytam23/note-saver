@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { supabase } from '../../src/services/supabase';
 
 const CODE_TTL_MS = 10 * 60 * 1000;
 // Unambiguous characters only (no 0/O/1/I/l) - the code travels in a URL, but

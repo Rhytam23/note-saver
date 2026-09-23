@@ -15,23 +15,23 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-import { COMMAND_NAMES, findCommand, renderHelpOverview, renderHelpFor } from '../_shared/commands.ts';
+import { COMMAND_NAMES, findCommand, renderHelpOverview, renderHelpFor } from './_shared/commands.ts';
 import {
   ARCHIVE_TAG, FLASHCARDS_TITLE, INBOX_TITLE, PAGE_SIZE,
   appendTask, applyFilter, extractOpenTasks, formatNoteLine, isArchived, joinHtml, matchTitle,
   normalisePriority, normaliseTag, paginate, parseListArgs, parseTarget, pickByNumber,
   priorityLabel, sortNotes, stampedLine, withTag, withoutTag, isLocked,
-} from '../_shared/notesLogic.ts';
+} from './_shared/notesLogic.ts';
 import {
   MAX_BODY, MAX_TITLE, chunkText, escapeHtml, escapeLike, htmlToMarkdown, htmlToText, maskEmail,
   sanitizeFilename, snippet, textToHtml, timingSafeEqual, titleFromText,
-} from '../_shared/text.ts';
-import { formatLocal, isValidTimezone, parseWhen, startOfLocalDay } from '../_shared/reminderTime.ts';
-import { checkRate } from '../_shared/rateLimit.ts';
-import { extractAllFlashcards } from '../_shared/generated/flashcards.ts';
-import { findBacklinks, resolveOutgoingLinks } from '../_shared/generated/noteLinks.ts';
-import { NOTE_TEMPLATES } from '../_shared/generated/noteTemplates.ts';
-import { LOCK_PREFIX } from '../_shared/generated/lockPrefix.ts';
+} from './_shared/text.ts';
+import { formatLocal, isValidTimezone, parseWhen, startOfLocalDay } from './_shared/reminderTime.ts';
+import { checkRate } from './_shared/rateLimit.ts';
+import { extractAllFlashcards } from './_shared/generated/flashcards.ts';
+import { findBacklinks, resolveOutgoingLinks } from './_shared/generated/noteLinks.ts';
+import { NOTE_TEMPLATES } from './_shared/generated/noteTemplates.ts';
+import { LOCK_PREFIX } from './_shared/generated/lockPrefix.ts';
 
 const BOT_TOKEN = Deno.env.get('TELEGRAM_BOT_TOKEN');
 const WEBHOOK_SECRET = Deno.env.get('TELEGRAM_WEBHOOK_SECRET');

@@ -1,7 +1,7 @@
 /**
  * @vitest-environment node
  *
- * Runs the REAL supabase/functions/telegram-bot/index.ts (bundled with esbuild,
+ * Runs the REAL telegram/bot/index.ts (bundled with esbuild,
  * Deno imports stubbed) against an in-memory fake of the Supabase client and a
  * fake Telegram API. It exercises the router, the multi-step flows, user
  * scoping, locked-note handling and the sync-relevant write rules.
@@ -10,7 +10,7 @@ import { describe, it, expect, beforeAll, beforeEach, afterAll, vi } from 'vites
 import { build } from 'esbuild';
 import { join } from 'node:path';
 
-const ENTRY = join(__dirname, '..', '..', '..', 'supabase', 'functions', 'telegram-bot', 'index.ts');
+const ENTRY = join(__dirname, '..', 'bot', 'index.ts');
 const SECRET = 'webhook-secret-0123456789';
 const CRON = 'cron-secret-0123456789';
 const NOW = new Date('2026-09-23T04:30:00.000Z'); // 10:00 in Asia/Kolkata

@@ -139,7 +139,7 @@ export function parseWhen(input: string, now: Date, tz: string): ParsedWhen | nu
     if (m < 1 || m > 12 || d < 1 || d > 31) return null;
     let h = 9;
     let mi = 0;
-    let rest = iso[5];
+    const rest = iso[5];
     if (iso[4]) {
       const t = parseTimeOfDay(iso[4]);
       if (!t) return null;

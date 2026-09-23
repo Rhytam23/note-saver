@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   COMMANDS,
@@ -8,10 +8,10 @@ import {
   renderHelpFor,
   renderHelpOverview,
   toTelegramMenu,
-} from '../../../supabase/functions/_shared/commands';
-import { buildGenerated, GENERATED_DIR } from '../../../scripts/sync-bot-shared.mjs';
+} from '../bot/_shared/commands';
+import { buildGenerated, buildDeployCopies, findOrphans, GENERATED_DIR } from '../scripts/sync-bot-shared.mjs';
 
-const root = join(__dirname, '..', '..', '..');
+const root = join(__dirname, '..', '..');
 
 describe('telegram command registry', () => {
   it('has unique names that satisfy Telegram\'s rules', () => {
@@ -49,7 +49,7 @@ describe('telegram command registry', () => {
   });
 
   it('has a handler in the bot function for every command the router dispatches', () => {
-    const source = readFileSync(join(root, 'supabase/functions/telegram-bot/index.ts'), 'utf8');
+    const source = readFileSync(join(root, 'telegram/bot/index.ts'), 'utf8');
     // /start and /help are answered before the linked-account check, so they have no entry in `handlers`.
     for (const c of COMMANDS.filter(c => c.name !== 'start' && c.name !== 'help')) {
       expect(new RegExp(`async ${c.name}\\(ctx\\)`).test(source), `handler for /${c.name}`).toBe(true);
@@ -65,11 +65,21 @@ describe('telegram command registry', () => {
   });
 });
 
-describe('generated bot copies of app modules', () => {
-  it('match the source in src/ (run `npm run bot:sync` if this fails)', () => {
+describe('generated and deployable copies', () => {
+  it('generated app modules match src/ (run `npm run bot:sync` if this fails)', () => {
     for (const [name, expected] of Object.entries(buildGenerated())) {
       const actual = readFileSync(join(GENERATED_DIR, name), 'utf8').replace(/\r\n/g, '\n');
       expect(actual, name).toBe(expected);
     }
+  });
+
+  it('supabase/ holds an exact copy of telegram/bot and telegram/database (run `npm run bot:sync`)', () => {
+    const copies = Object.entries(buildDeployCopies());
+    expect(copies.length).toBeGreaterThan(5);
+    for (const [target, expected] of copies) {
+      expect(existsSync(target), target).toBe(true);
+      expect(readFileSync(target, 'utf8').replace(/\r\n/g, '\n'), target).toBe(expected);
+    }
+    expect(findOrphans()).toEqual([]);
   });
 });

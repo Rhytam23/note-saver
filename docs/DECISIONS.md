@@ -47,6 +47,13 @@ rows; it adds no sync logic.
 - *Not built:* photo/voice notes, ticking tasks from Telegram (editing task
   HTML remotely is easy to corrupt), semantic Q&A over notes.
 
+**Layout:** every Telegram file lives in the top-level `telegram/` folder
+(`bot/`, `database/`, `app/`, `scripts/`, `tests/`, `README.md`). Supabase
+only deploys functions from `supabase/functions/` and migrations from
+`supabase/migrations/`, so `npm run bot:sync` copies `telegram/bot` and
+`telegram/database` there; those copies are generated and parity-tested.
+`ProfileModal` only imports `telegram/app/TelegramSection`.
+
 **Manual steps:** create the bot with @BotFather, set secrets, deploy with
 `--no-verify-jwt`, run `npm run bot:register`, set `VITE_TELEGRAM_BOT_USERNAME`
 (see `docs/SETUP.md`). The desktop app's `shell:allow-open` scope gained
@@ -55,8 +62,8 @@ rows; it adds no sync logic.
 **Verified:** `tsc`, `lint`, `npm test` (569 tests) and `npm run build` pass.
 New suites cover the command registry, text helpers, list ordering and target
 resolution, reminder time parsing (incl. DST) and rate limiting. A 52-test
-integration suite (`telegramBot.integration.test.ts`) bundles the REAL
-`telegram-bot/index.ts` with esbuild and runs it against an in-memory fake
+integration suite (`telegram/tests/telegramBot.integration.test.ts`) bundles the REAL
+`telegram/bot/index.ts` with esbuild and runs it against an in-memory fake
 Supabase and fake Telegram: linking, every multi-step flow, user isolation,
 locked notes, version/soft-delete rules, the reminder scheduler and the rate
 limit. It caught a real bug (the save confirmation printed `Saved "null"`).

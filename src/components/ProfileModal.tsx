@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { CloseIcon, LogoutIcon, SaveIcon, SpinnerIcon, EditIcon } from './Icons';
 import type { User, SeasonalTheme } from '../types';
@@ -9,8 +9,7 @@ import * as localDb from '../services/localDb';
 import { announceLocalChange, processSyncQueue, writeNote } from '../services/syncEngine';
 import { importBatchFiles } from '../services/importPipeline';
 import { createWorkspaceBackup, restoreWorkspaceBackup, validateBackupPackage } from '../services/backupEngine';
-import { createTelegramLinkUrl, getTelegramBotUsername, isTelegramLinked, unlinkTelegram } from '../services/telegramLink';
-import { openInSystemBrowser } from '../services/platform/nativeAuthBridge';
+import TelegramSection from '../../telegram/app/TelegramSection';
 
 interface ProfileModalProps {
   user: User;
@@ -61,65 +60,6 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose, onLogout, on
   const fileInputRef = useRef<HTMLInputElement>(null);
   const restoreInputRef = useRef<HTMLInputElement>(null);
   const importInputRef = useRef<HTMLInputElement>(null);
-
-  const telegramEnabled = getTelegramBotUsername() !== null;
-  const [telegramLinked, setTelegramLinked] = useState<boolean | null>(null);
-  const [telegramUrl, setTelegramUrl] = useState<string | null>(null);
-  const [telegramBusy, setTelegramBusy] = useState(false);
-  const [telegramError, setTelegramError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!telegramEnabled) return;
-    let cancelled = false;
-    isTelegramLinked(user.id)
-      .then(linked => { if (!cancelled) setTelegramLinked(linked); })
-      .catch(() => { if (!cancelled) setTelegramLinked(false); });
-    return () => { cancelled = true; };
-  }, [telegramEnabled, user.id]);
-
-  // While the connect link is open, watch for the bot to finish linking (codes last 10 minutes).
-  useEffect(() => {
-    if (!telegramUrl || telegramLinked) return;
-    const started = Date.now();
-    const timer = window.setInterval(async () => {
-      if (Date.now() - started > 10 * 60 * 1000) { window.clearInterval(timer); return; }
-      try {
-        if (await isTelegramLinked(user.id)) {
-          setTelegramLinked(true);
-          setTelegramUrl(null);
-        }
-      } catch { /* keep polling */ }
-    }, 4000);
-    return () => window.clearInterval(timer);
-  }, [telegramUrl, telegramLinked, user.id]);
-
-  const handleConnectTelegram = async () => {
-    setTelegramBusy(true);
-    setTelegramError(null);
-    try {
-      const url = await createTelegramLinkUrl(user.id);
-      setTelegramUrl(url);
-      await openInSystemBrowser(url);
-    } catch {
-      setTelegramError('Could not create a connect link. Check your connection and try again.');
-    } finally {
-      setTelegramBusy(false);
-    }
-  };
-
-  const handleDisconnectTelegram = async () => {
-    setTelegramBusy(true);
-    setTelegramError(null);
-    try {
-      await unlinkTelegram(user.id);
-      setTelegramLinked(false);
-      setTelegramUrl(null);
-    } catch {
-      setTelegramError('Could not disconnect. Please try again.');
-    } finally {
-      setTelegramBusy(false);
-    }
-  };
 
   const handleSave = async () => {
     const nameChanged = name.trim() !== (user.name || '');
@@ -493,41 +433,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose, onLogout, on
             </div>
           </div>
 
-          {telegramEnabled && (
-            <div className="pt-4 border-t border-divider-light dark:border-divider">
-              <h3 className={`text-sm font-medium mb-3 ${colors.secondaryText}`}>Telegram</h3>
-              {telegramLinked ? (
-                <div className="space-y-2">
-                  <p className={`text-sm ${colors.secondaryText}`}>Connected. Write and read notes from Telegram. Send /help to the bot to see every command.</p>
-                  <button
-                    onClick={handleDisconnectTelegram}
-                    disabled={telegramBusy}
-                    className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-200 disabled:opacity-60"
-                  >
-                    Disconnect Telegram
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <p className={`text-sm ${colors.secondaryText}`}>Add notes and look them up from Telegram; they sync to every device. Telegram chats are not end-to-end encrypted, and locked notes are never shown there.</p>
-                  <button
-                    onClick={handleConnectTelegram}
-                    disabled={telegramBusy || telegramLinked === null}
-                    className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-200 disabled:opacity-60"
-                  >
-                    {telegramBusy ? 'Preparing link...' : 'Connect Telegram'}
-                  </button>
-                  {telegramUrl && (
-                    <p className={`text-sm ${colors.secondaryText}`}>
-                      Tap Start in Telegram to finish. Didn't open?{' '}
-                      <a href={telegramUrl} target="_blank" rel="noopener noreferrer" className="underline">Open Telegram</a>
-                    </p>
-                  )}
-                </div>
-              )}
-              {telegramError && <p className="mt-2 text-sm text-red-500">{telegramError}</p>}
-            </div>
-          )}
+          <TelegramSection userId={user.id} />
 
           <div className="pt-4 border-t border-divider-light dark:border-divider">
             <h3 className={`text-sm font-medium mb-3 ${colors.secondaryText}`}>Data Management</h3>

@@ -19,9 +19,9 @@ import {
   withTag,
   withoutTag,
   type BotNote,
-} from '../../../supabase/functions/_shared/notesLogic';
-import { LOCK_PREFIX } from '../noteLock';
-import { NOTE_TEMPLATES, taskList } from '../noteTemplates';
+} from '../bot/_shared/notesLogic';
+import { LOCK_PREFIX } from '../../src/services/noteLock';
+import { NOTE_TEMPLATES, taskList } from '../../src/services/noteTemplates';
 
 const note = (over: Partial<BotNote> & { id: string }): BotNote => ({
   title: over.id,

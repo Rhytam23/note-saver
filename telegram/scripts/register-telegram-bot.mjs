@@ -14,7 +14,7 @@ const dryRun = process.argv.includes('--dry-run');
 
 let toTelegramMenu;
 try {
-  ({ toTelegramMenu } = await import('../supabase/functions/_shared/commands.ts'));
+  ({ toTelegramMenu } = await import('../bot/_shared/commands.ts'));
 } catch (err) {
   console.error('Could not load the command registry. This script needs Node 22.18 or newer.\n', err.message);
   process.exit(1);

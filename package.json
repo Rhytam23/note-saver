@@ -11,9 +11,9 @@
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
     "test": "vitest run",
-    "bot:sync": "node scripts/sync-bot-shared.mjs",
-    "bot:register": "node scripts/register-telegram-bot.mjs",
-    "lint": "eslint src --ext .ts,.tsx"
+    "bot:sync": "node telegram/scripts/sync-bot-shared.mjs",
+    "bot:register": "node telegram/scripts/register-telegram-bot.mjs",
+    "lint": "eslint src telegram/app telegram/tests telegram/bot/_shared --ext .ts,.tsx"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.0",

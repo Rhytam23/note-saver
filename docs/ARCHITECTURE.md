@@ -114,12 +114,12 @@ the vector search / RAG pipeline described in
 
 ## Telegram bot (fourth client)
 
-`supabase/functions/telegram-bot/` is a Telegram webhook that reads and writes
+`telegram/bot/` (deployed as the Edge Function `telegram-bot`) is a Telegram webhook that reads and writes
 the same `notes` table as the apps, so notes written in Telegram sync to the
 phone, desktop and web through the existing sync engine with no extra sync
-code. Setup is in [SETUP.md](./SETUP.md#telegram-bot-optional).
+code. Everything Telegram-related lives in [`telegram/`](../telegram); setup is in [`telegram/README.md`](../telegram/README.md).
 
-- **Linking:** the app (Profile > Connect Telegram, `src/services/telegramLink.ts`)
+- **Linking:** the app (Profile > Connect Telegram, `telegram/app/telegramLink.ts`)
   inserts a single-use 10-minute code and opens `t.me/<bot>?start=<code>`. The
   bot looks the code up and stores `telegram_links(user_id, chat_id)`. An
   unlinked chat can do nothing. Only `/start` and `/help` work.
@@ -136,11 +136,12 @@ code. Setup is in [SETUP.md](./SETUP.md#telegram-bot-optional).
   show, edit, copy, export, search or summarise their content.
 - **Archive is a reserved tag** (`archived`), because the app has no archive
   column. The bot hides those notes from its lists; the app shows the tag.
-- **One registry, no drift.** `supabase/functions/_shared/commands.ts` drives
+- **One registry, no drift.** `telegram/bot/_shared/commands.ts` drives
   `/help`, routing and Telegram's `setMyCommands` menu. Pure app logic the bot
   needs (`flashcards`, `noteLinks`, `noteTemplates`, the lock prefix) is
-  mirrored into `_shared/generated/` by `scripts/sync-bot-shared.mjs`, and a
-  test fails if the mirror is stale.
+  mirrored into `_shared/generated/` by `telegram/scripts/sync-bot-shared.mjs`, which
+  also copies `telegram/bot/` to `supabase/functions/telegram-bot/` (Supabase only
+  deploys from there). A test fails if any copy is stale.
 - **Conversation state** (`/title` then body, `/delete` then `/confirm`, the
   numbered list behind `/get 3`) lives in `telegram_sessions`, service-role
   only. Lists expire after 30 minutes so a stale number can't hit the wrong note.

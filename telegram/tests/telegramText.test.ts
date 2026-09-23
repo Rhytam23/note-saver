@@ -10,7 +10,7 @@ import {
   textToHtml,
   timingSafeEqual,
   titleFromText,
-} from '../../../supabase/functions/_shared/text';
+} from '../bot/_shared/text';
 
 describe('telegram text helpers', () => {
   it('turns plain text into escaped editor paragraphs', () => {
