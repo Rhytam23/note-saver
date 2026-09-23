@@ -289,7 +289,7 @@ export const COMMANDS: BotCommand[] = [
   {
     name: 'unlink', group: 'Account', usage: '/unlink',
     description: 'Disconnect this chat from your account',
-    help: 'Your notes are untouched. Reconnect any time from the app: Profile > Connect Telegram.',
+    help: 'Your notes are untouched. Reconnect any time: send /start to get a new code and enter it in NoteNirman > Profile > Telegram.',
     example: '/unlink',
   },
   {
@@ -300,8 +300,8 @@ export const COMMANDS: BotCommand[] = [
   },
   {
     name: 'start', group: 'Account', usage: '/start',
-    description: 'Connect this chat to your NoteNirman account',
-    help: 'Open NoteNirman > Profile > Connect Telegram and tap the link; it opens this bot with a one-time code.',
+    description: 'Get a code to connect this chat to NoteNirman',
+    help: 'Gives you a one-time code (valid 10 minutes). Enter it in NoteNirman > Profile > Telegram and confirm. Never share the code: whoever uses it can read your notes.',
     example: '/start',
   },
 ];

@@ -22,7 +22,7 @@ type Row = Record<string, any>;
 
 const PK: Record<string, string> = {
   notes: 'id', telegram_links: 'user_id', telegram_sessions: 'chat_id',
-  telegram_link_codes: 'code', telegram_reminders: 'id', calendar_events: 'id',
+  telegram_pairing_codes: 'code', telegram_reminders: 'id', calendar_events: 'id',
 };
 
 class FakeDb {
@@ -219,10 +219,10 @@ async function post(body: unknown, headers: Record<string, string> = { 'x-telegr
 }
 
 /** Sends one message as `chat` and returns everything the bot replied with. */
-async function say(chat: number, text: string, chatType = 'private'): Promise<string> {
+async function say(chat: number, text: string, chatType = 'private', from?: Row): Promise<string> {
   vi.setSystemTime(new Date(Date.now() + 20_000)); // stay well inside the per-minute rate limit
   const before = sent.length;
-  const res = await post({ message: { chat: { id: chat, type: chatType }, text } });
+  const res = await post({ message: { chat: { id: chat, type: chatType }, text, ...(from ? { from } : {}) } });
   expect(res.status).toBe(200);
   return sent.slice(before).map((m) => m.text).join('\n---\n');
 }
@@ -274,20 +274,47 @@ describe('telegram bot: authentication and linking', () => {
     expect(await say(999, '/help')).toContain('/title');
   });
 
-  it('links a chat with a valid single-use code, then rejects reuse', async () => {
-    db.t('telegram_link_codes').push({ code: 'GOODCODE', user_id: U2, expires_at: new Date(Date.now() + 60_000).toISOString() });
-    db.users.set(U2, { email: 'two@example.com' });
-    expect(await say(C2, '/start GOODCODE')).toContain('Connected');
-    expect(db.t('telegram_links').find((l) => l.user_id === U2)?.chat_id).toBe(C2);
-    expect(db.t('telegram_link_codes')).toHaveLength(0);
-    expect(await say(333, '/start GOODCODE')).toContain('invalid or has expired');
+  it('gives an unlinked chat a pairing code, remembers who asked, and warns not to share it', async () => {
+    const reply = await say(555, '/start', 'private', { first_name: 'Asha', last_name: 'Rao', username: 'asha_r' });
+    const row = db.t('telegram_pairing_codes').find((r) => r.chat_id === 555)!;
+    expect(row.code).toMatch(/^[A-HJKMNP-Z2-9]{8}$/);
+    expect(reply).toContain(`${row.code.slice(0, 4)}-${row.code.slice(4)}`);
+    expect(reply).toContain('Profile > Telegram');
+    expect(reply).toContain('Never give this code');
+    expect(row.tg_name).toBe('Asha Rao');
+    expect(row.tg_username).toBe('asha_r');
+    expect(new Date(row.expires_at).getTime() - Date.now()).toBeLessThanOrEqual(10 * 60_000);
+    expect(new Date(row.expires_at).getTime() - Date.now()).toBeGreaterThan(9 * 60_000);
+    // asking for a code links nothing: only the app can do that, with a signed-in user.
+    expect(db.t('telegram_links').some((l) => l.chat_id === 555)).toBe(false);
   });
 
-  it('rejects an expired code and still consumes it', async () => {
-    db.t('telegram_link_codes').push({ code: 'OLD', user_id: U2, expires_at: new Date(Date.now() - 1000).toISOString() });
-    expect(await say(C2, '/start OLD')).toContain('invalid or has expired');
-    expect(db.t('telegram_link_codes')).toHaveLength(0);
-    expect(db.t('telegram_links').some((l) => l.user_id === U2)).toBe(false);
+  it('keeps exactly one live code per chat', async () => {
+    await say(555, '/start');
+    const first = db.t('telegram_pairing_codes').find((r) => r.chat_id === 555)!.code;
+    await say(555, '/start');
+    const rows = db.t('telegram_pairing_codes').filter((r) => r.chat_id === 555);
+    expect(rows).toHaveLength(1);
+    expect(rows[0].code).not.toBe(first);
+    await say(556, '/start');
+    expect(db.t('telegram_pairing_codes')).toHaveLength(2);
+  });
+
+  it('ignores anything after /start, so an old deep-link code cannot link a chat', async () => {
+    db.t('telegram_pairing_codes').push({ code: 'AAAABBBB', chat_id: 777, expires_at: new Date(Date.now() + 60_000).toISOString() });
+    const reply = await say(555, '/start AAAABBBB');
+    expect(reply).toContain('Your connect code');
+    expect(db.t('telegram_links').some((l) => l.chat_id === 555)).toBe(false);
+    expect(db.t('telegram_pairing_codes').some((r) => r.code === 'AAAABBBB')).toBe(true); // someone else's code is untouched
+  });
+
+  it('tells an already-linked chat it is connected, without creating a code', async () => {
+    expect(await say(C1, '/start')).toContain('already connected');
+    expect(db.t('telegram_pairing_codes')).toHaveLength(0);
+  });
+
+  it('points unlinked chats at /start', async () => {
+    expect(await say(999, '/notes')).toContain('Send /start');
   });
 });
 
@@ -685,10 +712,32 @@ describe('telegram bot: reminders and time', () => {
     expect(db.t('telegram_reminders').find((r) => r.id === 'later')!.sent).toBe(false);
   });
 
-  it('the scheduler also clears expired link codes', async () => {
-    db.t('telegram_link_codes').push({ code: 'STALE', user_id: U1, expires_at: new Date(Date.now() - 1000).toISOString() });
-    await handler(new Request('https://x/functions/v1/telegram-bot', { method: 'POST', headers: { 'x-cron-secret': CRON }, body: '{}' }));
-    expect(db.t('telegram_link_codes')).toHaveLength(0);
+  const runCron = () => handler(new Request('https://x/functions/v1/telegram-bot', { method: 'POST', headers: { 'x-cron-secret': CRON }, body: '{}' }));
+
+  it('the scheduler clears expired pairing codes and keeps live ones', async () => {
+    db.t('telegram_pairing_codes').push({ code: 'STALE111', chat_id: 1, expires_at: new Date(Date.now() - 1000).toISOString() });
+    db.t('telegram_pairing_codes').push({ code: 'LIVE2222', chat_id: 2, expires_at: new Date(Date.now() + 60_000).toISOString() });
+    await runCron();
+    expect(db.t('telegram_pairing_codes').map((r) => r.code)).toEqual(['LIVE2222']);
+  });
+
+  it('the scheduler welcomes a chat the app just linked, exactly once, naming the account', async () => {
+    db.users.set(U2, { email: 'newuser@example.com' });
+    db.t('telegram_links').push({ user_id: U2, chat_id: C2, timezone: 'UTC', welcomed: false });
+    await runCron();
+    const welcome = sent.filter((m) => m.chat === C2);
+    expect(welcome).toHaveLength(1);
+    expect(welcome[0].text).toContain('Connected to NoteNirman');
+    expect(welcome[0].text).toContain('ne*****@example.com');
+    expect(welcome[0].text).not.toContain('newuser@example.com');
+    expect(db.t('telegram_links').find((l) => l.user_id === U2)!.welcomed).toBe(true);
+    await runCron();
+    expect(sent.filter((m) => m.chat === C2)).toHaveLength(1);
+  });
+
+  it('does not re-welcome chats that were already welcomed', async () => {
+    await runCron();
+    expect(sent.filter((m) => m.chat === C1)).toHaveLength(0);
   });
 });
 

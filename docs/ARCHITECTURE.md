@@ -119,10 +119,11 @@ the same `notes` table as the apps, so notes written in Telegram sync to the
 phone, desktop and web through the existing sync engine with no extra sync
 code. Everything Telegram-related lives in [`telegram/`](../telegram); setup is in [`telegram/README.md`](../telegram/README.md).
 
-- **Linking:** the app (Profile > Connect Telegram, `telegram/app/telegramLink.ts`)
-  inserts a single-use 10-minute code and opens `t.me/<bot>?start=<code>`. The
-  bot looks the code up and stores `telegram_links(user_id, chat_id)`. An
-  unlinked chat can do nothing. Only `/start` and `/help` work.
+- **Linking:** the bot issues a one-time 10-minute code (`/start`); the signed-in
+  user types it into Profile > Telegram (`telegram/app/`) and confirms which
+  Telegram account it belongs to. A database function (`claim_telegram_pairing`)
+  links the caller's account to that chat and rate-limits guessing. An unlinked
+  chat can do nothing; only `/start` and `/help` work.
 - **Service role, so scoping is in code.** The function uses the service-role
   key, which bypasses RLS. Every `notes` query is filtered by the linked
   `user_id`; there is no code path that reads a note by id alone.

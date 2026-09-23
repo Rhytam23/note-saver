@@ -11,6 +11,38 @@ archived.
 
 ---
 
+## 2026-09-23 — Telegram pairing: the bot shows the code, the app takes it
+
+**Decision:** Linking now works in the direction *Telegram gives a code, the user
+types it into NoteNirman* (`/start` in the bot, then Profile > Telegram). This
+replaced the first version, where the app generated a code and opened a `t.me`
+link.
+
+**Why:** The user asked for it. It also works when Telegram's app link doesn't
+open (no `tg://` handler, embedded browsers), because the user just copies a code.
+
+**The risk this direction adds, and the fix:** anyone can start the bot and get a
+code, so a stranger could talk someone into typing the stranger's code and gain
+access to that person's notes. The app therefore previews the code first and shows
+the Telegram name and username that requested it, and the user must confirm. Also:
+codes are single-use, expire in 10 minutes, one live code per chat, and guessing
+is limited to 10 attempts per 10 minutes per user.
+
+**Where the security lives:** two Postgres functions
+(`preview_telegram_pairing`, `claim_telegram_pairing`), SECURITY DEFINER,
+callable only by signed-in users, that use `auth.uid()` so a client can never name
+which account to link. The rate limiter returns `rate_limited` instead of raising,
+because an exception would roll back the counter and the limit would never trip.
+The old `telegram_link_codes` table (which let any signed-in user insert codes) was dropped.
+
+**Verified on the live database** (in a transaction that always rolls back): not
+signed in is refused; preview shows the asker and links nothing; wrong, reused and
+expired codes fail; claim links the *caller* to the chat; repeated guessing is
+blocked even for a valid code; anon cannot call the functions. The deployed bot
+was also driven with a real update and wrote its code row correctly.
+
+---
+
 ## 2026-09-23 — Telegram bot as a fourth client
 
 **Decision:** A Telegram bot (Supabase Edge Function `telegram-bot`) that

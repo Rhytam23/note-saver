@@ -28,6 +28,7 @@ import {
 } from './_shared/text.ts';
 import { formatLocal, isValidTimezone, parseWhen, startOfLocalDay } from './_shared/reminderTime.ts';
 import { checkRate } from './_shared/rateLimit.ts';
+import { PAIRING_TTL_MS, codeFromBytes, formatCode } from './_shared/pairing.ts';
 import { extractAllFlashcards } from './_shared/generated/flashcards.ts';
 import { findBacklinks, resolveOutgoingLinks } from './_shared/generated/noteLinks.ts';
 import { NOTE_TEMPLATES } from './_shared/generated/noteTemplates.ts';
@@ -688,7 +689,7 @@ const handlers = {
     await sb.from('telegram_reminders').delete().eq('user_id', ctx.userId);
     await sb.from('telegram_links').delete().eq('chat_id', ctx.chatId);
     await sb.from('telegram_sessions').delete().eq('chat_id', ctx.chatId);
-    await send(ctx.chatId, 'Disconnected. Your notes are untouched. Reconnect any time from NoteNirman > Profile.');
+    await send(ctx.chatId, 'Disconnected. Your notes are untouched. To reconnect, send /start for a new code and enter it in NoteNirman > Profile > Telegram.');
   },
 };
 
@@ -775,34 +776,66 @@ async function handleFreeText(ctx, text) {
 
 // ---------------------------------------------------------------- linking
 
-async function handleStart(chatId, code) {
-  if (!code) {
-    const { data } = await sb.from('telegram_links').select('user_id').eq('chat_id', chatId).maybeSingle();
-    return send(chatId, data
-      ? 'This chat is already connected. Send /help to see what I can do.'
-      : 'To connect this chat, open NoteNirman > Profile > Connect Telegram and tap the link it gives you.');
+/**
+ * /start: an unlinked chat gets a one-time pairing code to type into NoteNirman
+ * (Profile > Telegram). The app shows the Telegram name/username that asked for
+ * the code and makes the user confirm, so a stranger can't get their chat linked
+ * to someone else's account by talking that person into entering the stranger's code.
+ * Any text after /start (old deep links) is ignored on purpose.
+ */
+async function handleStart(chatId, from) {
+  const { data: link } = await sb.from('telegram_links').select('user_id').eq('chat_id', chatId).maybeSingle();
+  if (link) {
+    return send(chatId, 'This chat is already connected. Send /help to see what I can do.');
   }
-  const { data: row } = await sb.from('telegram_link_codes').select('user_id, expires_at').eq('code', code).maybeSingle();
-  // Single-use: delete regardless of outcome so a leaked or expired code is dead.
-  await sb.from('telegram_link_codes').delete().eq('code', code);
-  if (!row || new Date(row.expires_at).getTime() < Date.now()) {
-    return send(chatId, 'That connect link is invalid or has expired. Generate a new one in NoteNirman.');
+
+  const displayName = [from?.first_name, from?.last_name].filter(Boolean).join(' ').slice(0, 100) || null;
+  // One live code per chat: drop the previous one, then create a fresh one.
+  await sb.from('telegram_pairing_codes').delete().eq('chat_id', chatId);
+  let code = null;
+  for (let attempt = 0; attempt < 5 && !code; attempt++) {
+    const candidate = codeFromBytes(crypto.getRandomValues(new Uint8Array(32)));
+    const { error } = await sb.from('telegram_pairing_codes').insert({
+      code: candidate,
+      chat_id: chatId,
+      tg_name: displayName,
+      tg_username: from?.username ?? null,
+      expires_at: new Date(Date.now() + PAIRING_TTL_MS).toISOString(),
+    });
+    if (!error) code = candidate;
+    else console.error('pairing code insert failed', error);
   }
-  await sb.from('telegram_links').delete().eq('user_id', row.user_id);
-  await sb.from('telegram_links').delete().eq('chat_id', chatId);
-  const { error } = await sb.from('telegram_links').insert({ user_id: row.user_id, chat_id: chatId });
-  if (error) {
-    console.error('link insert failed', error);
-    return send(chatId, 'Could not connect. Please try again.');
-  }
-  await sb.from('telegram_sessions').upsert({ chat_id: chatId, ...IDLE, last_list: null, updated_at: new Date().toISOString() });
-  await send(chatId, 'Connected! ✅\n\nStart a note with /title <title>, then send the body. /notes lists your notes, /get <title> reads one, /help shows everything.');
+  if (!code) return send(chatId, 'Could not create a code right now. Please try again in a moment.');
+
+  await send(chatId, [
+    'Your connect code:',
+    '',
+    formatCode(code),
+    '',
+    'Valid for 10 minutes. In NoteNirman, open Profile > Telegram, enter this code and confirm.',
+    '',
+    'Only enter it yourself. Never give this code to anyone else - whoever uses it can read your notes.',
+  ].join('\n'));
 }
 
 // -------------------------------------------------------------- reminders
 
 async function runScheduledJobs() {
-  await sb.from('telegram_link_codes').delete().lt('expires_at', new Date().toISOString());
+  await sb.from('telegram_pairing_codes').delete().lt('expires_at', new Date().toISOString());
+
+  // The app linked these chats; tell each one, once, that it worked.
+  const { data: fresh } = await sb.from('telegram_links').select('user_id,chat_id').eq('welcomed', false).limit(20);
+  for (const link of fresh ?? []) {
+    const { data: claimed } = await sb.from('telegram_links').update({ welcomed: true })
+      .eq('user_id', link.user_id).eq('welcomed', false).select('user_id');
+    if (!claimed?.length) continue;
+    const { data: userRes } = await sb.auth.admin.getUserById(link.user_id);
+    await send(link.chat_id,
+      `Connected to NoteNirman (${maskEmail(userRes?.user?.email)}). ✅
+
+Start a note with /title <title>, then send the body. /notes lists your notes, /get <title> reads one, /help shows everything.`);
+  }
+
   const { data } = await sb.from('telegram_reminders').select('id,chat_id,body')
     .eq('sent', false).lte('due_at', new Date().toISOString()).order('due_at', { ascending: true }).limit(50);
   for (const r of data ?? []) {
@@ -845,7 +878,7 @@ serve(async (req) => {
     const command = rawCommand.startsWith('/') ? rawCommand.slice(1).split('@')[0].toLowerCase() : null;
     const arg = rest.join(' ').trim();
 
-    if (command === 'start') { await handleStart(chatId, arg); return new Response('ok'); }
+    if (command === 'start') { await handleStart(chatId, msg.from); return new Response('ok'); }
     if (command === 'help') {
       const detail = arg ? renderHelpFor(arg) : null;
       await send(chatId, arg ? detail ?? `No command called "${arg}". Send /help for the list.` : renderHelpOverview());
@@ -854,7 +887,7 @@ serve(async (req) => {
 
     const { data: link } = await sb.from('telegram_links').select('user_id,timezone').eq('chat_id', chatId).maybeSingle();
     if (!link) {
-      await send(chatId, 'This chat is not connected to a NoteNirman account yet. Open NoteNirman > Profile > Connect Telegram.');
+      await send(chatId, 'This chat is not connected to a NoteNirman account yet. Send /start to get a connect code, then enter it in NoteNirman > Profile > Telegram.');
       return new Response('ok');
     }
 
