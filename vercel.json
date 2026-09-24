@@ -22,6 +22,10 @@
                     "value": "max-age=31536000; includeSubDomains"
                 },
                 {
+                    "key": "X-Robots-Tag",
+                    "value": "noai, noimageai"
+                },
+                {
                     "key": "Referrer-Policy",
                     "value": "strict-origin-when-cross-origin"
                 },

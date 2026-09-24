@@ -11,6 +11,16 @@ archived.
 
 ---
 
+## 2026-09-24 - AI crawlers blocked (robots.txt, X-Robots-Tag, Vercel rule); Anubis not used
+
+**Decision.** `public/robots.txt` now Disallows the known AI crawlers (GPTBot, ClaudeBot, PerplexityBot, CCBot, Google-Extended, Applebot-Extended, Bytespider and others) while search engines stay allowed. `vercel.json` sends `X-Robots-Tag: noai, noimageai`. `public/llms.txt` was removed because it existed only to invite AI tools. The Vercel dashboard's AI Bots firewall rule is turned on manually (Project > Firewall > Bot Management).
+
+**Why not Anubis.** Anubis (TecharoHQ/anubis) is a proof-of-work reverse proxy that must run as a server in front of the site. It cannot sit in front of a *.vercel.app address (needs a custom domain and a container host), it makes every first-time visitor wait on a challenge page, and it would need exemptions for the apps' update check (`/downloads/version.json`), installers and search engines. Reconsider if scrapers that ignore robots.txt become a real problem and there is a custom domain.
+
+**Reverses** the earlier decision (SEO/GEO entry) that explicitly allowed AI crawlers so answer engines could cite the site. robots.txt and headers are requests, not enforcement: crawlers that lie about who they are are not stopped by them.
+
+---
+
 ## 2026-09-24 - Fonts: Fraunces headings + Poppins body, self-hosted
 
 **Decision.** Headings and the wordmark use Fraunces (a warm serif), body text stays Poppins, and JetBrains Mono is kept only for code and numerals. All three are self-hosted through `@fontsource` packages (imported in `src/index.tsx`) instead of Google Fonts. Tailwind's `font-serif` now maps to Fraunces.

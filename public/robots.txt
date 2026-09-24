@@ -1,38 +1,69 @@
+# Search engines (Google, Bing, etc.) are welcome.
 User-agent: *
 Allow: /
 
-# AI crawlers, explicitly allowed so answer engines can read and cite this site.
+# AI training and answer-engine crawlers are not.
 User-agent: GPTBot
-Allow: /
+Disallow: /
 
 User-agent: ChatGPT-User
-Allow: /
+Disallow: /
 
 User-agent: OAI-SearchBot
-Allow: /
-
-User-agent: Google-Extended
-Allow: /
+Disallow: /
 
 User-agent: ClaudeBot
-Allow: /
+Disallow: /
+
+User-agent: Claude-User
+Disallow: /
+
+User-agent: Claude-SearchBot
+Disallow: /
 
 User-agent: anthropic-ai
-Allow: /
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
 
 User-agent: PerplexityBot
-Allow: /
+Disallow: /
 
 User-agent: Perplexity-User
-Allow: /
+Disallow: /
 
 User-agent: CCBot
-Allow: /
+Disallow: /
 
 User-agent: Bytespider
-Allow: /
+Disallow: /
 
 User-agent: Applebot-Extended
-Allow: /
+Disallow: /
+
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: meta-externalagent
+Disallow: /
+
+User-agent: FacebookBot
+Disallow: /
+
+User-agent: cohere-ai
+Disallow: /
+
+User-agent: Diffbot
+Disallow: /
+
+User-agent: ImagesiftBot
+Disallow: /
+
+User-agent: Omgilibot
+Disallow: /
+
+User-agent: Timpibot
+Disallow: /
 
 Sitemap: https://notenirman.vercel.app/sitemap.xml

@@ -216,7 +216,7 @@ note-nirman/
 │   └── migrations/               # Postgres schema + RLS policies
 ├── src-tauri/                    # Windows desktop shell
 ├── android/                       # Android shell
-├── public/                        # Static assets, PWA manifest/service worker, SEO files (robots.txt, sitemap.xml, llms.txt)
+├── public/                        # Static assets, PWA manifest/service worker, SEO files (robots.txt, sitemap.xml)
 └── docs/                          # You are here
 ```
 

@@ -112,7 +112,7 @@ The manifest declares the `notenirman://` scheme (packaged apps cannot register 
 
 - **Short description**: "Offline-first notes app for students — write
   anywhere, sync when you can."
-- **Description**: adapt `public/llms.txt` or the landing page's feature
+- **Description**: adapt the landing page's feature
   list (`src/components/LandingPage.tsx`'s `FEATURES` array) — both are
   already accurate to what ships, per [DECISIONS.md](./DECISIONS.md).
 - **Privacy policy URL**: `https://notenirman.vercel.app/privacy` (Store
