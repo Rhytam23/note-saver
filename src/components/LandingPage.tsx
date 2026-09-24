@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { motion, useTransform } from 'framer-motion';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, useScroll, useMotionValueEvent, AnimatePresence } from 'framer-motion';
 import type { Theme } from '../types';
 import { SunIcon, MoonIcon } from './Icons';
 import { useSeason } from '../contexts/SeasonalContext';
 import { HeroProductPreview, HERO_THEMES, SeasonalThemeMode } from './HeroProductPreview';
 import { NoteNirmanLogo } from './NoteNirmanLogo';
-import { SeasonalCardStack } from './SeasonalCardStack';
+import { SeasonalShowcase, YEAR_TOUR } from './SeasonalShowcase';
 import GetTheApp from './GetTheApp';
 import Footer from './Footer';
 import { useMotionCapability } from '../hooks/useMotionCapability';
@@ -101,13 +101,38 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   // just to background accents, so nothing shifts under a reader or a click.
   const featuresParallax = useParallax(motionTier, [-30, 30]);
   const themesParallax = useParallax(motionTier, [-20, 20]);
-  const themesScale = useTransform(
-    themesParallax.scrollYProgress,
-    [0, 0.5],
-    motionTier === 'full' ? [0.98, 1] : [1, 1]
+
+  // Themes section: while the section is pinned, scrolling walks the preview through the year.
+  // Tapping a swatch takes over until the reader scrolls out of the section and back.
+  const [previewSeason, setPreviewSeason] = useState<SeasonalThemeMode>(activeSeason);
+  const userPicked = useRef(false);
+  const themesWrapRef = useRef<HTMLDivElement>(null);
+  const [isDesktop, setIsDesktop] = useState(
+    () => typeof window !== 'undefined' && !!window.matchMedia && window.matchMedia('(min-width: 1024px)').matches
   );
+  useEffect(() => {
+    if (!window.matchMedia) return;
+    const mq = window.matchMedia('(min-width: 1024px)');
+    const onChange = () => setIsDesktop(mq.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+  const pinned = isDesktop && motionTier === 'full';
+  const { scrollYProgress: tourProgress } = useScroll({ target: themesWrapRef, offset: ['start start', 'end end'] });
+  useMotionValueEvent(tourProgress, 'change', p => {
+    if (!pinned) return;
+    if (p <= 0.001 || p >= 0.999) userPicked.current = false;
+    if (userPicked.current) return;
+    const next = YEAR_TOUR[Math.min(YEAR_TOUR.length - 1, Math.max(0, Math.floor(p * YEAR_TOUR.length)))];
+    setPreviewSeason(prev => (prev === next ? prev : next));
+  });
+  useEffect(() => {
+    if (contextSeason && HERO_THEMES[contextSeason]) setPreviewSeason(contextSeason as SeasonalThemeMode);
+  }, [contextSeason]);
 
   const handleSeasonSelect = (seasonId: SeasonalThemeMode) => {
+    userPicked.current = true;
+    setPreviewSeason(seasonId);
     setActiveSeason(seasonId);
     setSeasonalTheme(seasonId);
   };
@@ -142,7 +167,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
       onDoubleClick={handleDoubleClick}
-      className="flex-1 flex flex-col w-full cursor-default relative bg-transparent text-gray-900 dark:text-gray-100 overflow-x-hidden min-h-screen"
+      className="flex-1 flex flex-col w-full cursor-default relative bg-transparent text-gray-900 dark:text-gray-100 overflow-x-clip min-h-screen"
     >
       <header className="sticky top-0 z-40 backdrop-blur-md bg-white/80 dark:bg-[#090b10]/80 border-b border-gray-200/70 dark:border-gray-800/70">
         <div className="max-w-6xl 2xl:max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
@@ -340,65 +365,113 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </section>
 
         {/* Themes: the seasonal system. Automatic by default - this picker is a live preview,
-            not a persisted account setting (that lives in Profile & Settings once signed in). */}
-        <section id="themes" className="relative overflow-hidden">
-          <div ref={themesParallax.ref} className="max-w-6xl 2xl:max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-80px' }}
-              transition={{ duration: 0.5 }}
-              className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start"
+            not a persisted account setting (that lives in Profile & Settings once signed in).
+            On desktop the section stays pinned while the reader scrolls and the preview walks
+            through the year; overflow-clip (not hidden) keeps position: sticky working. */}
+        <section id="themes" className="relative overflow-clip">
+          <div ref={themesWrapRef} className={pinned ? 'h-[300vh]' : ''}>
+            <div
+              ref={themesParallax.ref}
+              className={`max-w-6xl 2xl:max-w-7xl mx-auto px-4 sm:px-6 ${
+                pinned ? 'sticky top-16 h-[calc(100vh-4rem)] flex items-center' : 'py-16 sm:py-24'
+              }`}
             >
-            <div className="lg:col-span-5">
-              <h2 className={`text-3xl sm:text-4xl font-serif font-bold tracking-tight ${colors.primaryText}`}>
-                A workspace that follows the calendar
-              </h2>
-              <p className={`mt-4 text-lg ${colors.secondaryText}`}>
-                NoteNirman picks a theme automatically based on today&rsquo;s date and Indian festivals &mdash; no setup needed. Tap a swatch to preview it right here, and once you&rsquo;re signed in, set a favourite permanently from Profile &amp; Settings.
-              </p>
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center w-full">
+                <motion.div
+                  initial={{ opacity: 0, x: -24 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: '-80px' }}
+                  transition={{ duration: 0.6 }}
+                  className="lg:col-span-5"
+                >
+                  <p className="text-sm font-semibold tracking-wide uppercase" style={{ color: accent }}>Themes</p>
+                  <h2 className={`mt-2 text-3xl sm:text-4xl font-serif font-bold tracking-tight ${colors.primaryText}`}>
+                    A workspace that follows the calendar
+                  </h2>
+                  <p className={`mt-4 text-lg leading-relaxed ${colors.primaryText} opacity-80`}>
+                    NoteNirman picks a theme automatically based on today&rsquo;s date and Indian festivals &mdash; no setup needed. Tap a swatch to preview it, and once you&rsquo;re signed in, set a favourite permanently from Profile &amp; Settings.
+                  </p>
+
+                  {pinned && (
+                    <div className="mt-8" aria-hidden="true">
+                      <div className="h-1 rounded-full bg-black/10 dark:bg-white/10 overflow-hidden">
+                        <motion.div
+                          className="h-full origin-left rounded-full"
+                          style={{ scaleX: tourProgress, backgroundColor: accent }}
+                        />
+                      </div>
+                      <div className={`mt-2 flex items-center justify-between text-xs ${colors.primaryText} opacity-70`}>
+                        <span>Jan</span>
+                        <AnimatePresence mode="wait" initial={false}>
+                          <motion.span
+                            key={previewSeason}
+                            initial={{ opacity: 0, y: 4 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -4 }}
+                            transition={{ duration: 0.18 }}
+                            className="font-semibold"
+                          >
+                            {HERO_THEMES[previewSeason].themeLabel}
+                          </motion.span>
+                        </AnimatePresence>
+                        <span>Dec</span>
+                      </div>
+                      <p className={`mt-3 text-sm ${colors.primaryText} opacity-60`}>Keep scrolling to move through the year.</p>
+                    </div>
+                  )}
+                </motion.div>
+
+                <motion.div
+                  className="lg:col-span-7 relative"
+                  initial={{ opacity: 0, x: 24 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: '-80px' }}
+                  transition={{ duration: 0.6, delay: 0.1 }}
+                >
+                  {/* Decorative-only glow; takes the parallax y so the buttons never move under a cursor. */}
+                  <motion.div
+                    aria-hidden="true"
+                    className="absolute -inset-x-6 -top-6 h-48 rounded-full blur-3xl opacity-25 pointer-events-none transition-colors duration-700"
+                    style={{ backgroundColor: HERO_THEMES[previewSeason].accentHex, y: themesParallax.y }}
+                  />
+                  <div className="relative mb-8">
+                    <SeasonalShowcase season={previewSeason} />
+                  </div>
+                  <div role="radiogroup" aria-label="Preview a theme" className="relative flex flex-wrap gap-2">
+                    {ALL_SEASONAL_THEMES.map((s, i) => {
+                      const isActive = previewSeason === s.id;
+                      const swatch = HERO_THEMES[s.id].accentHex;
+                      return (
+                        <motion.button
+                          key={s.id}
+                          role="radio"
+                          aria-checked={isActive}
+                          onClick={() => handleSeasonSelect(s.id)}
+                          initial={{ opacity: 0, y: 14 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true, margin: '-40px' }}
+                          transition={{ duration: 0.35, delay: i * 0.04 }}
+                          className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-md border text-sm font-medium transition-colors ${
+                            isActive
+                              ? 'border-transparent text-gray-950'
+                              : 'border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-900'
+                          }`}
+                          style={isActive ? { backgroundColor: swatch } : undefined}
+                        >
+                          <span
+                            className={`h-3 w-3 rounded-full ${isActive ? 'bg-gray-950/80' : 'border border-black/10'}`}
+                            style={isActive ? undefined : { backgroundColor: swatch }}
+                            aria-hidden="true"
+                          />
+                          {s.label}
+                        </motion.button>
+                      );
+                    })}
+                  </div>
+                  <p className={`mt-3 text-sm ${colors.primaryText} opacity-70`}>Just previewing this page &mdash; it doesn&rsquo;t change your account.</p>
+                </motion.div>
+              </div>
             </div>
-            <motion.div className="lg:col-span-7 relative" style={{ scale: themesScale }}>
-              {/* Decorative-only accent behind the stack; takes the parallax y so the
-                  swatch buttons themselves never move under a reader's cursor. */}
-              <motion.div
-                aria-hidden="true"
-                className="absolute -inset-x-6 -top-6 h-40 rounded-full blur-3xl opacity-20 pointer-events-none"
-                style={{ backgroundColor: accent, y: themesParallax.y }}
-              />
-              <div className="relative mb-6 max-w-sm">
-                <SeasonalCardStack activeSeason={activeSeason} />
-              </div>
-              <div role="radiogroup" aria-label="Preview a theme" className="relative flex flex-wrap gap-2">
-                {ALL_SEASONAL_THEMES.map(s => {
-                  const isActive = activeSeason === s.id;
-                  const swatch = HERO_THEMES[s.id].accentHex;
-                  return (
-                    <button
-                      key={s.id}
-                      role="radio"
-                      aria-checked={isActive}
-                      onClick={() => handleSeasonSelect(s.id)}
-                      className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-md border text-sm font-medium transition-colors ${
-                        isActive
-                          ? 'border-transparent text-gray-950'
-                          : 'border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-900'
-                      }`}
-                      style={isActive ? { backgroundColor: swatch } : undefined}
-                    >
-                      <span
-                        className="h-3 w-3 rounded-full border border-black/10"
-                        style={{ backgroundColor: swatch }}
-                        aria-hidden="true"
-                      />
-                      {s.label}
-                    </button>
-                  );
-                })}
-              </div>
-              <p className={`mt-3 text-sm ${colors.secondaryText}`}>Just previewing this page &mdash; it doesn&rsquo;t change your account.</p>
-            </motion.div>
-            </motion.div>
           </div>
         </section>
 
