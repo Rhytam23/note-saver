@@ -1,6 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { GitHubIcon, BuyMeACoffeeIcon, PayPalIcon, InstagramIcon, MailIcon, DiyaIcon } from './Icons';
+import { GitHubIcon, BuyMeACoffeeIcon, PayPalIcon, InstagramIcon, MailIcon, DiyaIcon, TelegramIcon } from './Icons';
+import { NoteNirmanLogo } from './NoteNirmanLogo';
+import { getTelegramBotLink, getTelegramBotUsername } from '../../telegram/app/telegramLink';
 import { useSeason } from '../contexts/SeasonalContext';
 
 import { useRouter } from '../contexts/RouterContext';
@@ -22,6 +24,12 @@ const socialLinks = [
 
 const Footer: React.FC<FooterProps> = ({ variant = 'simple', onPrivacyClick, onTermsClick, onFAQClick }) => {
   const { colors, theme } = useSeason();
+  // Only shown once the bot is configured (VITE_TELEGRAM_BOT_USERNAME), like Profile > Telegram.
+  const telegramLink = getTelegramBotLink();
+  const telegramName = getTelegramBotUsername();
+  const allSocialLinks = telegramLink
+    ? [...socialLinks.slice(0, 3), { href: telegramLink, label: 'Telegram bot', icon: <TelegramIcon className="h-6 w-6" /> }, ...socialLinks.slice(3)]
+    : socialLinks;
   const { pushPath } = useRouter();
   const isSummer = theme === 'summer';
   const isNavratri = theme === 'navratri';
@@ -34,12 +42,13 @@ const Footer: React.FC<FooterProps> = ({ variant = 'simple', onPrivacyClick, onT
         className={`w-full p-4 border-t ${colors.border} flex items-center justify-between transition-colors`}
       >
         <div className="flex items-center space-x-6">
-            {socialLinks.map(link => (
+            {allSocialLinks.map(link => (
                 <a
                     key={link.label}
                     href={link.href}
                     target={link.label !== 'Email' ? '_blank' : undefined}
                     rel="noopener noreferrer"
+                    aria-label={link.label}
                     className={`transition-colors duration-200 ${colors.secondaryText} hover:text-accent`}
                 >
                     {link.icon}
@@ -62,9 +71,9 @@ const Footer: React.FC<FooterProps> = ({ variant = 'simple', onPrivacyClick, onT
     >
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 text-left">
         <div className="space-y-4">
-          <div className="flex items-center space-x-2">
-            <span className="text-3xl">📄</span>
-            <h2 className={`text-2xl font-bold font-mono ${colors.primaryText}`}>Notenirman</h2>
+          <div className="flex items-center space-x-3">
+            <NoteNirmanLogo size="lg" />
+            <h2 className={`text-2xl font-bold font-mono ${colors.primaryText}`}>NoteNirman</h2>
           </div>
           <p className={`text-sm ${colors.secondaryText} uppercase tracking-widest`}>Crafted for Thoughts</p>
           {isNavratri && <DiyaIcon className="h-8 w-8 text-amber-400" />}
@@ -76,6 +85,9 @@ const Footer: React.FC<FooterProps> = ({ variant = 'simple', onPrivacyClick, onT
                 <li><a href="#" className="hover:text-accent">Features</a></li>
                 <li><a href="#" className="hover:text-accent">Smart Search</a></li>
                 <li><a href="#" className="hover:text-accent">AI Assistance</a></li>
+                {telegramLink && (
+                    <li><a href={telegramLink} target="_blank" rel="noopener noreferrer" className="hover:text-accent">Telegram Bot (@{telegramName})</a></li>
+                )}
             </ul>
         </div>
 
@@ -124,8 +136,8 @@ const Footer: React.FC<FooterProps> = ({ variant = 'simple', onPrivacyClick, onT
         <div className="space-y-4">
             <h3 className={`font-bold text-sm uppercase tracking-wider ${colors.primaryText}`}>Connect</h3>
             <div className="flex flex-wrap gap-4">
-                {socialLinks.map(link => (
-                    <a key={link.label} href={link.href} target="_blank" rel="noopener noreferrer" className={`${colors.secondaryText} hover:text-accent`}>
+                {allSocialLinks.map(link => (
+                    <a key={link.label} href={link.href} target="_blank" rel="noopener noreferrer" aria-label={link.label} className={`${colors.secondaryText} hover:text-accent`}>
                         {link.icon}
                     </a>
                 ))}

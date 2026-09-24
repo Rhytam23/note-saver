@@ -50,7 +50,15 @@ const faqs = [
     },
     {
         question: "Is my data secure, and can I lock a note?",
-        answer: "Your notes sync to a private Supabase database tied to your account, reached over an encrypted connection. You can also lock any individual note with its own passphrase (AES-256 encryption) so its content is unreadable without it — note that a locked note cannot be recovered if you forget that passphrase."
+        answer: "Your notes sync to a private Supabase database tied to your account, reached over an encrypted connection. You can also lock any individual note with its own passphrase (AES-256 encryption) so its content is unreadable without it — note that a locked note cannot be recovered if you forget that passphrase. If you connect the Telegram bot, locked notes are never read or shown there. See the Privacy Policy for exactly what the bot stores."
+    },
+    {
+        question: "Can I use Notenirman from Telegram?",
+        answer: "Yes. There is an optional Telegram bot: send it /start to get a one-time code, then enter that code in Profile > Telegram in the app and confirm which Telegram account it belongs to. After that you can write notes, search, set reminders and more from Telegram, and everything syncs with the app. Locked notes are never shown in Telegram, and you can disconnect at any time. Telegram chats are not end-to-end encrypted, so avoid sending highly sensitive information to the bot."
+    },
+    {
+        question: "What is an 'Emergency' note in Telegram?",
+        answer: "If you message the bot without a command, it saves your text as a note titled Emergency so nothing is lost (up to 3 per day). Rename it in the app within 24 hours to keep it; otherwise it is moved to Trash, where you can still restore it for 30 days."
     },
     {
         question: "What happens if I delete a note by accident?",

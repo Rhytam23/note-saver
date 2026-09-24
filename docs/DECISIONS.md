@@ -11,6 +11,18 @@ archived.
 
 ---
 
+## 2026-09-24 - Telegram in the footer and the legal pages; disconnect cleans up
+
+**Decision.** The footer uses the real logo (was a 📄 emoji) and links to the bot (icon + "Telegram Bot" link, shown only when `VITE_TELEGRAM_BOT_USERNAME` is set). Privacy Policy gains a Telegram section (what is stored, where it goes, locked notes, how to disconnect), the Terms gain a Telegram section (code security, Emergency notes, fair use, no guarantees, not affiliated with Telegram), and the FAQ has two Telegram entries.
+
+**Why.** The bot processes personal data through a third party (Telegram, not end-to-end encrypted) and can auto-trash notes, so the policy has to say so. The text was written from what the code actually stores (chat id, temporary name/username for pairing, messages that become notes, reminders and time zone, working state, rate counter).
+
+**Bug fixed on the way.** The app's Disconnect button deleted only the link row, so pending reminders would still have been sent to that chat and session rows stayed. Migration `20260924000000_telegram_unlink_cleanup.sql` adds a trigger on `telegram_links` delete that removes the user's reminders and the chat's session, which also covers `/unlink` and account-deletion cascades. Verified on the live DB in a rolled-back transaction.
+
+**Not legal advice.** This is a plain-language description of the behaviour, not reviewed by a lawyer. Also not covered by this change: the app calls public IP-geolocation services (ipwho.is, geojs.io, ipapi.co, from `locationService.ts`) and the policy does not mention that; worth adding.
+
+---
+
 ## 2026-09-24 - Telegram "Emergency" notes for plain messages
 
 **Decision.** A plain message with no command (and no multi-step input in progress) is saved as a note titled "Emergency" with the reserved tag `emergency`. The bot tells the user to rename it in the app within 24 hours. The scheduler (per-minute cron) moves notes that are still titled "Emergency" after 24 hours to the trash (soft delete, recoverable with /trash and /restore) and messages the user; renamed ones just lose the tag. Limit: 3 per rolling 24 hours per user.
