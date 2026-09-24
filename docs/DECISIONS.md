@@ -11,6 +11,16 @@ archived.
 
 ---
 
+## 2026-09-24 - Fonts: Fraunces headings + Poppins body, self-hosted
+
+**Decision.** Headings and the wordmark use Fraunces (a warm serif), body text stays Poppins, and JetBrains Mono is kept only for code and numerals. All three are self-hosted through `@fontsource` packages (imported in `src/index.tsx`) instead of Google Fonts. Tailwind's `font-serif` now maps to Fraunces.
+
+**Why.** `font-serif` was used in 32 places but no serif was ever defined or loaded, so each device showed its own default. In-app titles were JetBrains Mono bold, so the landing page and the app looked like different products. Self-hosting means the fonts work offline in the Windows and Android apps (the product is offline-first) and no request goes to Google on each visit.
+
+**Trade-offs.** Fraunces has no Devanagari, so a Hindi heading falls back to a system serif (Poppins body text covers Devanagari). The CSP still allows fonts.googleapis.com / fonts.gstatic.com; it can be tightened. The note editor body and PDF export are unchanged.
+
+---
+
 ## 2026-09-24 - Telegram in the footer and the legal pages; disconnect cleans up
 
 **Decision.** The footer uses the real logo (was a 📄 emoji) and links to the bot (icon + "Telegram Bot" link, shown only when `VITE_TELEGRAM_BOT_USERNAME` is set). Privacy Policy gains a Telegram section (what is stored, where it goes, locked notes, how to disconnect), the Terms gain a Telegram section (code security, Emergency notes, fair use, no guarantees, not affiliated with Telegram), and the FAQ has two Telegram entries.

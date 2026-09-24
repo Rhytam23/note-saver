@@ -179,7 +179,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onBackToHome, mode }) => {
         className={`w-full max-w-md p-6 sm:p-8 rounded-2xl shadow-lg border backdrop-blur-lg ${colors.bgSimple} ${colors.border} mt-12 sm:mt-0`}
       >
         <div className="text-center mb-8">
-          <h1 className={`text-3xl font-mono font-bold ${colors.primaryText} mb-2 flex items-center justify-center`}>
+          <h1 className={`text-3xl font-serif font-bold ${colors.primaryText} mb-2 flex items-center justify-center`}>
             {isForgotPasswordView ? 'Reset Password' : (isLoginView ? 'Welcome Back' : 'Join Notenirman')}
           </h1>
           <p className={colors.secondaryText}>

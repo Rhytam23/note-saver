@@ -100,7 +100,7 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, customTags, onSelectNote, onD
         />
       )}
       <div className="p-4 sm:p-6 flex-1">
-        <h3 className={`text-base sm:text-lg font-mono font-bold ${colors.primaryText} truncate flex items-center`}>
+        <h3 className={`text-base sm:text-lg font-serif font-bold ${colors.primaryText} truncate flex items-center`}>
           {note.priority && note.priority !== 'none' && (
             <span title={priorityStyles[note.priority].title}>
               <FlagIcon

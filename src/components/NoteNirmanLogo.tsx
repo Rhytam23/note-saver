@@ -28,7 +28,7 @@ export const NoteNirmanLogo: React.FC<NoteNirmanLogoProps> = ({
         className={`${sizeMap[size]} rounded-lg object-contain drop-shadow-sm select-none`}
       />
       {showText && (
-        <span className={`font-mono font-bold tracking-tight select-none ${textClassName}`}>
+        <span className={`font-serif font-bold tracking-tight select-none ${textClassName}`}>
           NoteNirman
         </span>
       )}

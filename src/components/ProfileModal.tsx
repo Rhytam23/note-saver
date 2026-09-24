@@ -347,7 +347,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose, onLogout, on
         className="bg-surface-light dark:bg-surface rounded-2xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden border border-divider-light dark:border-divider backdrop-blur-lg max-h-[90vh]"
       >
         <header className="p-4 flex items-center justify-between border-b border-divider-light dark:border-divider">
-          <h2 className={`text-xl font-mono font-bold ${colors.primaryText}`}>Profile</h2>
+          <h2 className={`text-xl font-serif font-bold ${colors.primaryText}`}>Profile</h2>
           <button onClick={onClose} className={`p-2 rounded-full ${colors.hover} ${colors.secondaryText}`}>
             <CloseIcon className="h-6 w-6" />
           </button>

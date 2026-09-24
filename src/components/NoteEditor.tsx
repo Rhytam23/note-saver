@@ -455,7 +455,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onClose, allTags,
             <button onClick={onClose} className={`p-2 rounded-full md:hidden ${colors.hover}`}>
               <ChevronDownIcon className="h-6 w-6 rotate-90" />
             </button>
-            <h2 className="text-lg md:text-xl font-mono font-bold truncate">Edit Note</h2>
+            <h2 className="text-lg md:text-xl font-serif font-bold truncate">Edit Note</h2>
           </div>
           <div className="flex items-center space-x-2">
             {/* Voice Dictation Button */}

@@ -49,7 +49,7 @@ const CookiePreferences: React.FC = () => {
           <ChevronLeftIcon className="h-6 w-6" />
           <span className="font-medium">Back</span>
         </button>
-        <h1 className={`text-xl font-mono font-bold ${colors.primaryText}`}>Cookie Preferences</h1>
+        <h1 className={`text-xl font-serif font-bold ${colors.primaryText}`}>Cookie Preferences</h1>
       </header>
 
       <main className="max-w-4xl w-full mx-auto flex-1">

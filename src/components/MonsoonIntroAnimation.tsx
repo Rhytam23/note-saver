@@ -64,7 +64,7 @@ const MonsoonIntroAnimation: React.FC<IntroAnimationProps> = ({ onAnimationCompl
                 transition={{ duration: 1, delay: 0.5 }}
                 className="text-center z-10 text-white"
             >
-                <h1 className="text-4xl md:text-6xl font-mono font-bold mb-2">Monsoon Season</h1>
+                <h1 className="text-4xl md:text-6xl font-serif font-bold mb-2">Monsoon Season</h1>
                 <p className="text-lg text-blue-200">Let the rhythm of rain inspire you 🌧️</p>
             </motion.div>
         </motion.div>

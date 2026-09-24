@@ -101,7 +101,7 @@ const PasswordReset: React.FC = () => {
         ) : (
           <div className="space-y-6">
             <div className="text-center space-y-2">
-              <h1 className={`text-2xl font-bold font-mono ${colors.primaryText}`}>Create New Password</h1>
+              <h1 className={`text-2xl font-bold font-serif ${colors.primaryText}`}>Create New Password</h1>
               <p className={`text-xs ${colors.secondaryText}`}>
                 Please enter and confirm your new secure password.
               </p>

@@ -28,6 +28,7 @@ export default {
             },
             fontFamily: {
                 sans: ['Poppins', 'sans-serif'],
+                serif: ['"Fraunces Variable"', 'Fraunces', 'Georgia', 'serif'],
                 mono: ['"JetBrains Mono"', 'monospace'],
             },
             boxShadow: {

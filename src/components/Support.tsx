@@ -33,7 +33,7 @@ const Support: React.FC = () => {
           <ChevronLeftIcon className="h-6 w-6" />
           <span className="font-medium">Back</span>
         </button>
-        <h1 className={`text-xl font-mono font-bold ${colors.primaryText}`}>Support Center</h1>
+        <h1 className={`text-xl font-serif font-bold ${colors.primaryText}`}>Support Center</h1>
       </header>
 
       <main className="max-w-5xl w-full mx-auto flex-1 space-y-8">
