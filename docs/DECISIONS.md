@@ -11,6 +11,18 @@ archived.
 
 ---
 
+## 2026-09-25 - Native apps were embedding the previous release (v0.1.3 came out at 60 MB)
+
+**Symptom.** v0.1.3 .exe / .msi / .apk were 60 MB; v0.1.2 was 27 MB.
+
+**Root cause.** The self-updating landing page keeps the latest installers in `public/downloads/` (~57 MB). Vite copies `public/` into `dist/`, and `dist/` is what the native apps embed, so each native build contained the previous release inside itself and every release would have roughly doubled.
+
+**Fix.** Both native jobs in `release.yml` delete `public/downloads` in the runner's checkout right after `npm ci`. The web build on Vercel is unaffected, and the publish job runs in its own checkout. Measured locally: dist is 62 MB with the folder and 7 MB without.
+
+**Note.** v0.1.3 works (its Supabase guard passed) but is bloated; the fix ships from the next tag.
+
+---
+
 ## 2026-09-25 - Windows app shipped without its backend URL ("Failed to fetch" on sign up)
 
 **Symptom.** Store certification testers on Windows: Sign up shows "Failed to fetch".
