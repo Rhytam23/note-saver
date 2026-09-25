@@ -18,6 +18,16 @@ jobs:
     name: Build Windows Application
     runs-on: windows-latest
 
+    # Job-level on purpose: tauri-action runs `npm run build` again (beforeBuildCommand) and that
+    # second build is the one embedded in the .exe/.msi. When these were set on the earlier
+    # "Build Web Application" step only, the shipped Windows app was built with NO Supabase URL and
+    # every sign-up/sign-in failed with "Failed to fetch".
+    env:
+      VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || vars.VITE_SUPABASE_URL || 'https://tcisqeieyyhdlfwvvsec.supabase.co' }}
+      VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY || vars.VITE_SUPABASE_ANON_KEY || 'sb_publishable_GgCh1LuEfnCuWnRjDccyWA_i4GRP8N5' }}
+      VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID || vars.VITE_GOOGLE_CLIENT_ID || '699121691348-4rhtqociutiobvgfbq94udhre0b0tsq3.apps.googleusercontent.com' }}
+      VITE_TELEGRAM_BOT_USERNAME: ${{ vars.VITE_TELEGRAM_BOT_USERNAME || 'notenirman_bot' }}
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -50,26 +60,29 @@ jobs:
         run: npm ci
 
       - name: Build Web Application
-        env:
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || vars.VITE_SUPABASE_URL || 'https://tcisqeieyyhdlfwvvsec.supabase.co' }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY || vars.VITE_SUPABASE_ANON_KEY || 'sb_publishable_GgCh1LuEfnCuWnRjDccyWA_i4GRP8N5' }}
-          VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID || vars.VITE_GOOGLE_CLIENT_ID || '699121691348-4rhtqociutiobvgfbq94udhre0b0tsq3.apps.googleusercontent.com' }}
-          VITE_TELEGRAM_BOT_USERNAME: ${{ vars.VITE_TELEGRAM_BOT_USERNAME || 'notenirman_bot' }}
         run: npm run build
 
       - name: Build Tauri Desktop Application
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # tauri.conf.json's beforeBuildCommand rebuilds the web assets here, so
-          # the (public) bot username must be visible to this step as well.
-          VITE_TELEGRAM_BOT_USERNAME: ${{ vars.VITE_TELEGRAM_BOT_USERNAME || 'notenirman_bot' }}
+          # The VITE_* build settings come from the job-level env above.
         with:
           tagName: ${{ github.ref_name }}
           releaseName: 'NoteNirman ${{ github.ref_name }}'
           releaseBody: 'NoteNirman Automated Release ${{ github.ref_name }}'
           releaseDraft: false
           prerelease: false
+
+      - name: Verify Supabase settings are inside the built web assets
+        shell: pwsh
+        # Fails the job (before the MSIX and artifacts are trusted) if the frontend that got embedded in
+        # the app was built without the Supabase URL - the bug that made Windows sign-up fail.
+        run: |
+          if (-not (Select-String -Path dist/assets/*.js -SimpleMatch -Pattern $env:VITE_SUPABASE_URL -Quiet)) {
+            throw "dist/ does not contain VITE_SUPABASE_URL: the app would ship without a backend."
+          }
+          Write-Host "OK: Supabase URL is baked into dist/"
 
       - name: Collect Windows Artifacts
         shell: pwsh
@@ -165,6 +178,13 @@ jobs:
           VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID || vars.VITE_GOOGLE_CLIENT_ID || '699121691348-4rhtqociutiobvgfbq94udhre0b0tsq3.apps.googleusercontent.com' }}
           VITE_TELEGRAM_BOT_USERNAME: ${{ vars.VITE_TELEGRAM_BOT_USERNAME || 'notenirman_bot' }}
         run: npm run build
+
+      - name: Verify Supabase settings are inside the built web assets
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || vars.VITE_SUPABASE_URL || 'https://tcisqeieyyhdlfwvvsec.supabase.co' }}
+        run: |
+          grep -rlF "$VITE_SUPABASE_URL" dist/assets > /dev/null || { echo "dist/ does not contain VITE_SUPABASE_URL"; exit 1; }
+          echo "OK: Supabase URL is baked into dist/"
 
       - name: Sync Capacitor Android
         run: npx cap sync android

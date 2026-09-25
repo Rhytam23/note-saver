@@ -11,6 +11,18 @@ archived.
 
 ---
 
+## 2026-09-25 - Windows app shipped without its backend URL ("Failed to fetch" on sign up)
+
+**Symptom.** Store certification testers on Windows: Sign up shows "Failed to fetch".
+
+**Root cause.** In `.github/workflows/release.yml` the `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` / `VITE_GOOGLE_CLIENT_ID` values were set only on the "Build Web Application" step. `tauri-action` then runs `beforeBuildCommand` (`npm run build`) again in its own step, and THAT build is the one embedded in the .exe/.msi/.msix. Its environment had only `VITE_TELEGRAM_BOT_USERNAME`, so the app was built with no Supabase URL and fell back to `https://placeholder.supabase.co` (`src/services/supabase.ts`). Every Windows build so far (v0.1.0 to v0.1.2, the landing-page .exe and the .msix) had broken sign-up, sign-in and sync. The web app (Vercel) and the Android APK were built correctly. Confirmed from the CI log of the v0.1.2 run: the tauri step's env lists only `GITHUB_TOKEN` and `VITE_TELEGRAM_BOT_USERNAME`.
+
+**Fix.** The `VITE_*` values are now job-level `env` for the Windows job, so every step sees them. A new "Verify Supabase settings are inside the built web assets" step (Windows and Android) fails the job if the built `dist/` does not contain the Supabase URL. Checked locally: a build with the settings contains the URL, one without does not.
+
+**Still to do after merging.** Cut a new release (v0.1.3) so the landing-page .exe and a new .msix are rebuilt, and resubmit the Store package.
+
+---
+
 ## 2026-09-24 - AI crawlers blocked (robots.txt, X-Robots-Tag, Vercel rule); Anubis not used
 
 **Decision.** `public/robots.txt` now Disallows the known AI crawlers (GPTBot, ClaudeBot, PerplexityBot, CCBot, Google-Extended, Applebot-Extended, Bytespider and others) while search engines stay allowed. `vercel.json` sends `X-Robots-Tag: noai, noimageai`. `public/llms.txt` was removed because it existed only to invite AI tools. The Vercel dashboard's AI Bots firewall rule is turned on manually (Project > Firewall > Bot Management).
