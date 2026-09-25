@@ -11,6 +11,18 @@ archived.
 
 ---
 
+## 2026-09-25 - Google sign-in no longer requests calendar access ("Google hasn't verified this app")
+
+**Symptom.** Signing in with Google showed a red "Google hasn't verified this app - requesting access to sensitive info" screen.
+
+**Cause.** `useAuth.ts` passed `scopes: 'https://www.googleapis.com/auth/calendar.readonly'` on every Google sign-in. That is a Google *sensitive* scope, and apps that request one show the unverified-app warning until they pass Google's verification. Verification needs a domain the developer owns (a *.vercel.app address cannot be verified), a demo video and a scope justification. It also would have needed a Privacy Policy line about calendar access, which did not exist.
+
+**Decision.** Sign in with Google now asks only for the default openid / email / profile scopes (not sensitive, no warning once the consent screen is published). The only use of the calendar was `fetchTodayEvents` in `SeasonalContext`, which picked a festival theme from event titles; without it the theme falls back to the date and location, exactly as it already did for anyone without matching events. `calendarService.ts` is left in place and simply returns no events (Google answers 403 without the scope).
+
+**If calendar access is wanted later.** Add it as an explicit opt-in ("Connect Google Calendar") that requests the scope only then, after getting Google verification and adding the disclosure to the Privacy Policy. Remove the scope from the Google Cloud consent screen's scope list too.
+
+---
+
 ## 2026-09-25 - Native apps were embedding the previous release (v0.1.3 came out at 60 MB)
 
 **Symptom.** v0.1.3 .exe / .msi / .apk were 60 MB; v0.1.2 was 27 MB.

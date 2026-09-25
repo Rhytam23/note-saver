@@ -169,6 +169,9 @@ export function useAuth(): AuthContextType {
     return PUBLIC_WEB_ORIGIN;
   };
 
+  // Google sign-in asks for the basic profile and email only. It used to also request
+  // calendar.readonly (a Google "sensitive" scope), which makes Google show the "Google hasn't
+  // verified this app" warning to every user. See docs/DECISIONS.md.
   const login = useCallback(async (): Promise<void> => {
     setIsSubmitting(true);
     try {
@@ -182,7 +185,6 @@ export function useAuth(): AuthContextType {
           provider: 'google',
           options: {
             redirectTo: getNativeAuthRedirectUrl(),
-            scopes: 'https://www.googleapis.com/auth/calendar.readonly',
             skipBrowserRedirect: true,
           }
         });
@@ -195,7 +197,6 @@ export function useAuth(): AuthContextType {
         provider: 'google',
         options: {
           redirectTo: getSafeOrigin(),
-          scopes: 'https://www.googleapis.com/auth/calendar.readonly'
         }
       });
       if (error) throw error;
