@@ -11,6 +11,16 @@ archived.
 
 ---
 
+## 2026-09-26 - Focus timer: custom length that survives closing the panel; Vercel no longer skips the downloads commit
+
+**Focus timer.** Click the time to choose the focus length: type any number of minutes (`90`, `90 min`, `1:30`, 1 to 600) or tap a preset (25, 45, 60, 80, 90, 100, 120). 25 minutes stays the default. Logic lives in `src/components/editor/focusTimer.ts` (unit tested), the UI in `PomodoroTimer.tsx`. Times of an hour or more show as h:mm:ss.
+
+**Bug found while doing it.** The timer lives in the note editor's side panel, so opening another note or closing the editor destroyed the countdown, which matters far more for 60 to 100 minute sessions. The timer is now saved to localStorage (phase, chosen length, and the end time while running) and restored on mount: a running countdown keeps counting while the panel is closed, a paused one keeps its exact time, and one that ran out while away comes back as the break, stopped.
+
+**Vercel.** The release workflow's "publish downloads" commit ended with `[skip ci]`. Vercel honours that marker, so it skipped (showed as canceled) the one deployment that carries the new `version.json` and installers, and the landing page kept serving the previous version until some other commit deployed. It now uses `[skip actions]`, which only stops GitHub Actions. Other "Canceled" entries are normal: a newer push supersedes a build that is still queued.
+
+---
+
 ## 2026-09-25 - Google sign-in no longer requests calendar access ("Google hasn't verified this app")
 
 **Symptom.** Signing in with Google showed a red "Google hasn't verified this app - requesting access to sensitive info" screen.
