@@ -17,17 +17,20 @@ interface PlatformDef {
   // release pipeline overwrites it on every tagged release (see
   // .github/workflows/release.yml, "Publish Latest Downloads To Landing
   // Page"), so this link never needs to be hand-edited again.
-  downloadUrl: string;
+  downloadUrl?: string;
+  // Microsoft Store listing. When set, the card shows the Store badge as
+  // its action instead of a direct download.
+  storeUrl?: string;
 }
 
 const platforms: PlatformDef[] = [
   {
     key: 'windows',
     label: 'Windows',
-    detail: 'Installer (.exe), 64-bit',
+    detail: 'Microsoft Store',
     icon: <WindowsIcon className="h-7 w-7" />,
-    installNote: 'If Windows SmartScreen appears, choose More info, then Run anyway. The installer is not code-signed yet.',
-    downloadUrl: '/downloads/NoteNirman-Setup.exe',
+    installNote: 'Install it from the Microsoft Store for one-click setup and automatic updates.',
+    storeUrl: 'https://apps.microsoft.com/detail/9N4ZX7BRL3VZ',
   },
   {
     key: 'android',
@@ -73,14 +76,10 @@ const GetTheApp: React.FC<GetTheAppProps> = ({ accent, onOpenWebApp }) => {
   const { tier } = useMotionCapability();
   const latestVersion = useLatestVersion();
 
-  // Gentle, staggered depth on the 3 cards as the grid scrolls into view -
-  // card 0 barely moves, card 2 a little more. Three explicit calls (not a
-  // hook-in-a-loop) since there are always exactly 3 cards here.
+  // One shared, gentle scroll-linked shift for all cards. It is the same
+  // value for every card so they always stay level with each other.
   const grid = useParallax(tier, [0, 1]); // range unused directly, just want the shared scrollYProgress + ref
-  const cardY0 = useTransform(grid.scrollYProgress, [0, 1], tier === 'full' ? [0, 6] : [0, 0]);
-  const cardY1 = useTransform(grid.scrollYProgress, [0, 1], tier === 'full' ? [0, 14] : [0, 0]);
-  const cardY2 = useTransform(grid.scrollYProgress, [0, 1], tier === 'full' ? [0, 22] : [0, 0]);
-  const cardParallax = [cardY0, cardY1, cardY2];
+  const cardY = useTransform(grid.scrollYProgress, [0, 1], tier === 'full' ? [0, 12] : [0, 0]);
 
   return (
     <section id="get-the-app" className={`border-t ${colors.border} ${colors.surface}`}>
@@ -105,21 +104,31 @@ const GetTheApp: React.FC<GetTheAppProps> = ({ accent, onOpenWebApp }) => {
             // Outer element carries the scroll-linked parallax `y`; the inner
             // motion.div keeps its own independent whileInView reveal `y` -
             // kept on separate elements so the two motion values don't fight.
-            <motion.div key={platform.key} style={{ y: cardParallax[index] }}>
+            <motion.div key={platform.key} className="h-full" style={{ y: cardY }}>
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-80px' }}
               transition={{ duration: 0.4, delay: index * 0.08 }}
-              className={`flex flex-col p-6 rounded-lg border ${colors.border} ${colors.bgSimple}`}>
+              className={`flex flex-col h-full p-6 rounded-lg border ${colors.border} ${colors.bgSimple}`}>
               <div className="flex items-center gap-3" style={{ color: accent }}>
                 {platform.icon}
                 <div className={colors.primaryText}>
                   <h3 className="font-semibold leading-tight">{platform.label}</h3>
-                  <p className={`text-sm ${colors.secondaryText}`}>{platform.detail}{latestVersion ? ` · v${latestVersion}` : ''}</p>
+                  <p className={`text-sm ${colors.secondaryText}`}>{platform.detail}{platform.downloadUrl && latestVersion ? ` · v${latestVersion}` : ''}</p>
                 </div>
               </div>
               <p className={`mt-4 text-sm leading-relaxed flex-1 ${colors.secondaryText}`}>{platform.installNote}</p>
+              {platform.storeUrl && (
+                <a
+                  href={platform.storeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-5 self-start transition-opacity hover:opacity-90"
+                >
+                  <img src="/badges/ms-store-badge.svg" alt="Get it from Microsoft" width={161} height={44} className="h-11 w-auto" loading="lazy" />
+                </a>
+              )}
               {platform.downloadUrl ? (
                 <a
                   href={platform.downloadUrl}
@@ -129,7 +138,7 @@ const GetTheApp: React.FC<GetTheAppProps> = ({ accent, onOpenWebApp }) => {
                 >
                   {`Download for ${platform.label}`}
                 </a>
-              ) : (
+              ) : !platform.storeUrl && (
                 <span
                   aria-disabled="true"
                   className={`mt-5 inline-flex items-center justify-center px-4 py-2.5 rounded-md text-sm font-semibold border ${colors.border} ${colors.secondaryText} cursor-not-allowed`}
@@ -141,17 +150,16 @@ const GetTheApp: React.FC<GetTheAppProps> = ({ accent, onOpenWebApp }) => {
             </motion.div>
           ))}
 
-          <motion.div style={{ y: cardParallax[2] }}>
+          <motion.div className="h-full" style={{ y: cardY }}>
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-80px' }}
             transition={{ duration: 0.4, delay: platforms.length * 0.08 }}
-            className={`flex flex-col p-6 rounded-lg border ${colors.border} ${colors.bgSimple}`}
+            className={`flex flex-col h-full p-6 rounded-lg border ${colors.border} ${colors.bgSimple}`}
           >
             <div className={colors.primaryText}>
               <h3 className="font-semibold leading-tight">Web</h3>
-              <p className={`text-sm ${colors.secondaryText}`}>Nothing to install</p>
             </div>
             <p className={`mt-4 text-sm leading-relaxed flex-1 ${colors.secondaryText}`}>
               Works in any current browser and opens offline after your first visit. Sign in with email or Google.
