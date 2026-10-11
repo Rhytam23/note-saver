@@ -11,6 +11,16 @@ archived.
 
 ---
 
+## 2026-10-11 - Installers moved out of git; history rewritten before going open source
+
+**Problem.** The release workflow committed the latest `.exe` and `.apk` (about 120 MB together) to `main` on every tagged release, because the repository was private and the website could not link to GitHub Releases. Git keeps every version, so the history grew to about 230 MB and cloning became slow and unreliable.
+
+**Decision.** Installers now live only in GitHub Releases. The release also uploads version-less copies (`NoteNirman-Setup.exe`, `NoteNirman.apk`), and `vercel.json` redirects `/downloads/NoteNirman-Setup.exe` and `/downloads/NoteNirman.apk` to `releases/latest/download/...`. Links on the landing page and the `version.json` format are unchanged, so already-installed apps keep working. CI now commits only the small `public/downloads/version.json`.
+
+**History rewrite.** Previous copies of the installers were stripped from all commits, so commit hashes before this date differ from older clones. This needs the repository to be public for the redirects to work for anonymous users.
+
+---
+
 ## 2026-09-26 - Focus timer: custom length that survives closing the panel; Vercel no longer skips the downloads commit
 
 **Focus timer.** Click the time to choose the focus length: type any number of minutes (`90`, `90 min`, `1:30`, 1 to 600) or tap a preset (25, 45, 60, 80, 90, 100, 120). 25 minutes stays the default. Logic lives in `src/components/editor/focusTimer.ts` (unit tested), the UI in `PomodoroTimer.tsx`. Times of an hour or more show as h:mm:ss.

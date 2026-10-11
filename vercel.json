@@ -1,4 +1,16 @@
 {
+    "redirects": [
+        {
+            "source": "/downloads/NoteNirman.apk",
+            "destination": "https://github.com/Rhytam23/note-saver/releases/latest/download/NoteNirman.apk",
+            "permanent": false
+        },
+        {
+            "source": "/downloads/NoteNirman-Setup.exe",
+            "destination": "https://github.com/Rhytam23/note-saver/releases/latest/download/NoteNirman-Setup.exe",
+            "permanent": false
+        }
+    ],
     "rewrites": [
         {
             "source": "/((?!downloads/).*)",

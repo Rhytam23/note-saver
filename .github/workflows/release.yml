@@ -263,6 +263,18 @@ jobs:
           name: android-artifacts
           path: release-files/
 
+      # Stable, version-less copies of the installers. GitHub serves
+      # releases/latest/download/<name> for whatever the newest release is, so
+      # the website can redirect /downloads/NoteNirman.apk and
+      # /downloads/NoteNirman-Setup.exe there (see vercel.json) and the links
+      # never need to change. The installers themselves live only in Releases,
+      # never in git history.
+      - name: Add Stable-Named Installer Copies
+        shell: bash
+        run: |
+          cp "$(ls release-files/*setup.exe | head -n 1)" release-files/NoteNirman-Setup.exe
+          cp "$(ls release-files/*.apk | head -n 1)" release-files/NoteNirman.apk
+
       - name: Display Release Artifacts
         run: ls -la release-files/
 
@@ -276,21 +288,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # The landing page's "Get the App" buttons and the in-app update-check
-      # banner both read same-origin files under public/downloads/ (the repo
-      # is private, so client code can never hit the GitHub Releases API
-      # directly). Without this step those files only ever get updated by
-      # someone remembering to copy them by hand after each release - which
-      # is exactly how the exe on the live site went stale at v0.1.0 while
-      # v0.1.1 was already out. This keeps them in lockstep automatically.
-      - name: Stage Release Files For Landing Page
-        if: github.ref_type == 'tag'
-        shell: bash
-        run: |
-          mkdir -p "$RUNNER_TEMP/staged"
-          cp release-files/*setup.exe "$RUNNER_TEMP/staged/NoteNirman-Setup.exe"
-          cp release-files/*.apk "$RUNNER_TEMP/staged/NoteNirman.apk"
-
+      # The landing page's version label and the in-app update-check banner
+      # both read /downloads/version.json. Only that tiny manifest is
+      # committed; the installers it points at are served from GitHub
+      # Releases via the redirects in vercel.json, so they never bloat the
+      # repository.
       - name: Checkout Main Branch For Landing Page Update
         if: github.ref_type == 'tag'
         uses: actions/checkout@v4
@@ -298,14 +300,12 @@ jobs:
           ref: main
           fetch-depth: 0
 
-      - name: Publish Latest Downloads To Landing Page
+      - name: Publish Latest Version Manifest To Landing Page
         if: github.ref_type == 'tag'
         shell: bash
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
           mkdir -p public/downloads
-          cp "$RUNNER_TEMP/staged/NoteNirman-Setup.exe" public/downloads/NoteNirman-Setup.exe
-          cp "$RUNNER_TEMP/staged/NoteNirman.apk" public/downloads/NoteNirman.apk
           cat > public/downloads/version.json <<EOF
           {
             "version": "$VERSION",
@@ -316,10 +316,10 @@ jobs:
           EOF
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/downloads/
+          git add public/downloads/version.json
           if git diff --cached --quiet; then
-            echo "No landing page download changes for $VERSION."
+            echo "No version manifest changes for $VERSION."
           else
-            git commit -m "chore: publish v$VERSION downloads to landing page [skip actions]"
+            git commit -m "chore: publish v$VERSION version manifest to landing page [skip actions]"
             git push origin HEAD:main
           fi

@@ -164,6 +164,9 @@ release/repo-visibility question.
   asset). The download page shows "Coming soon" for Android rather than a
   broken link.
 - A real, working Windows installer *has* been built locally
-  (`src-tauri/target/release/bundle/nsis/...-setup.exe`, v0.1.0) and is
-  committed at `public/downloads/NoteNirman-Setup.exe` so the web download
-  button works without depending on GitHub.
+  (`src-tauri/target/release/bundle/nsis/...-setup.exe`, v0.1.0). Installers
+  are no longer committed to the repo: releases upload them to GitHub
+  Releases, and the website's `/downloads/*` links redirect there (see
+  `vercel.json` and the 2026-10-11 entry in
+  [DECISIONS.md](./DECISIONS.md)). Those redirects only work for visitors
+  once the repository is public.

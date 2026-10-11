@@ -1,0 +1,46 @@
+name: Bug report
+description: Something isn't working
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. If you lost notes, please say so clearly, that is our highest priority.
+        For security problems, do **not** file an issue; see SECURITY.md.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to ...
+        2. Click ...
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - Web
+        - Windows desktop
+        - Android
+        - Telegram bot
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: App version / browser
+      placeholder: e.g. 1.2.0, Chrome 130
+  - type: textarea
+    id: logs
+    attributes:
+      label: Screenshots or console output
+      description: Remove anything private before pasting.

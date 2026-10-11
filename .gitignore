@@ -36,3 +36,9 @@ supabase/.branches/
 skills/
 skills-lock.json
 
+
+# Installers are published to GitHub Releases, never committed (see docs/DECISIONS.md)
+public/downloads/*.exe
+public/downloads/*.apk
+public/downloads/*.msi
+public/downloads/*.msix
