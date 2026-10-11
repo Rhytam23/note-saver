@@ -112,4 +112,5 @@ order for everything below:
 
 ## License
 
-PolyForm Noncommercial 1.0.0: see [LICENSE](LICENSE).
+- **Code:** [MIT](LICENSE) — use it, fork it, learn from it, just keep the copyright notice.
+- **Name, logo, icons and screenshots:** © Rhytam Biswas, all rights reserved — see [LICENSE-ASSETS.md](LICENSE-ASSETS.md). Shipping your own fork? Give it your own name and logo.
