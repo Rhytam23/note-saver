@@ -91,60 +91,11 @@
     ]
   }
   </script>
-  <!-- Looks decent for the moment before the app loads (and for crawlers that read raw HTML).
-       Scoped to .seo-fallback so it never touches the React app, which replaces it on load. -->
-  <style>
-    html, body { margin: 0; background: #1B1B1F; }
-    .seo-fallback {
-      box-sizing: border-box;
-      max-width: 42rem;
-      margin: 0 auto;
-      padding: 14vh 1.25rem 3rem;
-      color: #ECE9EF;
-      font: 16px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    }
-    .seo-fallback h1 { margin: 0 0 1rem; font-size: 1.75rem; line-height: 1.25; letter-spacing: -0.01em; }
-    .seo-fallback h2 { margin: 2.25rem 0 0.5rem; font-size: 1.1rem; }
-    .seo-fallback p { margin: 0; opacity: 0.85; }
-    .seo-fallback dt { margin-top: 1rem; font-weight: 600; }
-    .seo-fallback dd { margin: 0.2rem 0 0; opacity: 0.75; }
-  </style>
+  <style>html, body { margin: 0; background: #1B1B1F; }</style>
 </head>
 
 <body>
-  <div id="root">
-    <!--
-      Static fallback content for crawlers and bots that don't execute JavaScript
-      (many AI/search crawlers fetch raw HTML only). React replaces this entirely
-      on load for real browsers — this text matches the live app's own content,
-      it isn't shown only to bots.
-    -->
-    <main class="seo-fallback">
-      <h1>NoteNirman — an offline-first notes app for Windows, Android and the web</h1>
-      <p>
-        NoteNirman is a notes app built for students. Notes save to your device first and sync when
-        you're back online, so a lost connection never costs you your work. It has a block-style editor
-        with tables, equations, flashcards, templates and notes linked with [[wiki links]], seasonal
-        themes tied to Indian festivals, and an optional Gemini AI assistant. It's free to use, and
-        available for Windows, Android and the web.
-      </p>
-      <h2>Frequently asked questions</h2>
-      <dl>
-        <dt>What is Notenirman?</dt>
-        <dd>An offline-first notes app for Windows, Android and the web, with a block-style editor,
-          seasonal Indian-festival themes, and an optional Gemini AI assistant.</dd>
-        <dt>Does Notenirman work offline?</dt>
-        <dd>Yes. Every note is saved to your device first and syncs automatically once you're back
-          online.</dd>
-        <dt>Can I add tables and equations to my notes?</dt>
-        <dd>Yes, from the editor's slash (/) menu.</dd>
-        <dt>Does Notenirman have flashcards?</dt>
-        <dd>Yes. Write "Question:: Answer" in a note and it becomes a spaced-repetition flashcard.</dd>
-        <dt>Is Notenirman free to use?</dt>
-        <dd>Yes.</dd>
-      </dl>
-    </main>
-  </div>
+  <div id="root"></div>
   <script type="module" src="/src/index.tsx"></script>
 </body>
 
