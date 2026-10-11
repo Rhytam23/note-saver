@@ -91,6 +91,24 @@
     ]
   }
   </script>
+  <!-- Looks decent for the moment before the app loads (and for crawlers that read raw HTML).
+       Scoped to .seo-fallback so it never touches the React app, which replaces it on load. -->
+  <style>
+    html, body { margin: 0; background: #1B1B1F; }
+    .seo-fallback {
+      box-sizing: border-box;
+      max-width: 42rem;
+      margin: 0 auto;
+      padding: 14vh 1.25rem 3rem;
+      color: #ECE9EF;
+      font: 16px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+    .seo-fallback h1 { margin: 0 0 1rem; font-size: 1.75rem; line-height: 1.25; letter-spacing: -0.01em; }
+    .seo-fallback h2 { margin: 2.25rem 0 0.5rem; font-size: 1.1rem; }
+    .seo-fallback p { margin: 0; opacity: 0.85; }
+    .seo-fallback dt { margin-top: 1rem; font-weight: 600; }
+    .seo-fallback dd { margin: 0.2rem 0 0; opacity: 0.75; }
+  </style>
 </head>
 
 <body>
@@ -101,7 +119,7 @@
       on load for real browsers — this text matches the live app's own content,
       it isn't shown only to bots.
     -->
-    <main>
+    <main class="seo-fallback">
       <h1>NoteNirman — an offline-first notes app for Windows, Android and the web</h1>
       <p>
         NoteNirman is a notes app built for students. Notes save to your device first and sync when
