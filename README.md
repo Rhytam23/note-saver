@@ -135,5 +135,7 @@ order for everything below:
 
 ## License
 
-- **Code:** [MIT](LICENSE) — use it, fork it, learn from it, just keep the copyright notice.
-- **Name, logo, icons and screenshots:** © Rhytam Biswas, all rights reserved — see [LICENSE-ASSETS.md](LICENSE-ASSETS.md). Shipping your own fork? Give it your own name and logo.
+NoteNirman is **source-available**, not open source: you can read, run, fork and learn from it, but only for non-commercial use.
+
+- **Code:** [PolyForm Noncommercial 1.0.0](LICENSE). Personal, educational, research and other non-commercial use is welcome. Commercial use is reserved to the author; ask for a commercial licence.
+- **Name, logo, icons, visual design and media:** © Rhytam Biswas, all rights reserved. See [LICENSE-ASSETS.md](LICENSE-ASSETS.md) for the details. Sharing a fork? Give it your own name and logo.
