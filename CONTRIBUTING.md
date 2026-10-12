@@ -61,6 +61,15 @@ How to use them:
 - For anything larger than a small fix, open an issue first so we can agree
   on the approach before you spend time on it.
 
+## How issues are organised
+
+- **Type labels:** `bug`, `enhancement`, `documentation`, `question`, `security`, `performance`, `refactor`, `tests`.
+- **Area labels:** `area: web`, `area: desktop`, `area: android`, `area: telegram`, `area: backend`, `area: ai`, `area: docs`, `area: ci`, `area: store`. They match the `area/*` branches.
+- **Status labels:** new issues start as `needs triage`. `needs info` means we are waiting on the reporter, and `confirmed` means a maintainer accepted it.
+- **Priority labels:** `priority: critical` (data loss, security, app unusable) down to `priority: low`.
+- **Milestones:** `v0.2.0` and `v0.3.0` are the next releases, `v1.0.0` is the first stable release, and `Backlog` holds ideas with no date.
+- **Releases:** the release notes are generated from pull request labels (see `.github/release.yml`), so please give your pull request a type label.
+
 ## Things worth knowing
 
 - **Not everything in `src/` is live.** A block editor, real-time
