@@ -4,9 +4,13 @@ on:
   push:
     branches:
       - main
+      - develop
+      - deployment
   pull_request:
     branches:
       - main
+      - develop
+      - "area/**"
 
 concurrency:
   group: ci-${{ github.ref }}

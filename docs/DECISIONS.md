@@ -11,6 +11,14 @@ archived.
 
 ---
 
+## 2026-10-12 - A separate `deployment` branch; `develop` becomes the default
+
+**Problem.** Branch protection on `main` (pull requests only) would block the release workflow, which pushed the version manifest straight to `main`. Renaming `main` was ruled out: CI, the release workflow, the Vercel project and many links refer to it.
+
+**Decision.** Three long-lived branches. `develop` is the default branch where contributions land. `main` is stable and protected. `deployment` is what Vercel serves in production; the release workflow writes the version manifest there with a GitHub-signed commit (created through the GraphQL API, because Vercel only deploys verified commits), and the maintainer promotes `main` into it when releasing. `area/*` branches hold larger pieces of work. CI runs on `main`, `develop`, `deployment` and on pull requests to `main`, `develop` and `area/*`.
+
+---
+
 ## 2026-10-12 - Licence changed from MIT to PolyForm Noncommercial
 
 **Decision.** The code was MIT while the repository was private. Before making it public, the author decided that commercial use should stay with the author, so the code is now under the PolyForm Noncommercial License 1.0.0 (source-available, not open source). The name, logo, icons, visual design and media stay all-rights-reserved (`LICENSE-ASSETS.md`). Contributions grant the author the right to use them commercially (`CONTRIBUTING.md`).

@@ -288,38 +288,29 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # The landing page's version label and the in-app update-check banner
-      # both read /downloads/version.json. Only that tiny manifest is
-      # committed; the installers it points at are served from GitHub
-      # Releases via the redirects in vercel.json, so they never bloat the
-      # repository.
-      - name: Checkout Main Branch For Landing Page Update
-        if: github.ref_type == 'tag'
-        uses: actions/checkout@v4
-        with:
-          ref: main
-          fetch-depth: 0
-
-      - name: Publish Latest Version Manifest To Landing Page
+      # The landing page's version label and the in-app update-check banner both read
+      # /downloads/version.json. Only that tiny manifest is committed, and only to the `deployment`
+      # branch, which is the branch Vercel serves. `main` stays human-only and protected.
+      # The commit is created through the GitHub API so that GitHub signs it: Vercel only deploys
+      # commits that GitHub marks as verified, and a plain `git commit` from here would be unsigned.
+      - name: Publish Latest Version Manifest To The Deployment Branch
         if: github.ref_type == 'tag'
         shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
-          mkdir -p public/downloads
-          cat > public/downloads/version.json <<EOF
-          {
-            "version": "$VERSION",
-            "windows": "/downloads/NoteNirman-Setup.exe",
-            "android": "/downloads/NoteNirman.apk",
-            "publishedAt": "$(date -u +%Y-%m-%d)"
-          }
-          EOF
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/downloads/version.json
-          if git diff --cached --quiet; then
+          CONTENT=$(printf '{\n  "version": "%s",\n  "windows": "/downloads/NoteNirman-Setup.exe",\n  "android": "/downloads/NoteNirman.apk",\n  "publishedAt": "%s"\n}\n' "$VERSION" "$(date -u +%Y-%m-%d)" | base64 -w0)
+          CURRENT=$(gh api "repos/$GITHUB_REPOSITORY/contents/public/downloads/version.json?ref=deployment" --jq .content 2>/dev/null | tr -d '\n' || true)
+          if [ "$CURRENT" = "$CONTENT" ]; then
             echo "No version manifest changes for $VERSION."
-          else
-            git commit -m "chore: publish v$VERSION version manifest to landing page [skip actions]"
-            git push origin HEAD:main
+            exit 0
           fi
+          HEAD_OID=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/deployment" --jq .object.sha)
+          jq -n --arg repo "$GITHUB_REPOSITORY" --arg msg "chore: publish v$VERSION version manifest to landing page" --arg head "$HEAD_OID" --arg content "$CONTENT" \
+            '{query: "mutation($input: CreateCommitOnBranchInput!){ createCommitOnBranch(input:$input){ commit{ oid } } }",
+              variables: {input: {branch: {repositoryNameWithOwner: $repo, branchName: "deployment"},
+                message: {headline: $msg},
+                fileChanges: {additions: [{path: "public/downloads/version.json", contents: $content}]},
+                expectedHeadOid: $head}}}' \
+            | gh api graphql --input -

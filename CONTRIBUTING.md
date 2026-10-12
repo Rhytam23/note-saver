@@ -35,8 +35,9 @@ npm run build      # production build
 
 | Branch | Purpose |
 | :--- | :--- |
-| `main` | Stable. What is released and deployed. Changes arrive by pull request from `develop`; please do not commit to it directly. |
+| `main` | Stable, released code. Protected: changes arrive by pull request from `develop`; please do not commit to it directly. |
 | `develop` | Integration branch. **Open your pull requests against `develop`.** |
+| `deployment` | What is live. Vercel serves this branch, and the release workflow publishes the version manifest to it. The maintainer promotes `main` into it when releasing. Do not open pull requests against it. |
 | `area/web` | Web app and landing page (`src/`, `public/`). |
 | `area/desktop` | Windows app (`src-tauri/`). |
 | `area/android` | Android app (`android/`). |
@@ -51,7 +52,7 @@ How to use them:
 
 - **Small change?** Branch from `develop` (for example `fix/note-title-overflow`), open a pull request to `develop`.
 - **Bigger piece of work in one part of the project?** Use the matching `area/*` branch as its home, branch from it, and merge it into `develop` when it is ready. Keep `area/*` branches up to date by merging `develop` into them regularly.
-- **Releases:** `develop` is merged into `main` by the maintainer, and the release is tagged from `main`.
+- **Releases:** `develop` is merged into `main` by the maintainer, the release is tagged from `main`, and `main` is then promoted into `deployment`, which makes it live.
 - Preview deployments only build commits that GitHub marks as verified (signed). See [docs/DECISIONS.md](docs/DECISIONS.md).
 
 ## Finding something to work on
