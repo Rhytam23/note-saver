@@ -1,0 +1,23 @@
+# Controls the automatically generated release notes (see the "What's New" box in the app).
+changelog:
+  exclude:
+    labels:
+      - ignore-for-release
+      - dependencies
+    authors:
+      - dependabot
+  categories:
+    - title: Breaking changes
+      labels: ["breaking change"]
+    - title: New features
+      labels: [enhancement]
+    - title: Bug fixes
+      labels: [bug]
+    - title: Security
+      labels: [security]
+    - title: Performance
+      labels: [performance]
+    - title: Documentation
+      labels: [documentation]
+    - title: Other changes
+      labels: ["*"]
