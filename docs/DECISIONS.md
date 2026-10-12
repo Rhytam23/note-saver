@@ -11,6 +11,14 @@ archived.
 
 ---
 
+## 2026-10-12 - One update prompt, driven by the website's version manifest
+
+**Problem.** The app had two update checks. An old dialog asked GitHub for the latest release on every platform, so it appeared on the website too, popped up the moment a release was published (before it was ready), ignored the Microsoft Store build, and showed raw release text ("Automated Release", an unclickable "Full Changelog" link). A newer banner already did it correctly (installed apps only, Store build excluded, driven by `/downloads/version.json`).
+
+**Decision.** Keep one check. The dialog's look stays, but it is now driven by the version manifest on the website, which only changes when the maintainer promotes a release to the `deployment` branch. It appears in the installed Windows and Android apps only, never on the website and never in the Microsoft Store build. Release notes are fetched from the GitHub Release for that version and cleaned up; the "Full Changelog" line is a real link to the release page. "Remind me later" closes it for this session and it returns at the next launch. The old GitHub-latest check was removed. The Store release steps are in [MICROSOFT-STORE.md](./MICROSOFT-STORE.md).
+
+---
+
 ## 2026-10-12 - A separate `deployment` branch; `main` stays the default
 
 **Problem.** Branch protection on `main` (pull requests only) would block the release workflow, which pushed the version manifest straight to `main`. Renaming `main` was ruled out: CI, the release workflow, the Vercel project and many links refer to it.

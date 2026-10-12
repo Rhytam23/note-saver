@@ -2,22 +2,24 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useSeason } from '../contexts/SeasonalContext';
 import { CloseIcon } from './Icons';
-import type { UpdateInfo } from '../services/updateService';
+import type { UpdateInfo } from '../hooks/useUpdateCheck';
+import { openInSystemBrowser } from '../services/platform/nativeAuthBridge';
 
 interface UpdateModalProps {
-  updateInfo: UpdateInfo;
+  info: UpdateInfo;
   onClose: () => void;
 }
 
-const UpdateModal: React.FC<UpdateModalProps> = ({ updateInfo, onClose }) => {
+const UpdateModal: React.FC<UpdateModalProps> = ({ info, onClose }) => {
   const { colors } = useSeason();
 
   const handleDownload = () => {
-    if (updateInfo.downloadUrl) {
-      window.open(updateInfo.downloadUrl, '_blank', 'noopener,noreferrer');
-    } else {
-      window.open(updateInfo.releaseUrl, '_blank', 'noopener,noreferrer');
-    }
+    void openInSystemBrowser(info.downloadUrl);
+  };
+
+  const handleChangelog = (e: React.MouseEvent) => {
+    e.preventDefault();
+    void openInSystemBrowser(info.releaseUrl);
   };
 
   return (
@@ -43,7 +45,7 @@ const UpdateModal: React.FC<UpdateModalProps> = ({ updateInfo, onClose }) => {
             <div>
               <h3 className="text-lg font-bold">New Update Available</h3>
               <p className={`text-xs ${colors.secondaryText}`}>
-                Version v{updateInfo.latestVersion} is out! (Current: v{updateInfo.currentVersion})
+                Version v{info.latestVersion} is out!
               </p>
             </div>
           </div>
@@ -56,12 +58,17 @@ const UpdateModal: React.FC<UpdateModalProps> = ({ updateInfo, onClose }) => {
           </button>
         </div>
 
-        {updateInfo.releaseNotes && (
-          <div className={`my-4 p-3 rounded-xl bg-black/5 dark:bg-white/5 border border-white/10 max-h-36 overflow-y-auto text-xs leading-relaxed ${colors.secondaryText}`}>
-            <p className="font-semibold mb-1 text-accent">What's New:</p>
-            <p className="whitespace-pre-line">{updateInfo.releaseNotes}</p>
-          </div>
-        )}
+        <div className={`my-4 p-3 rounded-xl bg-black/5 dark:bg-white/5 border border-white/10 max-h-36 overflow-y-auto text-xs leading-relaxed ${colors.secondaryText}`}>
+          <p className="font-semibold mb-1 text-accent">What's New:</p>
+          {info.notes && <p className="whitespace-pre-line mb-2">{info.notes}</p>}
+          <a
+            href={info.releaseUrl}
+            onClick={handleChangelog}
+            className="text-accent underline underline-offset-2 hover:no-underline"
+          >
+            Full Changelog
+          </a>
+        </div>
 
         <div className="mt-6 flex items-center gap-3">
           <button

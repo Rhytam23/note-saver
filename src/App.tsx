@@ -44,8 +44,6 @@ import Support from './components/Support';
 import PasswordReset from './components/PasswordReset';
 import EmailVerification from './components/EmailVerification';
 import Maintenance from './components/Maintenance';
-import { checkForUpdates, type UpdateInfo } from './services/updateService';
-import UpdateModal from './components/UpdateModal';
 import { detectPlatform } from './services/platform/platformAdapterFactory';
 
 const ProfileModal = lazyWithRetry(() => import('./components/ProfileModal'));
@@ -102,23 +100,12 @@ const App: React.FC = () => {
     if (!user) setUnlockedNotes({});
   }, [user]);
   const [isTutorialOpen, setTutorialOpen] = useState(false);
-  const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null);
 
   useEffect(() => {
     if (path === '/profile' && user) {
       setProfileModalOpen(true);
     }
   }, [path, user]);
-
-  useEffect(() => {
-    let isMounted = true;
-    checkForUpdates().then(info => {
-      if (isMounted && info && info.hasUpdate) {
-        setUpdateInfo(info);
-      }
-    });
-    return () => { isMounted = false; };
-  }, []);
 
   // Reminders only fire while the app is open (see reminderEngine.ts); keep them scheduled
   // for whatever is currently due, and re-check whenever the app regains focus.
@@ -798,12 +785,6 @@ const App: React.FC = () => {
             )}
           </AnimatePresence>
         </Suspense>
-
-        <AnimatePresence>
-          {updateInfo && (
-            <UpdateModal updateInfo={updateInfo} onClose={() => setUpdateInfo(null)} />
-          )}
-        </AnimatePresence>
 
         {renderContent()}
       </div>
