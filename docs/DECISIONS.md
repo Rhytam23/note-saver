@@ -11,6 +11,14 @@ archived.
 
 ---
 
+## 2026-10-12 - Vercel only deploys GitHub-verified commits
+
+**Problem.** Pushes to `main` stopped reaching the live site. Vercel showed "Build Canceled: the commit signature couldn't be verified" for every new commit, while GitHub marked those commits as unsigned (commits made with plain `git commit` and no signing key).
+
+**Decision.** Leave Vercel's verified-commits protection on. A commit that should deploy must be signed (an SSH or GPG signing key registered on GitHub) or be created through the GitHub web UI or API, which GitHub signs itself. Unsigned commits still land in the history but do not deploy.
+
+---
+
 ## 2026-10-11 - Installers moved out of git; history rewritten before going open source
 
 **Problem.** The release workflow committed the latest `.exe` and `.apk` (about 120 MB together) to `main` on every tagged release, because the repository was private and the website could not link to GitHub Releases. Git keeps every version, so the history grew to about 230 MB and cloning became slow and unreliable.
