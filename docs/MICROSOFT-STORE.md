@@ -1,7 +1,6 @@
 # Publishing to the Microsoft Store
 
-Last verified: 2026-10-12. Status: **the app is published in the Microsoft Store** (confirmed by the maintainer); the packaging pipeline below built it. Every new release must also be submitted there, see "Releasing an update". Original status note: **packaging pipeline built, not yet
-submitted** — no Partner Center account exists yet for this app.
+Last verified: 2026-10-12. Status: **the app is published in the Microsoft Store** (confirmed by the maintainer). Every new release must also be submitted there: see [Releasing an update](#releasing-an-update-checklist).
 
 NoteNirman's Windows build is a plain Win32 app (Tauri), not native UWP.
 The Store still accepts that via "Desktop Bridge" — you submit an MSIX
