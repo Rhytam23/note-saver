@@ -11,6 +11,14 @@ archived.
 
 ---
 
+## 2026-10-12 - Licence changed from MIT to PolyForm Noncommercial
+
+**Decision.** The code was MIT while the repository was private. Before making it public, the author decided that commercial use should stay with the author, so the code is now under the PolyForm Noncommercial License 1.0.0 (source-available, not open source). The name, logo, icons, visual design and media stay all-rights-reserved (`LICENSE-ASSETS.md`). Contributions grant the author the right to use them commercially (`CONTRIBUTING.md`).
+
+**History.** The repository had never been public, so nobody had been given the MIT terms. To keep it that way, every commit and tag was rewritten to carry the new licence; commit hashes from before this date no longer exist. The author keeps a pre-change backup bundle outside the repository.
+
+---
+
 ## 2026-10-12 - Vercel only deploys GitHub-verified commits
 
 **Problem.** Pushes to `main` stopped reaching the live site. Vercel showed "Build Canceled: the commit signature couldn't be verified" for every new commit, while GitHub marked those commits as unsigned (commits made with plain `git commit` and no signing key).
