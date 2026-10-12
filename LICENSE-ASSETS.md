@@ -6,13 +6,13 @@ NoteNirman is **source-available**, not open source in the OSI sense: you can re
 
 ## 1. Source code: PolyForm Noncommercial 1.0.0
 
-The source code is licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE). In plain words, you may use, study, change, fork and share it for **personal use, education, research, hobby projects, and use by charities, schools, public bodies and similar organisations**. You may **not** use it for a business, to sell it or anything built from it, or to make money from it. The licence text in [LICENSE](LICENSE) is what counts; this page is only a summary.
+The source code is licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE.md). In plain words, you may use, study, change, fork and share it for **personal use, education, research, hobby projects, and use by charities, schools, public bodies and similar organisations**. You may **not** use it for a business, to sell it or anything built from it, or to make money from it. The licence text in [LICENSE.md](LICENSE.md) is what counts; this page is only a summary.
 
 **Commercial use is reserved to the author.** If you want to use NoteNirman commercially, ask for a commercial licence (see below).
 
 ## 2. Name, logo, icons and media: all rights reserved
 
-The [PolyForm licence](LICENSE) covers the **source code** only. It does **not** cover the brand and the artwork listed here, which remain the property of Rhytam Biswas:
+The [PolyForm licence](LICENSE.md) covers the **source code** only. It does **not** cover the brand and the artwork listed here, which remain the property of Rhytam Biswas:
 
 - the name **“NoteNirman”** and the tagline and wording used to promote it;
 - the **logo** and **app icons**: `public/logo.svg`, `public/app-icon.png`, `public/pwa-icon.png`, `src-tauri/icons/`, and the icons and splash screens in `android/app/src/main/res/`;

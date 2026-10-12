@@ -67,7 +67,7 @@ By participating you agree to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## License and your contributions
 
-NoteNirman is licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE) (see [LICENSE-ASSETS.md](LICENSE-ASSETS.md) for a summary). By submitting a contribution (a pull request, patch or other code) you agree that:
+NoteNirman is licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE.md) (see [LICENSE-ASSETS.md](LICENSE-ASSETS.md) for a summary). By submitting a contribution (a pull request, patch or other code) you agree that:
 
 1. it is licensed under the same PolyForm Noncommercial License as the rest of the project;
 2. you grant the project author, Rhytam Biswas, a perpetual, worldwide, irrevocable, royalty-free licence to use, modify, sublicense and distribute your contribution in any way, including commercially and under other licence terms. This is what keeps commercial use of the project reserved to the author; and

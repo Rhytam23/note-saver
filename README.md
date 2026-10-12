@@ -1,6 +1,6 @@
 # NoteNirman 🪔
 
-[![License](https://img.shields.io/badge/License-PolyForm%20Noncommercial-orange.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-PolyForm%20Noncommercial-orange.svg)](LICENSE.md)
 [![React](https://img.shields.io/badge/React-19.2-blue)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-6.2-purple)](https://vitejs.dev/)
@@ -137,5 +137,5 @@ order for everything below:
 
 NoteNirman is **source-available**, not open source: you can read, run, fork and learn from it, but only for non-commercial use.
 
-- **Code:** [PolyForm Noncommercial 1.0.0](LICENSE). Personal, educational, research and other non-commercial use is welcome. Commercial use is reserved to the author; ask for a commercial licence.
+- **Code:** [PolyForm Noncommercial 1.0.0](LICENSE.md). Personal, educational, research and other non-commercial use is welcome. Commercial use is reserved to the author; ask for a commercial licence.
 - **Name, logo, icons, visual design and media:** © Rhytam Biswas, all rights reserved. See [LICENSE-ASSETS.md](LICENSE-ASSETS.md) for the details. Sharing a fork? Give it your own name and logo.
