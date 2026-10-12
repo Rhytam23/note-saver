@@ -9,7 +9,7 @@ that wraps the existing `.exe`, no rewrite needed. This doc splits the
 work into what only you can do (your identity, your account) and what's
 already built and automated.
 
-## Part 1 — only you can do this
+## Part 1 — only you can do this (one-time, already done for this app)
 
 ### 1. Create a Microsoft Partner Center developer account
 Go to [partner.microsoft.com/dashboard](https://partner.microsoft.com/dashboard)
