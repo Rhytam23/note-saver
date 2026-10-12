@@ -20,6 +20,22 @@ festivals (Diwali, Holi, Navratri, Pongal, Independence Day, and more).
 > Gemini API key: see [docs/SETUP.md](docs/SETUP.md). The reasoning behind the project is in
 > [docs/DECISIONS.md](docs/DECISIONS.md).
 
+## See it in action
+
+Recorded from the live app at <https://notenirman.vercel.app> (other notes blurred).
+
+**Write with checklists, equations and tables**
+
+![Writing a note: title, checklist, an equation and a table](docs/media/writing-a-note.gif)
+
+**13 seasonal themes, switched automatically by date or picked by hand**
+
+![Switching between the Winter, Spring, Summer, Monsoon, Diwali, Holi, Navratri and Christmas themes](docs/media/seasonal-themes.gif)
+
+**Flashcards from plain text: write `Question:: Answer` on any line**
+
+![Reviewing three flashcards with spaced repetition](docs/media/flashcards.gif)
+
 ## Features
 
 - **Offline-first**: every note is written to the device first (IndexedDB),
