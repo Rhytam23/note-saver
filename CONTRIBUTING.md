@@ -22,7 +22,7 @@ API keys, bot tokens or signing keystores.
 
 ## Before you open a PR
 
-Run all of these and make sure they pass:
+Open your pull request against `develop` (see [Branches](#branches)). Run all of these and make sure they pass:
 
 ```bash
 npx tsc --noEmit   # type check
@@ -30,6 +30,29 @@ npm run lint       # eslint
 npm test           # vitest
 npm run build      # production build
 ```
+
+## Branches
+
+| Branch | Purpose |
+| :--- | :--- |
+| `main` | Stable. What is released and deployed. Changes arrive by pull request from `develop`; please do not commit to it directly. |
+| `develop` | Integration branch. **Open your pull requests against `develop`.** |
+| `area/web` | Web app and landing page (`src/`, `public/`). |
+| `area/desktop` | Windows app (`src-tauri/`). |
+| `area/android` | Android app (`android/`). |
+| `area/telegram` | Telegram bot (`telegram/`, `supabase/functions/telegram-bot/`). |
+| `area/backend` | Supabase migrations and Edge Functions (`supabase/`). |
+| `area/ai` | The AI assistant (Gemini functions and the client code that calls them). |
+| `area/docs` | Documentation (`docs/`, README, guides). |
+| `area/ci` | GitHub Actions and release automation (`.github/`). |
+| `feat/...`, `fix/...`, `docs/...` | Short-lived branches for a single change. Create them from `develop` (or from the matching `area/*` branch) and delete them after merging. |
+
+How to use them:
+
+- **Small change?** Branch from `develop` (for example `fix/note-title-overflow`), open a pull request to `develop`.
+- **Bigger piece of work in one part of the project?** Use the matching `area/*` branch as its home, branch from it, and merge it into `develop` when it is ready. Keep `area/*` branches up to date by merging `develop` into them regularly.
+- **Releases:** `develop` is merged into `main` by the maintainer, and the release is tagged from `main`.
+- Preview deployments only build commits that GitHub marks as verified (signed). See [docs/DECISIONS.md](docs/DECISIONS.md).
 
 ## Finding something to work on
 
