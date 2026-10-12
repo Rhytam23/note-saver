@@ -1,0 +1,49 @@
+name: Triage bot
+
+# Labels and comments on pull requests and issues. See .github/scripts/triage.mjs.
+#
+# SECURITY: pull_request_target runs with write access, so this workflow must never check out,
+# build or execute code from a pull request. It only reads PR data through the GitHub API.
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, edited, ready_for_review, converted_to_draft]
+  issues:
+    types: [opened, reopened, edited]
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+  schedule:
+    - cron: "17 3 * * *" # daily sweep of everything open
+  workflow_dispatch:
+
+concurrency:
+  group: triage-${{ github.event.pull_request.number || github.event.issue.number || 'sweep' }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  checks: read
+
+jobs:
+  triage:
+    name: Label & comment
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # Default branch only (pull_request_target checks out the BASE branch, never the PR head).
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/scripts
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run triage
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Optional: add this repo secret to get an AI code review in the comment.
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TRIAGE_MODE: ${{ (github.event_name == 'pull_request_target' || github.event_name == 'issues') && 'event' || 'sweep' }}
+        run: node .github/scripts/triage.mjs

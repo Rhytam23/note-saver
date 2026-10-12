@@ -10,14 +10,14 @@ changelog:
     - title: Breaking changes
       labels: ["breaking change"]
     - title: New features
-      labels: [enhancement]
+      labels: [enhancement, "type: feature"]
     - title: Bug fixes
-      labels: [bug]
+      labels: [bug, "type: bug"]
     - title: Security
       labels: [security]
     - title: Performance
       labels: [performance]
     - title: Documentation
-      labels: [documentation]
+      labels: [documentation, "type: docs"]
     - title: Other changes
       labels: ["*"]
