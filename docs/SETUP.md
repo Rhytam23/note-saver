@@ -153,16 +153,13 @@ As of 2026-09-22 these secrets are not set, and no `v0.1.0` tag has been
 pushed — see [DECISIONS.md](./DECISIONS.md) for the current state of the
 release/repo-visibility question.
 
-## Known gaps as of 2026-09-22
+## Known gaps as of 2026-10-12
 
-- The GitHub repo (`Rhytam23/note-saver`) is **private**. This blocks
-  anything here from being reachable by real users until it's made public
-  or downloads are hosted another way — see
-  [DECISIONS.md](./DECISIONS.md).
-- No Android APK has ever actually been produced by CI (the Android
-  keystore secrets above are unset, and past release runs show no `.apk`
-  asset). The download page shows "Coming soon" for Android rather than a
-  broken link.
+- The AI assistant needs the Supabase Edge Functions (`gemini-proxy`, `gemini-copilot`,
+  `gemini-embed`) deployed to your own project with `GEMINI_API_KEY` and the Upstash Redis
+  secrets set (see above). Without them the app works fully, but the AI features return an error.
+- Android APKs are sideloaded (there is no Play Store listing), and the Android signing
+  secrets above must be set in your own fork for CI to build a signed release.
 - A real, working Windows installer *has* been built locally
   (`src-tauri/target/release/bundle/nsis/...-setup.exe`, v0.1.0). Installers
   are no longer committed to the repo: releases upload them to GitHub

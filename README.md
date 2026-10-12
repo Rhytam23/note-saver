@@ -13,11 +13,12 @@ for you on your desktop next time you have a connection, even if the phone
 died in between. Free to use. Themed around the four seasons and Indian
 festivals (Diwali, Holi, Navratri, Pongal, Independence Day, and more).
 
-> **Where this stands right now:** the code here works and its test suite
-> passes, but the GitHub repository is currently **private**, no build has
-> been deployed publicly, and there's no signed Android APK yet. None of
-> this is reachable by a real user today. See
-> [docs/DECISIONS.md](docs/DECISIONS.md) for the full, current status.
+> **Status:** early release (v0.1.x). Use the web app at <https://notenirman.vercel.app>, or
+> install the Windows app or Android APK from [GitHub Releases](https://github.com/Rhytam23/note-saver/releases/latest).
+> The Android APK is installed outside the Play Store, so Android will ask you to allow it. The optional
+> AI assistant runs through Supabase Edge Functions, so if you host the backend yourself you supply your own
+> Gemini API key: see [docs/SETUP.md](docs/SETUP.md). The reasoning behind the project is in
+> [docs/DECISIONS.md](docs/DECISIONS.md).
 
 ## Features
 
@@ -55,7 +56,7 @@ festivals (Diwali, Holi, Navratri, Pongal, Independence Day, and more).
 | :--- | :--- | :--- |
 | Web | Vite build, installable as a PWA | Works |
 | Windows | Tauri 2 desktop app | Installer builds locally; not code-signed |
-| Android | Capacitor 8 app | No signed APK exists yet — see [docs/SETUP.md](docs/SETUP.md) |
+| Android | Capacitor 8 app | APK on [GitHub Releases](https://github.com/Rhytam23/note-saver/releases/latest) (sideloaded, not on the Play Store) |
 
 ## Quick start
 
