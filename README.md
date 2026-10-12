@@ -65,8 +65,9 @@ Recorded from the live app at <https://notenirman.vercel.app> (other notes blurr
   text or CSV.
 - **Telegram bot (optional)**: write, search and manage notes from Telegram with over 40 commands
   (`/quick`, `/search`, `/todo`, `/remind`, `/quiz`, `/summarize` and more), plus reminders and a
-  quick-capture inbox. It reads and writes the same notes as the apps, so everything syncs. You host it
-  yourself on Supabase with your own bot token: see [telegram/README.md](telegram/README.md).
+  quick-capture inbox. It reads and writes the same notes as the apps, so everything syncs. Try it at
+  [@notenirman_bot](https://t.me/notenirman_bot) (link it from Profile > Telegram in the app), or host your
+  own on Supabase with your own bot token: see [telegram/README.md](telegram/README.md).
 - **13 seasonal themes**, switched automatically by date/location or picked
   manually.
 
