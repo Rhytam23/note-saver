@@ -1,39 +1,19 @@
 import React from 'react';
+import { AnimatePresence } from 'framer-motion';
 import { useUpdateCheck } from '../hooks/useUpdateCheck';
-import { openInSystemBrowser } from '../services/platform/nativeAuthBridge';
+import UpdateModal from './UpdateModal';
 
 /**
- * A small dismissible strip telling desktop/Android users a newer build
- * exists and linking to it - never a silent auto-update. Renders nothing
- * on web, and nothing until a genuinely newer version is confirmed.
+ * Tells installed desktop/Android users a newer build exists. Never a silent auto-update: it only
+ * links to the download. Renders nothing on web, in the Microsoft Store build, or until the website's
+ * version manifest (which the maintainer controls) announces a newer version.
  */
 const UpdateBanner: React.FC = () => {
   const { info, dismiss } = useUpdateCheck();
-  if (!info) return null;
-
-  const handleDownload = () => {
-    void openInSystemBrowser(info.downloadUrl);
-  };
-
   return (
-    <div className="flex items-center justify-center gap-3 px-4 py-2 bg-indigo-600 text-white text-sm">
-      <span>
-        NoteNirman v{info.latestVersion} is available.
-      </span>
-      <button
-        onClick={handleDownload}
-        className="font-semibold underline underline-offset-2 hover:no-underline"
-      >
-        Download update
-      </button>
-      <button
-        onClick={dismiss}
-        aria-label="Dismiss update notice"
-        className="ml-1 opacity-80 hover:opacity-100"
-      >
-        ✕
-      </button>
-    </div>
+    <AnimatePresence>
+      {info && <UpdateModal info={info} onClose={dismiss} />}
+    </AnimatePresence>
   );
 };
 

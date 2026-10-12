@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { detectPlatform } from '../services/platform/platformAdapterFactory';
 
 const VERSION_MANIFEST_URL = 'https://notenirman.vercel.app/downloads/version.json';
-const DISMISSED_KEY_PREFIX = 'notenirman-update-dismissed-';
 
 interface VersionManifest {
   version: string;
@@ -13,6 +12,48 @@ interface VersionManifest {
 export interface UpdateInfo {
   latestVersion: string;
   downloadUrl: string;
+  /** The GitHub release page for this version: the "Full Changelog" link points here. */
+  releaseUrl: string;
+  /** Short plain-text release notes, or '' when the release has nothing meaningful to say. */
+  notes: string;
+}
+
+const RELEASES_URL = 'https://github.com/Rhytam23/note-saver/releases';
+
+/**
+ * Turns a GitHub release body into short plain text: drops boilerplate and the auto-generated
+ * "Full Changelog" link (the dialog shows its own link), strips Markdown markers, and returns ''
+ * if nothing is left.
+ */
+export function cleanReleaseNotes(body?: string): string {
+  if (!body) return '';
+  return body
+    .split(/\r?\n/)
+    .map((line) => line
+      .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+      .replace(/^#{1,6}\s*/, '')
+      .replace(/^[*-]\s+/, '• ')
+      .replace(/\*\*|__|`/g, '')
+      .trim())
+    .filter((line) => line
+      && !/^what's changed$/i.test(line)
+      && !/full changelog/i.test(line)
+      && !/automated release/i.test(line)
+      && !/^https?:\/\/\S+$/.test(line))
+    .join('\n');
+}
+
+async function fetchReleaseNotes(version: string): Promise<string> {
+  try {
+    const res = await fetch(`https://api.github.com/repos/Rhytam23/note-saver/releases/tags/v${version}`, {
+      headers: { Accept: 'application/vnd.github.v3+json' },
+    });
+    if (!res.ok) return '';
+    const data = await res.json();
+    return cleanReleaseNotes(data?.body);
+  } catch {
+    return '';
+  }
 }
 
 /**
@@ -105,29 +146,21 @@ export function useUpdateCheck(): { info: UpdateInfo | null; dismiss: () => void
       }
       if (cancelled || !manifest?.version || !isNewer(manifest.version, currentVersion)) return;
 
-      try {
-        if (localStorage.getItem(DISMISSED_KEY_PREFIX + manifest.version) === '1') return;
-      } catch {
-        // Ignore storage errors (private browsing, etc.) - just show the banner.
-      }
-
       const downloadUrl = platform === 'capacitor' ? manifest.android : manifest.windows;
-      setInfo({ latestVersion: manifest.version, downloadUrl: `https://notenirman.vercel.app${downloadUrl}` });
+      const notes = await fetchReleaseNotes(manifest.version);
+      if (cancelled) return;
+      setInfo({
+        latestVersion: manifest.version,
+        downloadUrl: `https://notenirman.vercel.app${downloadUrl}`,
+        releaseUrl: `${RELEASES_URL}/tag/v${manifest.version}`,
+        notes,
+      });
     })();
 
     return () => { cancelled = true; };
   }, []);
 
-  const dismiss = () => {
-    if (info) {
-      try {
-        localStorage.setItem(DISMISSED_KEY_PREFIX + info.latestVersion, '1');
-      } catch {
-        // Non-fatal - worst case the banner reappears next launch.
-      }
-    }
-    setInfo(null);
-  };
+  const dismiss = () => setInfo(null);
 
   return { info, dismiss };
 }

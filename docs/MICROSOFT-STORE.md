@@ -1,7 +1,6 @@
 # Publishing to the Microsoft Store
 
-Last verified: 2026-09-22. Status: **packaging pipeline built, not yet
-submitted** — no Partner Center account exists yet for this app.
+Last verified: 2026-10-12. Status: **the app is published in the Microsoft Store** (confirmed by the maintainer). Every new release must also be submitted there: see [Releasing an update](#releasing-an-update-checklist).
 
 NoteNirman's Windows build is a plain Win32 app (Tauri), not native UWP.
 The Store still accepts that via "Desktop Bridge" — you submit an MSIX
@@ -9,7 +8,7 @@ that wraps the existing `.exe`, no rewrite needed. This doc splits the
 work into what only you can do (your identity, your account) and what's
 already built and automated.
 
-## Part 1 — only you can do this
+## Part 1 — only you can do this (one-time, already done for this app)
 
 ### 1. Create a Microsoft Partner Center developer account
 Go to [partner.microsoft.com/dashboard](https://partner.microsoft.com/dashboard)
@@ -103,6 +102,31 @@ For developers → Developer Mode**, or trust the printed `.pfx` into
 ```powershell
 Add-AppxPackage -Path .\src-tauri\msix\dist\NoteNirman_<version>_x64.msix
 ```
+
+## Releasing an update (checklist)
+
+The app ships in three places, and each one updates differently:
+
+| Where | How users get the update | What you do |
+| :--- | :--- | :--- |
+| Website (`notenirman.vercel.app`) | Automatically, whenever `deployment` changes | Promote `main` into `deployment` |
+| Windows installer / Android APK (GitHub Releases) | The in-app "New Update Available" dialog, which reads the website's `version.json` | Nothing extra: the release workflow writes `version.json` to `deployment` |
+| **Microsoft Store** | The Store updates the app itself. The in-app dialog is hidden in the Store build | **Submit the new MSIX in Partner Center** (steps below) |
+
+Order for every release:
+
+1. Merge the finished pull requests into `main` and let CI pass.
+2. Tag the release from `main` (`git tag vX.Y.Z` and push the tag). The release workflow builds the Windows installer, the Android APK **and the MSIX**, and attaches the installers to the GitHub Release. The MSIX is **not** public: it is a workflow artifact named `msix-package`.
+3. Check the GitHub Release: the installers are attached, and write real release notes in its description (the dialog shows them; leave it empty and the dialog just shows the "Full Changelog" link).
+4. Promote `main` into `deployment` when you are happy. Only then does the website show the new version and does the in-app dialog start appearing for installed copies of the Windows installer and Android APK. Publishing a release alone does not pop anything up.
+5. **Microsoft Store:** download the `msix-package` artifact from the workflow run, then in Partner Center open the app, **Update**, **Packages**, upload the new `.msix`, then **Submit for certification**. Certification usually takes a few days, so the Store lags the website and GitHub. That is normal.
+
+Store rules to remember:
+
+- The MSIX version must go up with every submission. It is derived from the app version (`X.Y.Z` becomes `X.Y.Z.0`). Store packages must keep the last number at 0, so never hand-edit it.
+- The MSIX must be built with the real identity values (the `MSIX_IDENTITY_NAME`, `MSIX_PUBLISHER` and `MSIX_PUBLISHER_DISPLAY_NAME` repository secrets). A package built with the placeholder identity cannot be submitted.
+- The Store build never shows the in-app update dialog (it detects that it runs from `WindowsApps`). Do not add a download link inside it: the Store's policy does not allow an app to offer its own installer.
+- Do not bump the Store version before the website/GitHub one is ready to ship: users of the Store and the installer should end up on the same version.
 
 ## Google sign-in and updates in the Store build
 

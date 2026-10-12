@@ -11,11 +11,19 @@ archived.
 
 ---
 
-## 2026-10-12 - A separate `deployment` branch; `develop` becomes the default
+## 2026-10-12 - One update prompt, driven by the website's version manifest
+
+**Problem.** The app had two update checks. An old dialog asked GitHub for the latest release on every platform, so it appeared on the website too, popped up the moment a release was published (before it was ready), ignored the Microsoft Store build, and showed raw release text ("Automated Release", an unclickable "Full Changelog" link). A newer banner already did it correctly (installed apps only, Store build excluded, driven by `/downloads/version.json`).
+
+**Decision.** Keep one check. The dialog's look stays, but it is now driven by the version manifest on the website, which only changes when the maintainer promotes a release to the `deployment` branch. It appears in the installed Windows and Android apps only, never on the website and never in the Microsoft Store build. Release notes are fetched from the GitHub Release for that version and cleaned up; the "Full Changelog" line is a real link to the release page. "Remind me later" closes it for this session and it returns at the next launch. The old GitHub-latest check was removed. The Store release steps are in [MICROSOFT-STORE.md](./MICROSOFT-STORE.md).
+
+---
+
+## 2026-10-12 - A separate `deployment` branch; `main` stays the default
 
 **Problem.** Branch protection on `main` (pull requests only) would block the release workflow, which pushed the version manifest straight to `main`. Renaming `main` was ruled out: CI, the release workflow, the Vercel project and many links refer to it.
 
-**Decision.** Three long-lived branches. `develop` is the default branch where contributions land. `main` is stable and protected. `deployment` is what Vercel serves in production; the release workflow writes the version manifest there with a GitHub-signed commit (created through the GraphQL API, because Vercel only deploys verified commits), and the maintainer promotes `main` into it when releasing. `area/*` branches hold larger pieces of work. CI runs on `main`, `develop`, `deployment` and on pull requests to `main`, `develop` and `area/*`.
+**Decision.** Two long-lived branches. `main` is the default branch where every pull request lands; it is protected (pull request plus passing CI). The maintainer first made `develop` the default, then dropped that: one landing branch is simpler. `deployment` is what Vercel serves in production; the release workflow writes the version manifest there with a GitHub-signed commit (created through the GraphQL API, because Vercel only deploys verified commits), and the maintainer promotes `main` into it only when a change is judged good enough to go live. `area/*` branches hold larger pieces of work. CI runs on `main`, `develop`, `deployment` and on pull requests to `main`, `develop` and `area/*`.
 
 ---
 
