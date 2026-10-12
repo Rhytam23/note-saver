@@ -22,7 +22,7 @@ API keys, bot tokens or signing keystores.
 
 ## Before you open a PR
 
-Open your pull request against `develop` (see [Branches](#branches)). Run all of these and make sure they pass:
+Open your pull request against `main` (see [Branches](#branches)). Run all of these and make sure they pass:
 
 ```bash
 npx tsc --noEmit   # type check
@@ -35,8 +35,7 @@ npm run build      # production build
 
 | Branch | Purpose |
 | :--- | :--- |
-| `main` | Stable, released code. Protected: changes arrive by pull request from `develop`; please do not commit to it directly. |
-| `develop` | Integration branch. **Open your pull requests against `develop`.** |
+| `main` | Stable, released code. Protected: **open your pull requests against `main`.** Nothing reaches it without a pull request and a passing CI check. |
 | `deployment` | What is live. Vercel serves this branch, and the release workflow publishes the version manifest to it. The maintainer promotes `main` into it when releasing. Do not open pull requests against it. |
 | `area/web` | Web app and landing page (`src/`, `public/`). |
 | `area/desktop` | Windows app (`src-tauri/`). |
@@ -46,13 +45,13 @@ npm run build      # production build
 | `area/ai` | The AI assistant (Gemini functions and the client code that calls them). |
 | `area/docs` | Documentation (`docs/`, README, guides). |
 | `area/ci` | GitHub Actions and release automation (`.github/`). |
-| `feat/...`, `fix/...`, `docs/...` | Short-lived branches for a single change. Create them from `develop` (or from the matching `area/*` branch) and delete them after merging. |
+| `feat/...`, `fix/...`, `docs/...` | Short-lived branches for a single change. Create them from `main` (or from the matching `area/*` branch) and delete them after merging. |
 
 How to use them:
 
-- **Small change?** Branch from `develop` (for example `fix/note-title-overflow`), open a pull request to `develop`.
-- **Bigger piece of work in one part of the project?** Use the matching `area/*` branch as its home, branch from it, and merge it into `develop` when it is ready. Keep `area/*` branches up to date by merging `develop` into them regularly.
-- **Releases:** `develop` is merged into `main` by the maintainer, the release is tagged from `main`, and `main` is then promoted into `deployment`, which makes it live.
+- **Small change?** Branch from `develop` (for example `fix/note-title-overflow`), open a pull request to `main`.
+- **Bigger piece of work in one part of the project?** Use the matching `area/*` branch as its home, branch from it, and open a pull request from it to `main` when it is ready. Keep `area/*` branches up to date by merging `main` into them regularly.
+- **Releases:** pull requests are merged into `main`. The maintainer tags the release from `main`, and only promotes `main` into `deployment` (which makes it live) once the change is judged good.
 - Preview deployments only build commits that GitHub marks as verified (signed). See [docs/DECISIONS.md](docs/DECISIONS.md).
 
 ## Finding something to work on

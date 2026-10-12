@@ -29,6 +29,26 @@ function compareSemver(v1: string, v2: string): number {
   return 0;
 }
 
+/** Turns a GitHub release body into short plain text for the update dialog: drops boilerplate and the
+ * auto-generated "Full Changelog" link, strips Markdown markers, and returns '' if nothing is left. */
+function cleanReleaseNotes(body?: string): string {
+  if (!body) return '';
+  return body
+    .split(/\r?\n/)
+    .map((line) => line
+      .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+      .replace(/^#{1,6}\s*/, '')
+      .replace(/^[*-]\s+/, '\u2022 ')
+      .replace(/\*\*|__|`/g, '')
+      .trim())
+    .filter((line) => line
+      && !/^what's changed$/i.test(line)
+      && !/full changelog/i.test(line)
+      && !/automated release/i.test(line)
+      && !/^https?:\/\/\S+$/.test(line))
+    .join('\n');
+}
+
 export async function checkForUpdates(): Promise<UpdateInfo | null> {
   try {
     const response = await fetch('https://api.github.com/repos/Rhytam23/note-saver/releases/latest', {
@@ -79,7 +99,7 @@ export async function checkForUpdates(): Promise<UpdateInfo | null> {
       currentVersion: CURRENT_APP_VERSION,
       releaseUrl: data.html_url || 'https://github.com/Rhytam23/note-saver/releases',
       downloadUrl: downloadUrl || data.html_url,
-      releaseNotes: data.body || '',
+      releaseNotes: cleanReleaseNotes(data.body),
       publishedAt: data.published_at || '',
     };
   } catch (error) {
