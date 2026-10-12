@@ -63,6 +63,10 @@ Recorded from the live app at <https://notenirman.vercel.app> (other notes blurr
 - **Data control**: export any note as PDF/Markdown/text, back up the whole
   workspace to one file and restore it later, import from Markdown, HTML,
   text or CSV.
+- **Telegram bot (optional)**: write, search and manage notes from Telegram with over 40 commands
+  (`/quick`, `/search`, `/todo`, `/remind`, `/quiz`, `/summarize` and more), plus reminders and a
+  quick-capture inbox. It reads and writes the same notes as the apps, so everything syncs. You host it
+  yourself on Supabase with your own bot token: see [telegram/README.md](telegram/README.md).
 - **13 seasonal themes**, switched automatically by date/location or picked
   manually.
 
@@ -104,6 +108,7 @@ note-nirman/
 │   ├── services/            # business logic — sync engine, local storage, features
 │   ├── contexts/, hooks/, extensions/, config/, types.ts
 ├── supabase/                # Postgres migrations + Edge Functions
+├── telegram/                # Telegram bot: function source, migrations, in-app linking, tests
 ├── src-tauri/                 # Windows desktop shell (Tauri)
 ├── android/                    # Android shell (Capacitor)
 ├── public/                      # static assets, PWA manifest/service worker, SEO files
