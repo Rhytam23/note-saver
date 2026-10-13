@@ -60,12 +60,9 @@ export class SecuritySanitizer {
       .replace(/\x00/g, '')
       // Normalize to forward slashes
       .replace(/\\/g, '/');
-    // Strip path traversal sequences. Repeat until nothing changes: one pass turns "....//" into "../".
-    let prev: string;
-    do {
-      prev = out;
-      out = out.replace(/(\.\.\/)+/g, '').replace(/^\.\.$/g, '');
-    } while (out !== prev);
+    // Drop every ".." path segment. Working on whole segments (not a text pattern) means input like
+    // "....//" or a trailing ".." cannot be rebuilt into a traversal.
+    out = out.split('/').filter((segment) => segment !== '..').join('/');
     return out
       // Strip leading slashes (absolute path protection)
       .replace(/^\/+/, '')

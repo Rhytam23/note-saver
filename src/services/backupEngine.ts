@@ -189,12 +189,9 @@ export function sanitizePathOrId(pathOrId: string): string {
     // Null-byte removal (intentional: strips a null-byte injection vector, e.g. "a.txt\x00.exe")
     // eslint-disable-next-line no-control-regex
     .replace(/\x00/g, '');
-  // Strip path traversal sequences. Repeat until nothing changes: one pass turns "....//" into "../".
-  let prev: string;
-  do {
-    prev = out;
-    out = out.replace(/(\.\.[\\/])+/g, '').replace(/^\.\.$/g, '');
-  } while (out !== prev);
+  // Drop every ".." path segment. Working on whole segments (not a text pattern) means input like
+  // "....//" or a trailing ".." cannot be rebuilt into a traversal.
+  out = out.split(/[\\/]/).filter((segment) => segment !== '..').join('/');
   return out
     // Strip separator characters
     .replace(/[\\/]/g, '_')
