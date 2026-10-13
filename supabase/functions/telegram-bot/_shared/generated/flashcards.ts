@@ -23,17 +23,29 @@ const AGAIN_DELAY_MS = 10 * 60 * 1000;
 const MIN_EASE = 1.3;
 const NEW_CARDS_PER_SESSION = 20;
 
+function stripTags(html: string, replacement: string): string {
+  let out = html;
+  let prev: string;
+  do {
+    prev = out;
+    out = out.replace(/<[^>]*>/g, replacement);
+  } while (out !== prev);
+  return out;
+}
+
 function htmlToLines(html: string): string[] {
-  return (html || '')
-    .replace(/<\/(p|li|h[1-6]|div|tr|blockquote)>/gi, '\n')
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<[^>]*>/g, '')
+  return stripTags(
+    (html || '')
+      .replace(/<\/(p|li|h[1-6]|div|tr|blockquote)>/gi, '\n')
+      .replace(/<br\s*\/?>/gi, '\n'),
+    '',
+  )
     .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, '&')
     .split('\n')
     .map(line => line.trim())
     .filter(Boolean);

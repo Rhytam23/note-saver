@@ -251,7 +251,12 @@ async function analysePr(pr) {
   }
 
   // description / template (.github/PULL_REQUEST_TEMPLATE.md)
-  const body = (pr.body ?? "").replace(/<!--[\s\S]*?-->/g, "").trim();
+  let body = pr.body ?? "";
+  for (let prevBody = ""; prevBody !== body; ) {
+    prevBody = body;
+    body = body.replace(/<!--[\s\S]*?-->/g, "");
+  }
+  body = body.trim();
   const what = body.match(/##\s*What does this change\?\s*([\s\S]*?)(?=\n##|$)/i)?.[1]?.trim() ?? body;
   const tested = body.match(/##\s*How was it tested\?\s*([\s\S]*?)(?=\n##|$)/i)?.[1]?.trim();
   if (what.length < 15) required.push("Fill in **What does this change?** in the PR description.");

@@ -68,11 +68,15 @@ export function sanitizeImportHtml(rawHtml: string): string {
       FORBID_TAGS: [...ImportSecurityPolicy.STRIP_ELEMENTS],
     });
   }
-  // Server/node fallback basic script tag stripping if DOMPurify is unavailable
-  return rawHtml
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-    .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
-    .replace(/on\w+="[^"]*"/gi, '');
+  // No DOM (for example plain Node), so DOMPurify is unavailable. Regexes cannot sanitize HTML safely,
+  // so reduce the input to plain text: drop every tag (repeating until none is left) and escape what remains.
+  let text = rawHtml;
+  let prev: string;
+  do {
+    prev = text;
+    text = text.replace(/<[^>]*>/g, '');
+  } while (text !== prev);
+  return text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 /**

@@ -2,15 +2,24 @@ import type { Note } from '../types';
 
 const WIKI_LINK = /\[\[([^[\]\n]{1,120}?)\]\]/g;
 
+function stripTags(html: string, replacement: string): string {
+  let out = html;
+  let prev: string;
+  do {
+    prev = out;
+    out = out.replace(/<[^>]*>/g, replacement);
+  } while (out !== prev);
+  return out;
+}
+
 function htmlToText(html: string): string {
-  return html
-    .replace(/<[^>]*>/g, ' ')
+  return stripTags(html, ' ')
     .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'");
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, '&');
 }
 
 const normalise = (title: string): string => title.trim().replace(/\s+/g, ' ').toLowerCase();

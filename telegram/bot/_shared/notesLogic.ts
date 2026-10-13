@@ -1,6 +1,7 @@
 // Pure note-list logic for the Telegram bot: ordering, filtering, numbering,
 // target resolution and the HTML edits. No Deno or Node APIs.
 import { LOCK_PREFIX } from './generated/lockPrefix.ts';
+import { stripTags } from './text.ts';
 import { taskList } from './generated/noteTemplates.ts';
 
 export type Priority = 'high' | 'medium' | 'low' | 'none';
@@ -183,7 +184,7 @@ export function extractOpenTasks(html: string): string[] {
   const re = /<li[^>]*data-type="taskItem"[^>]*data-checked="false"[^>]*>([\s\S]*?)<\/li>/gi;
   let m: RegExpExecArray | null;
   while ((m = re.exec(html || ''))) {
-    const text = m[1].replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').trim();
+    const text = stripTags(m[1]).replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').trim();
     if (text) out.push(text);
   }
   return out;

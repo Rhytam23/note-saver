@@ -18,6 +18,17 @@ export function textToHtml(text: string): string {
     .join('');
 }
 
+/** Removes every tag, repeating until none is left so nested input like "<<b>b>" cannot leave one behind. */
+export function stripTags(html: string): string {
+  let out = html;
+  let prev: string;
+  do {
+    prev = out;
+    out = out.replace(/<[^>]+>/g, '');
+  } while (out !== prev);
+  return out;
+}
+
 function decodeEntities(s: string): string {
   return s
     .replace(/&nbsp;/g, ' ')
@@ -30,10 +41,11 @@ function decodeEntities(s: string): string {
 
 export function htmlToText(html: string): string {
   return decodeEntities(
-    (html || '')
-      .replace(/<\/(p|div|h[1-6]|li|tr|blockquote)>/gi, '\n')
-      .replace(/<br\s*\/?>/gi, '\n')
-      .replace(/<[^>]+>/g, ''),
+    stripTags(
+      (html || '')
+        .replace(/<\/(p|div|h[1-6]|li|tr|blockquote)>/gi, '\n')
+        .replace(/<br\s*\/?>/gi, '\n'),
+    ),
   )
     .replace(/[ \t]+\n/g, '\n')
     .replace(/\n{3,}/g, '\n\n')
@@ -51,9 +63,8 @@ export function htmlToMarkdown(html: string): string {
     .replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_m, inner) => `\n- ${inner}`)
     .replace(/<\/(p|div|tr|blockquote|ul|ol|table)>/gi, '\n')
     .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/t[hd]>/gi, ' | ')
-    .replace(/<[^>]+>/g, '');
-  return decodeEntities(md)
+    .replace(/<\/t[hd]>/gi, ' | ');
+  return decodeEntities(stripTags(md))
     .replace(/[ \t]+\n/g, '\n')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
