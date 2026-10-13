@@ -152,7 +152,7 @@ const fakeFetch = async (url: string, init?: any) => {
     documents.push({ chat: Number(f.get('chat_id')), filename: file.name, content: await file.text() });
     return ok({ ok: true });
   }
-  if (url.includes('generativelanguage.googleapis.com')) {
+  if (new URL(url).hostname === 'generativelanguage.googleapis.com') {
     geminiCalls++;
     return ok({ candidates: [{ content: { parts: [{ text: '- a short summary' }] } }] });
   }

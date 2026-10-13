@@ -50,18 +50,23 @@ export class SecuritySanitizer {
    */
   static sanitizePath(filepath: string): string {
     if (!filepath) return '';
-    return filepath
-      // Decode any percent-encoded separators before analysis
+    let out = filepath
+      // Decode any percent-encoded dots and separators before analysis
+      .replace(/%2[eE]/g, '.')
       .replace(/%2[fF]/g, '/')
       .replace(/%5[cC]/g, '\\')
       // Null-byte removal (intentional: strips a null-byte injection vector, e.g. "a.txt\x00.exe")
       // eslint-disable-next-line no-control-regex
       .replace(/\x00/g, '')
       // Normalize to forward slashes
-      .replace(/\\/g, '/')
-      // Strip path traversal sequences (../ and ..\ variants)
-      .replace(/(\.\.[/\\])+/g, '')
-      .replace(/^\.\.$/g, '')
+      .replace(/\\/g, '/');
+    // Strip path traversal sequences. Repeat until nothing changes: one pass turns "....//" into "../".
+    let prev: string;
+    do {
+      prev = out;
+      out = out.replace(/(\.\.\/)+/g, '').replace(/^\.\.$/g, '');
+    } while (out !== prev);
+    return out
       // Strip leading slashes (absolute path protection)
       .replace(/^\/+/, '')
       // Strip Windows drive letters (e.g. C:)

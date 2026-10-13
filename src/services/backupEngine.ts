@@ -181,16 +181,21 @@ export function computePackageChecksum(notes: BackupNoteItem[], attachments: Bac
  */
 export function sanitizePathOrId(pathOrId: string): string {
   if (!pathOrId) return '';
-  return pathOrId
-    // Decode percent-encoded separators before analysis
+  let out = pathOrId
+    // Decode percent-encoded dots and separators before analysis
+    .replace(/%2[eE]/g, '.')
     .replace(/%2[fF]/g, '/')
     .replace(/%5[cC]/g, '\\')
     // Null-byte removal (intentional: strips a null-byte injection vector, e.g. "a.txt\x00.exe")
     // eslint-disable-next-line no-control-regex
-    .replace(/\x00/g, '')
-    // Strip path traversal sequences
-    .replace(/(\.\.[\\/])+/g, '')
-    .replace(/^\.\.$/g, '')
+    .replace(/\x00/g, '');
+  // Strip path traversal sequences. Repeat until nothing changes: one pass turns "....//" into "../".
+  let prev: string;
+  do {
+    prev = out;
+    out = out.replace(/(\.\.[\\/])+/g, '').replace(/^\.\.$/g, '');
+  } while (out !== prev);
+  return out
     // Strip separator characters
     .replace(/[\\/]/g, '_')
     // Strip Windows drive letters
