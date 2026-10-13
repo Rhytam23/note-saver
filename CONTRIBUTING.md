@@ -49,7 +49,7 @@ npm run build      # production build
 
 How to use them:
 
-- **Small change?** Branch from `develop` (for example `fix/note-title-overflow`), open a pull request to `main`.
+- **Small change?** Branch from `main` (for example `fix/note-title-overflow`), open a pull request to `main`.
 - **Bigger piece of work in one part of the project?** Use the matching `area/*` branch as its home, branch from it, and open a pull request from it to `main` when it is ready. Keep `area/*` branches up to date by merging `main` into them regularly.
 - **Releases:** pull requests are merged into `main`. The maintainer tags the release from `main`, and only promotes `main` into `deployment` (which makes it live) once the change is judged good.
 - Preview deployments only build commits that GitHub marks as verified (signed). See [docs/DECISIONS.md](docs/DECISIONS.md).
