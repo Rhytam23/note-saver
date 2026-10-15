@@ -8,15 +8,17 @@ type Festival = {
 
 // Holi, Navratri and Diwali follow the lunar calendar; their dates are
 // computed per year in lunarFestivals.ts.
+// Holi and Navratri are India-only; Diwali is celebrated worldwide, so it is
+// in DEFAULT and applies to every country.
 const festivalData: Record<string, Festival[]> = {
     IN: [
         { theme: 'holi', isActive: (d) => isLunarFestival(d, 'holi') },
         { theme: 'navratri', isActive: (d) => isLunarFestival(d, 'navratri') },
-        { theme: 'diwali', isActive: (d) => isLunarFestival(d, 'diwali') },
         { theme: 'christmas', isActive: (d) => d.getMonth() === 11 && d.getDate() >= 24 && d.getDate() <= 26 },
     ],
     DEFAULT: [
         { theme: 'new_year', isActive: (d) => (d.getMonth() === 11 && d.getDate() === 31) || (d.getMonth() === 0 && d.getDate() <= 1) },
+        { theme: 'diwali', isActive: (d) => isLunarFestival(d, 'diwali') },
 
         { theme: 'christmas', isActive: (d) => d.getMonth() === 11 && d.getDate() >= 24 && d.getDate() <= 26 },
     ]

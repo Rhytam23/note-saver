@@ -5,6 +5,7 @@ import { fetchTodayEvents } from "../services/calendarService";
 import { getThemeColors } from "../services/themeColorService";
 import { useAuth } from "./AuthContext";
 import { useTheme } from "./ThemeContext";
+import { getNavratriStyle, getUserRegion, type NavratriStyle } from "../services/navratriStyle";
 
 export type SeasonalTheme =
   | 'none' | 'winter' | 'autumn' | 'spring' | 'summer' | 'monsoon'
@@ -26,6 +27,8 @@ export interface SeasonalContextType {
   theme: SeasonalTheme;
   colors: ThemeColors;
   setSeasonalTheme: (theme: SeasonalTheme) => void;
+  /** Regional way of celebrating Navratri; only meaningful when theme is 'navratri'. */
+  navratriStyle: NavratriStyle;
 }
 
 const SeasonalContext = createContext<SeasonalContextType | undefined>(undefined);
@@ -34,6 +37,16 @@ export const SeasonalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const { user } = useAuth() as any;
   const { theme: colorMode } = useTheme() as any;
   const [seasonalTheme, setSeasonalTheme] = useState<SeasonalTheme>('autumn');
+  const [navratriStyle, setNavratriStyle] = useState<NavratriStyle>('garba');
+
+  useEffect(() => {
+    if (seasonalTheme !== 'navratri') return;
+    let cancelled = false;
+    getUserRegion().then((region) => {
+      if (!cancelled) setNavratriStyle(getNavratriStyle(region));
+    });
+    return () => { cancelled = true; };
+  }, [seasonalTheme]);
 
   const colors = useMemo(() => {
     const isDarkMode = colorMode === 'dark';
@@ -79,7 +92,7 @@ export const SeasonalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [user?.themePreference]);
 
   return (
-    <SeasonalContext.Provider value={{ theme: seasonalTheme, colors, setSeasonalTheme }}>
+    <SeasonalContext.Provider value={{ theme: seasonalTheme, colors, setSeasonalTheme, navratriStyle }}>
       {children}
     </SeasonalContext.Provider>
   );
