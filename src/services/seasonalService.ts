@@ -1,15 +1,18 @@
 import type { SeasonalTheme, UserLocation } from "../types";
+import { isLunarFestival } from "./lunarFestivals";
 
 type Festival = {
     theme: SeasonalTheme;
     isActive: (date: Date) => boolean;
 };
 
+// Holi, Navratri and Diwali follow the lunar calendar; their dates are
+// computed per year in lunarFestivals.ts.
 const festivalData: Record<string, Festival[]> = {
     IN: [
-        { theme: 'holi', isActive: (d) => d.getMonth() === 2 && d.getDate() <= 15 },
-        { theme: 'navratri', isActive: (d) => d.getMonth() === 9 && d.getDate() >= 3 && d.getDate() <= 12 },
-        { theme: 'diwali', isActive: (d) => d.getMonth() === 10 },
+        { theme: 'holi', isActive: (d) => isLunarFestival(d, 'holi') },
+        { theme: 'navratri', isActive: (d) => isLunarFestival(d, 'navratri') },
+        { theme: 'diwali', isActive: (d) => isLunarFestival(d, 'diwali') },
         { theme: 'christmas', isActive: (d) => d.getMonth() === 11 && d.getDate() >= 24 && d.getDate() <= 26 },
     ],
     DEFAULT: [
