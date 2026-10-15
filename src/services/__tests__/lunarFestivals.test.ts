@@ -10,9 +10,12 @@ describe('lunarFestivals', () => {
     const diwali: [number, number, number][] = [[2023, 11, 12], [2024, 11, 1], [2025, 10, 20], [2026, 11, 8]];
     const holi: [number, number, number][] = [[2023, 3, 8], [2024, 3, 25], [2025, 3, 14], [2026, 3, 4]];
 
-    it.each(navratriStart)('Navratri %i starts near %i-%i', (y, m, d) => {
-        const { start } = getLunarFestivals(y).navratri;
-        expect(Math.abs(start - day(y, m, d))).toBeLessThanOrEqual(1);
+    // Mahalaya is the day before Pratipada; the theme window ends on Dussehra
+    // (Pratipada + 9 days).
+    it.each(navratriStart)('Navratri %i theme starts at Mahalaya before %i-%i', (y, m, d) => {
+        const { start, end } = getLunarFestivals(y).navratri;
+        expect(Math.abs(start - (day(y, m, d) - 1))).toBeLessThanOrEqual(1);
+        expect(end - start).toBe(10);
     });
     it.each(diwali)('Diwali %i window contains %i-%i', (y, m, d) => {
         const r = getLunarFestivals(y).diwali;

@@ -5,7 +5,8 @@
 // terms, accurate to a few minutes). Festival rules (amanta calendar):
 //   Diwali   = Kartik Amavasya, the new moon after the Ashvin full moon
 //   Navratri = 9 days starting the day after the new moon one lunar month
-//              before Diwali (Ashvin Shukla Pratipada), ending with Navami
+//              before Diwali (Ashvin Shukla Pratipada), ending with Navami.
+//              The theme runs from Mahalaya (that new moon) to Dussehra.
 //   Holi     = day after the Phalguna full moon (Holika Dahan); Phalguna is
 //              the lunar month containing the Sun's entry into Pisces
 // Festival days are decided by tithi at sunrise, so results can be off by a
@@ -88,7 +89,8 @@ export const getLunarFestivals = (year: number) => {
     const result = {
         // Dhanteras (2 days before) through Bhai Dooj (2 days after), plus a margin day.
         diwali: { start: diwaliDay - 3, end: diwaliDay + 3 },
-        navratri: { start: navratriStart, end: navratriStart + 8 },
+        // Mahalaya Amavasya (day before Pratipada) through Dussehra (day after Navami).
+        navratri: { start: navratriStart - 1, end: navratriStart + 9 },
         holi: { start: holiDay - 2, end: holiDay + 1 },
     };
     cache.set(year, result);
