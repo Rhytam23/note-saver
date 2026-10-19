@@ -16,6 +16,9 @@ updates:
       # Tailwind 4 needs a PostCSS plugin swap and a styling migration; do it deliberately, not by bot.
       - dependency-name: tailwindcss
         update-types: ["version-update:semver-major"]
+      # typescript-eslint only supports TypeScript <6.1.0, so a major bump breaks `npm ci`; revisit once it adds support.
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: cargo
     directory: /src-tauri
