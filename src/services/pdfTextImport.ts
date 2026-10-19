@@ -18,7 +18,8 @@ export async function extractPdfText(file: File | Blob): Promise<PdfTextResult> 
   pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl.toString();
 
   const data = new Uint8Array(await file.arrayBuffer());
-  const doc = await pdfjsLib.getDocument({ data }).promise;
+  const loadingTask = pdfjsLib.getDocument({ data });
+  const doc = await loadingTask.promise;
 
   const pages: string[] = [];
   try {
@@ -29,7 +30,7 @@ export async function extractPdfText(file: File | Blob): Promise<PdfTextResult> 
       pages.push(text);
     }
   } finally {
-    await doc.destroy();
+    await loadingTask.destroy();
   }
 
   return { pageCount: doc.numPages, pages };
