@@ -25,20 +25,18 @@ export default defineConfig(() => {
     build: {
       rollupOptions: {
         output: {
-          manualChunks: {
-            'react-vendor': ['react', 'react-dom', 'framer-motion'],
-            'supabase-vendor': ['@supabase/supabase-js'],
-            'tiptap-vendor': [
-              '@tiptap/react',
-              '@tiptap/starter-kit',
-              '@tiptap/extension-task-list',
-              '@tiptap/extension-task-item',
-              '@tiptap/extension-table',
-              '@tiptap/extension-mathematics',
-            ],
+          // Function form: Vite 8 (Rolldown) no longer accepts the object form.
+          manualChunks(id: string) {
+            const path = id.split('\\').join('/');
+            if (!path.includes('/node_modules/')) return undefined;
+            const inPkg = (...names: string[]) => names.some(n => path.includes(`/node_modules/${n}/`));
+            if (inPkg('react', 'react-dom', 'framer-motion')) return 'react-vendor';
+            if (inPkg('@supabase/supabase-js')) return 'supabase-vendor';
             // Equation rendering is only needed once the editor (already a lazy chunk) opens,
             // and it's large enough (fonts + render engine) to deserve its own cacheable chunk.
-            'katex-vendor': ['katex'],
+            if (inPkg('katex')) return 'katex-vendor';
+            if (path.includes('/node_modules/@tiptap/') || path.includes('/node_modules/prosemirror-')) return 'tiptap-vendor';
+            return undefined;
           },
         },
       },
