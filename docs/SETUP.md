@@ -57,7 +57,7 @@ npm run preview    # serve the production build locally
 ```bash
 npx tsc --noEmit    # type check
 npm run lint         # eslint src --ext .ts,.tsx
-npm test              # vitest run (663 tests as of 2026-10-27)
+npm test              # vitest run (622 tests as of 2026-10-27)
 ```
 
 ## 5. Supabase backend (auth, sync, AI proxy)

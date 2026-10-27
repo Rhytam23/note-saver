@@ -92,7 +92,7 @@ npm run dev              # http://localhost:3000
 ```bash
 npx tsc --noEmit   # type check
 npm run lint        # eslint
-npm test             # vitest — 663 tests as of 2026-10-27
+npm test             # vitest — 622 tests as of 2026-10-27
 npm run build         # production build
 ```
 

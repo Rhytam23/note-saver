@@ -34,7 +34,7 @@ required it.
 | Real on-device OCR | Done — `imageTextImport.ts` (tesseract.js), editor toolbar |
 | Version history / trash / restore | Trash: done. Full version history: **not done** (`historyService.ts` exists but is part of the dormant collaboration subsystem — see [DORMANT-CODE.md](./DORMANT-CODE.md)) |
 | App lock / encrypted notes | Done — per-note passphrase lock, AES-256-GCM (`noteLock.ts`) |
-| "Ask your notes" semantic search + Q&A | **Not done** — stayed dormant (`ragPipeline.ts`, `CopilotDrawer.tsx`); would need Gemini cost controls (`quotaManager.ts`) before enabling for everyone |
+| "Ask your notes" semantic search + Q&A | **Not done** — the dormant implementation (`ragPipeline.ts`, `CopilotDrawer.tsx`) was deleted on 2026-10-27, recoverable from git history; would need Gemini cost controls (`quotaManager.ts`) before enabling for everyone |
 | Voice notes with transcription | **Not done** — only plain voice dictation shipped (`useSpeechRecognition.ts`), not recording+transcription (`audioRecorder.ts`/`transcriptionService.ts` are dormant) |
 | Reminders and study calendar | Reminders: done (`reminderEngine.ts`, `RemindersModal.tsx`). Full calendar view: **not done** |
 
