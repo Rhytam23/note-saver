@@ -60,6 +60,18 @@ export const SeasonalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         return;
       }
 
+      if (typeof window !== 'undefined' && window.localStorage) {
+        try {
+          const stored = window.localStorage.getItem('notenirman_seasonal_theme') as SeasonalTheme | null;
+          if (stored && stored !== 'auto' as any) {
+            setSeasonalTheme(stored);
+            return;
+          }
+        } catch {
+          // Ignore storage errors
+        }
+      }
+
       try {
         const eventTitles = await fetchTodayEvents();
         if (eventTitles.length > 0) {
@@ -91,8 +103,19 @@ export const SeasonalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   }, [user?.themePreference]);
 
+  const handleSetSeasonalTheme = (theme: SeasonalTheme) => {
+    setSeasonalTheme(theme);
+    if (typeof window !== 'undefined' && window.localStorage) {
+      try {
+        window.localStorage.setItem('notenirman_seasonal_theme', theme);
+      } catch {
+        // Ignore storage errors
+      }
+    }
+  };
+
   return (
-    <SeasonalContext.Provider value={{ theme: seasonalTheme, colors, setSeasonalTheme, navratriStyle }}>
+    <SeasonalContext.Provider value={{ theme: seasonalTheme, colors, setSeasonalTheme: handleSetSeasonalTheme, navratriStyle }}>
       {children}
     </SeasonalContext.Provider>
   );

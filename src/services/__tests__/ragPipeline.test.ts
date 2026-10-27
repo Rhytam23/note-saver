@@ -124,4 +124,64 @@ describe('Phase 4 — RAG Pipeline & Context Budgeting (P4.9)', () => {
     expect(bundle.truncated).toBe(true);
     expect(bundle.contextItems.length).toBeLessThan(2);
   });
+
+  it('should exclude locked notes and NNLOCK1 encrypted content from RAG context', async () => {
+    const mockHybridResults: HybridSearchResult[] = [
+      {
+        documentId: 'doc-locked-note',
+        rrfScore: 0.05,
+        document: {
+          id: 'doc-locked-note',
+          noteId: 'locked-note-id',
+          sourceType: 'block_text',
+          textContent: 'Secret leaked text from locked note',
+          title: 'Locked Note Title',
+          tags: [],
+          updatedAt: 100,
+          contentHash: 'h1',
+          isDeleted: false,
+        },
+      },
+      {
+        documentId: 'doc-locked-ciphertext',
+        rrfScore: 0.04,
+        document: {
+          id: 'doc-locked-ciphertext',
+          noteId: 'other-note-id',
+          sourceType: 'block_text',
+          textContent: 'NNLOCK1:mockCiphertextEncryptedData==',
+          title: 'Encrypted Note',
+          tags: [],
+          updatedAt: 100,
+          contentHash: 'h2',
+          isDeleted: false,
+        },
+      },
+      {
+        documentId: 'doc-allowed',
+        rrfScore: 0.03,
+        document: {
+          id: 'doc-allowed',
+          noteId: 'public-note-id',
+          sourceType: 'block_text',
+          textContent: 'Legitimate public note content',
+          title: 'Public Note',
+          tags: [],
+          updatedAt: 100,
+          contentHash: 'h3',
+          isDeleted: false,
+        },
+      },
+    ];
+
+    vi.spyOn(mockHybridSearch, 'search').mockResolvedValue(mockHybridResults);
+
+    const bundle = await pipeline.buildRagContext('query', {
+      lockedNoteIds: new Set(['locked-note-id']),
+    });
+
+    expect(bundle.contextItems).toHaveLength(1);
+    expect(bundle.contextItems[0].documentId).toBe('doc-allowed');
+    expect(bundle.contextItems[0].snippetText).toBe('Legitimate public note content');
+  });
 });

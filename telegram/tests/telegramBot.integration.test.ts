@@ -511,6 +511,96 @@ describe('telegram bot: user isolation (service role bypasses RLS)', () => {
     expect(r).toContain('Mine only');
     expect(r).not.toContain('Theirs only');
   });
+
+  it('rejects cross-tenant note deletion when session target_note_id is manipulated', async () => {
+    const id = seedNote(U1, { title: 'Victim Note', content: '<p>untouchable</p>' });
+    // User 2 manually sets their session state to target User 1's note
+    db.t('telegram_sessions').push({
+      chat_id: C2,
+      state: 'awaiting_delete_confirm',
+      target_note_id: id,
+    });
+
+    const reply = await say(C2, '/confirm');
+    expect(reply).toContain('no longer exists');
+
+    const note = db.t('notes').find((r) => r.id === id)!;
+    expect(note.deleted).toBe(false);
+  });
+
+  it('rejects cross-tenant note append/prepend/rename when session target_note_id is manipulated', async () => {
+    const id = seedNote(U1, { title: 'Victim Note', content: '<p>original content</p>' });
+
+    const setSession = (state: string) => {
+      const sessions = db.t('telegram_sessions');
+      const idx = sessions.findIndex((s) => s.chat_id === C2);
+      const row = { chat_id: C2, state, target_note_id: id };
+      if (idx >= 0) sessions[idx] = row;
+      else sessions.push(row);
+    };
+
+    // Try append
+    setSession('awaiting_append');
+    const replyAppend = await say(C2, 'malicious append');
+    expect(replyAppend).toContain('no longer exists');
+
+    // Try rename
+    setSession('awaiting_rename');
+    const replyRename = await say(C2, 'Hacked Title');
+    expect(replyRename).toContain('no longer exists');
+
+    const note = db.t('notes').find((r) => r.id === id)!;
+    expect(note.title).toBe('Victim Note');
+    expect(note.content).toBe('<p>original content</p>');
+  });
+
+  it('never restores another user\'s deleted note via /undo', async () => {
+    const victimNoteId = seedNote(U1, {
+      title: 'Victim Deleted Note',
+      deleted: true,
+      deleted_at: new Date().toISOString(),
+    });
+
+    // User 2 has no deleted notes, attempts /undo
+    const reply = await say(C2, '/undo');
+    expect(reply).toContain('Nothing to restore');
+
+    const note = db.t('notes').find((r) => r.id === victimNoteId)!;
+    expect(note.deleted).toBe(true);
+  });
+
+  it('prevents cross-tenant reminder cancellation and enumeration', async () => {
+    db.t('telegram_reminders').push({
+      id: 'r-u1',
+      user_id: U1,
+      chat_id: C1,
+      body: 'User 1 secret reminder',
+      due_at: new Date(Date.now() + 3600000).toISOString(),
+      sent: false,
+    });
+
+    const remindersList = await say(C2, '/reminders');
+    expect(remindersList).not.toContain('User 1 secret reminder');
+    expect(remindersList).toContain('No pending reminders');
+
+    // Attempt to cancel
+    const cancelReply = await say(C2, '/reminders cancel 1');
+    expect(cancelReply).toContain('No reminder with that number');
+
+    const reminder = db.t('telegram_reminders').find((r) => r.id === 'r-u1');
+    expect(reminder).toBeDefined();
+  });
+
+  it('fails closed when tenant user_id is missing or invalid in database mapping', async () => {
+    const UNLINKED_CHAT = 99999;
+    const res = await say(UNLINKED_CHAT, '/notes');
+    expect(res).toContain('This chat is not connected to a NoteNirman account yet');
+
+    // Invalid user ID mapping (e.g. empty or malicious string)
+    db.t('telegram_links').push({ user_id: '   ', chat_id: 88888 });
+    const resInvalid = await say(88888, '/notes');
+    expect(resInvalid).toContain('This chat is not connected to a NoteNirman account yet');
+  });
 });
 
 describe('telegram bot: editing (sync-safe writes)', () => {

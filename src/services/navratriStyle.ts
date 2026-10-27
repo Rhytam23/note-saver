@@ -30,22 +30,18 @@ export const getNavratriStyle = (region?: string | null): NavratriStyle => {
     return 'garba';
 };
 
-const regionServices: { url: string; read: (d: any) => string | undefined }[] = [
-    { url: 'https://ipwho.is/', read: (d) => (d.success ? d.region : undefined) },
-    { url: 'https://get.geojs.io/v1/ip/geo.json', read: (d) => d.region },
-    { url: 'https://ipapi.co/json/', read: (d) => (d.error ? undefined : d.region) },
-];
-
-/** Looks up the user's state/region by IP. Resolves to null when offline or unavailable. */
+/**
+ * Returns the user's preferred region from local storage without external network requests.
+ * Resolves to null when unset, falling back to the default 'garba' style.
+ */
 export const getUserRegion = async (): Promise<string | null> => {
-    for (const service of regionServices) {
+    if (typeof window !== 'undefined' && window.localStorage) {
         try {
-            const response = await fetch(service.url, { headers: { Accept: 'application/json' } });
-            if (!response.ok) continue;
-            const region = service.read(await response.json());
-            if (region) return region;
+            const stored = window.localStorage.getItem('notenirman_navratri_region') ||
+                           window.localStorage.getItem('notenirman_user_region');
+            if (stored) return stored;
         } catch {
-            // This service failed; try the next one.
+            // Ignore storage errors
         }
     }
     return null;

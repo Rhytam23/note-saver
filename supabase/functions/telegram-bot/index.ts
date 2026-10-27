@@ -37,6 +37,7 @@ import { extractAllFlashcards } from './_shared/generated/flashcards.ts';
 import { findBacklinks, resolveOutgoingLinks } from './_shared/generated/noteLinks.ts';
 import { NOTE_TEMPLATES } from './_shared/generated/noteTemplates.ts';
 import { LOCK_PREFIX } from './_shared/generated/lockPrefix.ts';
+import { createTenantDb, isValidUserId, assertValidUserId, LIST_COLS } from './_shared/tenantDb.ts';
 
 const BOT_TOKEN = Deno.env.get('TELEGRAM_BOT_TOKEN');
 const WEBHOOK_SECRET = Deno.env.get('TELEGRAM_WEBHOOK_SECRET');
@@ -102,83 +103,45 @@ const rememberList = (ctx, ids) => setSession(ctx, { last_list: { ids: ids.slice
 // ------------------------------------------------------------------- notes
 
 async function fetchLockedIds(userId) {
-  const { data } = await sb.from('notes').select('id').eq('user_id', userId).like('content', `${LOCK_PREFIX}%`);
-  return new Set((data ?? []).map((r) => r.id));
+  return createTenantDb(sb, userId).fetchLockedIds();
 }
 
 /** Lists (no content). deleted=true returns the trash instead. */
 async function fetchNotes(userId, { deleted = false } = {}) {
-  const { data, error } = await sb
-    .from('notes').select(LIST_COLS)
-    .eq('user_id', userId).eq('deleted', deleted)
-    .order('updated_at', { ascending: false }).limit(1000);
-  if (error) throw error;
-  const locked = await fetchLockedIds(userId);
-  return (data ?? []).map((n) => ({ ...n, tags: n.tags ?? [], is_pinned: !!n.is_pinned, locked: locked.has(n.id) }));
+  return createTenantDb(sb, userId).fetchNotes({ deleted });
 }
 
 /** One note WITH content. */
 async function fetchOne(userId, id, deleted = false) {
-  const { data } = await sb
-    .from('notes').select(`${LIST_COLS},content,version`)
-    .eq('id', id).eq('user_id', userId).eq('deleted', deleted).maybeSingle();
-  if (!data) return null;
-  return { ...data, tags: data.tags ?? [], is_pinned: !!data.is_pinned, locked: isLocked(data.content) };
+  return createTenantDb(sb, userId).fetchOne(id, deleted);
 }
 
 /** Every live note WITH content (capped), for search/tasks/quiz/links/backup. */
 async function fetchAllWithContent(userId) {
-  const { data, error } = await sb
-    .from('notes').select(`${LIST_COLS},content`)
-    .eq('user_id', userId).eq('deleted', false)
-    .order('updated_at', { ascending: false }).limit(500);
-  if (error) throw error;
-  return (data ?? []).map((n) => ({ ...n, tags: n.tags ?? [], is_pinned: !!n.is_pinned, locked: isLocked(n.content) }));
+  return createTenantDb(sb, userId).fetchAllWithContent();
 }
 
 async function insertNote(userId, { title, content = '', tags = [], priority = 'none', is_pinned = false }) {
-  const now = new Date().toISOString();
-  const id = crypto.randomUUID();
-  const { error } = await sb.from('notes').insert({
-    id, user_id: userId,
-    title: (title || 'Untitled').slice(0, MAX_TITLE),
-    content, tags, is_pinned, priority,
-    created_at: now, updated_at: now,
-    version: 1, deleted: false, deleted_at: null,
-  });
-  if (error) throw error;
-  return id;
+  return createTenantDb(sb, userId).insertNote({ title, content, tags, priority, is_pinned });
 }
 
 // UPDATEs never set version/updated_at: the notes_bump_version trigger owns both,
 // which is what makes every other device pick the change up.
 async function updateNote(userId, id, patch) {
-  const { error } = await sb.from('notes').update(patch).eq('id', id).eq('user_id', userId);
-  if (error) throw error;
+  return createTenantDb(sb, userId).updateNote(id, patch);
 }
 
 /** Read-modify-write on content, guarded by the version we read, retried once. */
 async function editContent(userId, id, transform) {
-  for (let attempt = 0; attempt < 2; attempt++) {
-    const note = await fetchOne(userId, id);
-    if (!note) return { ok: false, reason: 'missing' };
-    if (note.locked) return { ok: false, reason: 'locked', note };
-    const { data, error } = await sb
-      .from('notes').update({ content: transform(note.content ?? '') })
-      .eq('id', id).eq('user_id', userId).eq('version', note.version).select('id');
-    if (error) throw error;
-    if (data?.length) return { ok: true, note };
-  }
-  return { ok: false, reason: 'conflict' };
+  return createTenantDb(sb, userId).editContent(id, transform);
 }
 
 /** Find a note by exact title (case-insensitive) or create it. Used for Inbox and Flashcards. */
 async function ensureNote(userId, title, { create = true } = {}) {
-  const { data } = await sb
-    .from('notes').select('id').eq('user_id', userId).eq('deleted', false)
-    .ilike('title', escapeLike(title)).order('updated_at', { ascending: false }).limit(1);
+  const tenant = createTenantDb(sb, userId);
+  const data = await tenant.searchNotesByTitle(escapeLike(title), false);
   if (data?.length) return data[0].id;
-  return create ? insertNote(userId, { title, content: '' }) : null;
+  return create ? tenant.insertNote({ title, content: '' }) : null;
 }
 
 const noteHeader = (n) =>
@@ -226,11 +189,7 @@ async function resolveNote(ctx, arg, { deleted = false, useLast = true } = {}) {
     }
     id = pick.id;
   } else {
-    const { data } = await sb
-      .from('notes').select(LIST_COLS)
-      .eq('user_id', ctx.userId).eq('deleted', deleted)
-      .ilike('title', `%${escapeLike(target.text)}%`)
-      .order('updated_at', { ascending: false }).limit(20);
+    const data = await createTenantDb(sb, ctx.userId).searchNotesByTitle(`%${escapeLike(target.text)}%`, deleted);
     const match = matchTitle(data ?? [], target.text);
     if (match.kind === 'none') {
       await send(ctx.chatId, `No note found with "${target.text}" in the title.`);
@@ -525,12 +484,15 @@ const handlers = {
 
   async events(ctx) {
     const now = new Date();
-    const { data, error } = await sb
-      .from('calendar_events').select('title,start_at,is_all_day,status')
-      .eq('user_id', ctx.userId).eq('is_deleted', false)
-      .gte('start_at', now.toISOString()).lte('start_at', new Date(now.getTime() + 7 * 86400000).toISOString())
-      .order('start_at', { ascending: true }).limit(20);
-    if (error) { console.error('events failed', error); return send(ctx.chatId, 'Could not read your calendar.'); }
+    const end = new Date(now.getTime() + 7 * 86400000);
+    const tenant = createTenantDb(sb, ctx.userId);
+    let data;
+    try {
+      data = await tenant.fetchCalendarEvents(now.toISOString(), end.toISOString());
+    } catch (error) {
+      console.error('events failed', error);
+      return send(ctx.chatId, 'Could not read your calendar.');
+    }
     if (!data?.length) return send(ctx.chatId, 'No events in the next 7 days.');
     const lines = data.map((e) => {
       const when = formatLocal(new Date(e.start_at), ctx.tz);
@@ -546,27 +508,23 @@ const handlers = {
       return send(ctx.chatId, 'I could not understand that time, or it is in the past.\nTry: /remind in 2h call mom   or   /remind tomorrow 9am revise');
     }
     if (!parsed.text) return send(ctx.chatId, 'What should I remind you about? /remind tomorrow 9am revise chapter 3');
-    const { count } = await sb.from('telegram_reminders').select('id', { count: 'exact', head: true })
-      .eq('user_id', ctx.userId).eq('sent', false);
-    if ((count ?? 0) >= MAX_PENDING_REMINDERS) {
+    const tenant = createTenantDb(sb, ctx.userId);
+    const count = await tenant.reminders.countPending();
+    if (count >= MAX_PENDING_REMINDERS) {
       return send(ctx.chatId, `You already have ${MAX_PENDING_REMINDERS} pending reminders. Cancel some with /reminders.`);
     }
-    const { error } = await sb.from('telegram_reminders').insert({
-      user_id: ctx.userId, chat_id: ctx.chatId, body: parsed.text.slice(0, 500), due_at: parsed.due.toISOString(),
-    });
-    if (error) throw error;
+    await tenant.reminders.insert(ctx.chatId, parsed.text.slice(0, 500), parsed.due.toISOString());
     await send(ctx.chatId, `⏰ Reminder set for ${formatLocal(parsed.due, ctx.tz)} (${ctx.tz}):\n${parsed.text}`);
   },
 
   async reminders(ctx) {
-    const { data } = await sb.from('telegram_reminders').select('id,body,due_at')
-      .eq('user_id', ctx.userId).eq('sent', false).order('due_at', { ascending: true }).limit(MAX_PENDING_REMINDERS);
-    const list = data ?? [];
+    const tenant = createTenantDb(sb, ctx.userId);
+    const list = await tenant.reminders.listPending(MAX_PENDING_REMINDERS);
     const cancel = ctx.arg.match(/^cancel\s+(\d+)$/i);
     if (cancel) {
       const item = list[parseInt(cancel[1], 10) - 1];
       if (!item) return send(ctx.chatId, 'No reminder with that number. Send /reminders to see them.');
-      await sb.from('telegram_reminders').delete().eq('id', item.id).eq('user_id', ctx.userId);
+      await tenant.reminders.delete(item.id);
       return send(ctx.chatId, `Cancelled: ${item.body}`);
     }
     if (!list.length) return send(ctx.chatId, 'No pending reminders. Set one with /remind.');
@@ -577,7 +535,8 @@ const handlers = {
   async timezone(ctx) {
     if (!ctx.arg) return send(ctx.chatId, `Your timezone is ${ctx.tz}. Change it with /timezone Asia/Kolkata`);
     if (!isValidTimezone(ctx.arg)) return send(ctx.chatId, 'That is not a valid timezone. Use a name like Asia/Kolkata or Europe/London.');
-    await sb.from('telegram_links').update({ timezone: ctx.arg }).eq('user_id', ctx.userId);
+    const tenant = createTenantDb(sb, ctx.userId);
+    await tenant.link.updateTimezone(ctx.chatId, ctx.arg);
     ctx.tz = ctx.arg;
     await send(ctx.chatId, `Timezone set to ${ctx.arg}. Local time now: ${formatLocal(new Date(), ctx.arg)}`);
   },
@@ -615,9 +574,8 @@ const handlers = {
   },
 
   async undo(ctx) {
-    const { data } = await sb.from('notes').select('id')
-      .eq('user_id', ctx.userId).eq('deleted', true).order('deleted_at', { ascending: false, nullsFirst: false }).limit(1);
-    const note = data?.length ? await fetchOne(ctx.userId, data[0].id, true) : null;
+    const tenant = createTenantDb(sb, ctx.userId);
+    const note = await tenant.findLastDeletedNote();
     if (!note) return send(ctx.chatId, 'Nothing to restore.');
     await restoreNote(ctx, note);
   },
@@ -672,10 +630,10 @@ const handlers = {
   },
 
   async status(ctx) {
+    const tenant = createTenantDb(sb, ctx.userId);
     const { data: userRes } = await sb.auth.admin.getUserById(ctx.userId);
-    const notes = await fetchNotes(ctx.userId);
-    const { count } = await sb.from('telegram_reminders').select('id', { count: 'exact', head: true })
-      .eq('user_id', ctx.userId).eq('sent', false);
+    const notes = await tenant.fetchNotes();
+    const count = await tenant.reminders.countPending();
     const by = (p) => notes.filter((n) => n.priority === p).length;
     await send(ctx.chatId, [
       'NoteNirman bot status',
@@ -693,8 +651,9 @@ const handlers = {
   },
 
   async unlink(ctx) {
-    await sb.from('telegram_reminders').delete().eq('user_id', ctx.userId);
-    await sb.from('telegram_links').delete().eq('chat_id', ctx.chatId);
+    const tenant = createTenantDb(sb, ctx.userId);
+    await tenant.reminders.deleteAll();
+    await tenant.link.unlink(ctx.chatId);
     await sb.from('telegram_sessions').delete().eq('chat_id', ctx.chatId);
     await send(ctx.chatId, 'Disconnected. Your notes are untouched. To reconnect, send /start for a new code and enter it in NoteNirman > Profile > Telegram.');
   },
@@ -783,12 +742,11 @@ async function handleFreeText(ctx, text) {
 
 /** Plain text with no command: keep it as an "Emergency" note (max 3 per rolling day). */
 async function saveEmergencyNote(ctx, text) {
+  const tenant = createTenantDb(sb, ctx.userId);
   const since = new Date(Date.now() - EMERGENCY_TTL_MS).toISOString();
-  const { count, error } = await sb.from('notes').select('id', { count: 'exact', head: true })
-    .eq('user_id', ctx.userId).contains('tags', [EMERGENCY_TAG]).gte('created_at', since);
-  if (error) throw error;
-  if ((count ?? 0) >= EMERGENCY_DAILY_LIMIT) return send(ctx.chatId, emergencyLimitMessage());
-  await insertNote(ctx.userId, {
+  const count = await tenant.countRecentEmergencyNotes(since, EMERGENCY_TAG);
+  if (count >= EMERGENCY_DAILY_LIMIT) return send(ctx.chatId, emergencyLimitMessage());
+  await tenant.insertNote({
     title: EMERGENCY_TITLE,
     content: textToHtml(text.slice(0, MAX_BODY)),
     tags: [EMERGENCY_TAG],
@@ -884,6 +842,7 @@ async function expireEmergencyNotes() {
     .eq('deleted', false).contains('tags', [EMERGENCY_TAG]).lt('created_at', cutoff).limit(100);
   const deletedBy = new Map();
   for (const n of data ?? []) {
+    if (!isValidUserId(n.user_id)) continue;
     if (isUnrenamedEmergency(n)) {
       // Re-check the title in the UPDATE itself so a rename in the app a moment ago wins.
       const { data: hit } = await sb.from('notes').update({ deleted: true, deleted_at: new Date().toISOString() })
@@ -940,7 +899,7 @@ serve(async (req) => {
     }
 
     const { data: link } = await sb.from('telegram_links').select('user_id,timezone').eq('chat_id', chatId).maybeSingle();
-    if (!link) {
+    if (!link || !isValidUserId(link.user_id)) {
       await send(chatId, 'This chat is not connected to a NoteNirman account yet. Send /start to get a connect code, then enter it in NoteNirman (' + APP_URL + ') > Profile > Telegram.');
       return new Response('ok');
     }

@@ -66,4 +66,43 @@ describe('Phase 4 — Incremental Indexing Engine (P4.7)', () => {
       })
     );
   });
+
+  it('should purge existing search data and return zero count when a note is locked', async () => {
+    // 1. Index plain note first
+    await indexer.processNoteIndexing(sampleNote);
+    let results = await localSearchService.search('paragraph');
+    expect(results).toHaveLength(1);
+
+    // 2. Now lock the note
+    const lockedNote: Note = {
+      ...sampleNote,
+      content: 'NNLOCK1:mockCiphertextEncryptedContentBase64==',
+    };
+
+    const res = await indexer.processNoteIndexing(lockedNote);
+    expect(res.indexedDocsCount).toBe(0);
+    expect(res.skippedCount).toBe(0);
+
+    // 3. Verify plaintext search documents are completely purged
+    results = await localSearchService.search('paragraph');
+    expect(results).toHaveLength(0);
+
+    const titleResults = await localSearchService.search('Indexing');
+    expect(titleResults).toHaveLength(0);
+  });
+
+  it('scheduleNoteIndexing immediately purges search data for locked notes', async () => {
+    await indexer.processNoteIndexing(sampleNote);
+    expect(await localSearchService.search('paragraph')).toHaveLength(1);
+
+    const lockedNote: Note = {
+      ...sampleNote,
+      content: 'NNLOCK1:someEncryptedPayload',
+    };
+
+    await indexer.scheduleNoteIndexing(lockedNote);
+    // Purge is completed immediately without waiting for timers
+    const results = await localSearchService.search('paragraph');
+    expect(results).toHaveLength(0);
+  });
 });
