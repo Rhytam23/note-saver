@@ -48,7 +48,10 @@ export class SupabaseRealtimeProvider implements ICollaborationProvider {
 
     try {
       this.channel = supabase.channel(roomId, {
-        config: { broadcast: { self: false } },
+        config: {
+          private: true,
+          broadcast: { self: false },
+        },
       });
 
       this.channel
@@ -60,8 +63,10 @@ export class SupabaseRealtimeProvider implements ICollaborationProvider {
             this.setStatus('connected');
             // Announce presence on join
             this.sendAwareness({ online: true });
-          } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
+          } else if (status === 'CLOSED') {
             this.setStatus('reconnecting');
+          } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+            this.setStatus('error');
           }
         });
     } catch (err) {
@@ -159,6 +164,7 @@ export class SupabaseRealtimeProvider implements ICollaborationProvider {
 
   private handleIncomingMessage(msg: TransportMessage): void {
     if (!msg || msg.senderId === this.config?.userId) return; // Ignore self
+    if (this.config?.noteId && msg.noteId !== this.config.noteId) return; // Ignore cross-room payloads
 
     switch (msg.type) {
       case 'doc-update': {

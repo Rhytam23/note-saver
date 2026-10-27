@@ -107,6 +107,28 @@ export class VectorSearchService {
       return { success: false, count: 0, error: err.message };
     }
   }
+
+  public async deleteEmbeddingsForNote(
+    noteId: string
+  ): Promise<{ success: boolean; error?: string }> {
+    if (!noteId) return { success: true };
+    if (!isSupabaseConfigured) return { success: false, error: 'Supabase unconfigured' };
+
+    try {
+      const { error } = await supabase
+        .from('note_block_embeddings')
+        .delete()
+        .eq('note_id', noteId);
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message || 'Failed to delete note embeddings' };
+    }
+  }
 }
 
 export const vectorSearchService = new VectorSearchService();

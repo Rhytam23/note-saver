@@ -26,6 +26,7 @@ import PassphraseModal from "./components/PassphraseModal";
 import NotebooksModal from "./components/NotebooksModal";
 import LinkGraphModal from "./components/LinkGraphModal";
 import { isNoteLocked, lockNoteContent, unlockNoteContent } from "./services/noteLock";
+import { searchIndexer } from "./services/searchIndexer";
 import SyncStatusIndicator from "./components/SyncStatusIndicator";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Footer from "./components/Footer";
@@ -404,6 +405,7 @@ const App: React.FC = () => {
     const note = createLockFor;
     void lockNoteContent(note.content, passphrase).then(locked => {
       handleSaveNote({ ...note, content: locked });
+      void searchIndexer.purgeNoteSearchData(note.id);
       setUnlockedNotes(prev => {
         const next = { ...prev };
         delete next[note.id];
@@ -431,7 +433,9 @@ const App: React.FC = () => {
     const note = removeLockFor;
     unlockNoteContent(note.content, passphrase)
       .then(plain => {
-        handleSaveNote({ ...note, content: plain });
+        const unlockedNote = { ...note, content: plain };
+        handleSaveNote(unlockedNote);
+        searchIndexer.scheduleNoteIndexing(unlockedNote);
         setUnlockedNotes(prev => {
           const next = { ...prev };
           delete next[note.id];

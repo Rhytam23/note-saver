@@ -6,6 +6,7 @@ import { localSearchService } from './localSearchService';
 import { geminiEmbeddingAdapter } from './geminiAdapter';
 import { vectorSearchService } from './vectorSearchService';
 import { processingJobQueue } from './processingJobQueue';
+import { isNoteLocked } from './noteLock';
 
 export interface IndexerOptions {
   debounceMs?: number;
@@ -21,10 +22,19 @@ export class SearchIndexerService {
 
   /**
    * Enqueues an asynchronous debounced indexing task for a note.
+   * If note is locked, cancels pending timers and immediately purges search data.
    */
-  public scheduleNoteIndexing(note: Note): void {
+  public async scheduleNoteIndexing(note: Note): Promise<void> {
+    if (!note) return;
+
     if (this.debounceTimers.has(note.id)) {
       clearTimeout(this.debounceTimers.get(note.id));
+      this.debounceTimers.delete(note.id);
+    }
+
+    if (isNoteLocked(note)) {
+      await this.purgeNoteSearchData(note.id);
+      return;
     }
 
     const timer = setTimeout(async () => {
@@ -37,12 +47,18 @@ export class SearchIndexerService {
 
   /**
    * Immediately processes indexing for a note (idempotent, content-hash guarded).
+   * Automatically purges search records and aborts if note is locked or deleted.
    */
   public async processNoteIndexing(note: Note): Promise<{ indexedDocsCount: number; skippedCount: number }> {
     if (!note || note.deleted || note.syncStatus === 'failed') {
       if (note?.deleted) {
         await this.handleNoteDeleted(note.id);
       }
+      return { indexedDocsCount: 0, skippedCount: 0 };
+    }
+
+    if (isNoteLocked(note)) {
+      await this.purgeNoteSearchData(note.id);
       return { indexedDocsCount: 0, skippedCount: 0 };
     }
 
@@ -164,11 +180,16 @@ export class SearchIndexerService {
   }
 
   public async handleNoteDeleted(noteId: string): Promise<void> {
-    if (this.debounceTimers.has(noteId)) {
-      clearTimeout(this.debounceTimers.get(noteId));
-      this.debounceTimers.delete(noteId);
-    }
-    await localSearchService.markNoteDeleted(noteId, true);
+    this.cancelPending(noteId);
+    await localSearchService.removeNote(noteId);
+    await vectorSearchService.deleteEmbeddingsForNote(noteId);
+  }
+
+  /**
+   * Purges all existing embeddings and search documents across local and remote stores.
+   */
+  public async purgeNoteSearchData(noteId: string): Promise<void> {
+    await this.handleNoteDeleted(noteId);
   }
 
   public cancelPending(noteId: string): void {

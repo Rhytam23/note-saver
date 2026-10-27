@@ -1,6 +1,7 @@
 import { RagContextItem, SearchDocumentId } from '../types/search';
 import { hybridSearchEngine, HybridSearchEngine } from './hybridSearchEngine';
 import { geminiEmbeddingAdapter, GeminiEmbeddingAdapter } from './geminiAdapter';
+import { isLockedContent } from './noteLock';
 
 /**
  * RAG Context Token Budget configuration.
@@ -19,6 +20,7 @@ export interface RagPipelineOptions {
   activeNoteTitle?: string;
   maxResults?: number;
   tokenBudget?: number;
+  lockedNoteIds?: Set<string> | string[];
 }
 
 export interface RagContextBundle {
@@ -99,10 +101,18 @@ export class RagPipeline {
 
     const clusteredItems: RagContextItem[] = [];
     const seenDocIds = new Set<SearchDocumentId>();
+    const lockedSet = options.lockedNoteIds
+      ? (options.lockedNoteIds instanceof Set ? options.lockedNoteIds : new Set(options.lockedNoteIds))
+      : null;
 
     for (const entry of prioritizedResults) {
       const doc = entry.item.document;
       if (seenDocIds.has(doc.id)) continue;
+
+      // SECURITY: Exclude locked notes and locked ciphertext chunks from RAG AI context
+      if (lockedSet && lockedSet.has(doc.noteId)) continue;
+      if (isLockedContent(doc.textContent)) continue;
+
       seenDocIds.add(doc.id);
 
       const priority = options.activeNoteId === doc.noteId ? 1 : (doc.sourceType === 'note_title' ? 2 : 3);
