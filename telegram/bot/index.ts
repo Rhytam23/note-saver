@@ -48,7 +48,6 @@ const GEMINI_MODEL = 'gemini-2.5-flash'; // same model as gemini-proxy
 
 const sb = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
 
-const LIST_COLS = 'id,title,tags,is_pinned,priority,created_at,updated_at,deleted_at';
 const MAX_PENDING_REMINDERS = 50;
 const TRASH_DAYS = 30;
 // Commands that must not discard a half-finished multi-step command.
