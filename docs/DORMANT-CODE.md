@@ -1,6 +1,7 @@
 # Dormant code: what's in the repo but not in the app
 
-Last verified: 2026-09-22. Amended 2026-10-27: see "One exception" below.
+Last verified: 2026-09-22. Amended 2026-10-27: the realtime collaboration engine and the AI-search
+indexer/RAG chain were deleted, see "Removed on 2026-10-27" below.
 
 If you're reading this 20 years from now and wondering "why is there a Yjs
 CRDT collaboration engine, an AI RAG pipeline, and a block-based editor in
@@ -34,17 +35,27 @@ It was deliberately **not deleted** (the user's explicit choice when asked:
 kept in case a future collaborator wants to pick the block-editor/CRDT
 direction back up. Just don't mistake its presence for it being live.
 
-## One exception (since 2026-10-27)
+## Removed on 2026-10-27
 
-A security fix (PR #47) made the live `src/App.tsx` import `searchIndexer`
-from the search cluster: locking a note purges its search records, and
-removing a lock schedules indexing. Nothing else in that cluster is wired in,
-the feature flags are still all off, and the matching database tables do not
-exist in the live Supabase project, so these calls do nothing useful today.
-The reasoning and the follow-up (gate them behind a flag) are in
-[DECISIONS.md](./DECISIONS.md), 2026-10-27. `src/collaboration/realtimeProvider.ts`
-was also hardened (private channels, owner-only policies) but is still mounted
-by nothing live.
+The security fix in PR #47 touched three pieces of this code and, as a side
+effect, made the live `src/App.tsx` call the search indexer. Rather than keep
+wiring dead code into the live app, the pieces it touched were deleted:
+
+- **Realtime collaboration**: all of `src/collaboration/` (Yjs binding,
+  Realtime provider, awareness, comments, history) and its tests.
+  `UniversalBlockEditor.tsx` lost its collaboration props and status badge.
+- **AI-search chain**: `searchIndexer.ts`, `vectorSearchService.ts`,
+  `ragPipeline.ts`, `hybridSearchEngine.ts`, `CopilotDrawer.tsx` and their tests.
+  The lock/unlock calls in `App.tsx` were removed.
+
+Left in place on purpose: `localSearchService.ts`, `lexicalIndexDb.ts`,
+`citationValidator.ts`, `search.worker.ts`, the `gemini-embed` and
+`gemini-copilot` Edge Function sources, the `COLLABORATION`/`CRDT_COLLAB`
+feature flags, and the SQL migrations (the realtime policy migration is
+already applied to the live project and is harmless without a client). The
+`yjs` package stays because `backupEngine.ts` uses it. Git history has the
+deleted files if this direction is ever revived. Reasoning is in
+[DECISIONS.md](./DECISIONS.md), 2026-10-27.
 
 ## How to verify this yourself
 
@@ -52,11 +63,8 @@ by nothing live.
 # Nothing outside the block editor's own files imports it:
 grep -rn "UniversalBlockEditor" src --include=*.tsx --include=*.ts
 
-# Nothing outside CopilotDrawer/ragPipeline/hybridSearchEngine imports them:
-grep -rln "ragPipeline\|hybridSearchEngine\|CopilotDrawer" src
-
-# Only App.tsx (lock/unlock, see "One exception") imports the indexer:
-grep -rln "searchIndexer" src --include=*.ts --include=*.tsx | grep -v __tests__
+# The deleted collaboration and RAG chain should have no references left:
+grep -rln "ragPipeline\|hybridSearchEngine\|CopilotDrawer\|searchIndexer\|useCollaboration" src
 
 # All feature flags default false, and only the two dormant modules below
 # ever check them:
@@ -68,8 +76,8 @@ grep -rn "isFeatureEnabled\|setFeatureFlag" src --include=*.ts --include=*.tsx
 | Area | Files | Status |
 | :--- | :--- | :--- |
 | Block editor | `src/components/block/*`, `src/services/blockDocument.ts`, `blockNesting.ts`, `blockOperations.ts`, `blockParser.ts`, `blockPersistence.ts`, `editorBlockAdapter.ts` | Not imported by `App.tsx` or `NoteEditor.tsx`. The live editor is TipTap (`NoteEditor.tsx`), which stores plain HTML in `Note.content` — see [ARCHITECTURE.md](./ARCHITECTURE.md). |
-| Realtime collaboration | `src/collaboration/*` (Yjs CRDT doc binding, awareness/presence, comments, history) | Only consumer is the dormant block editor. No live component mounts `useCollaboration`. |
-| AI semantic search / RAG | `src/services/ragPipeline.ts`, `hybridSearchEngine.ts`, `citationValidator.ts`, `vectorSearchService.ts`, `lexicalIndexDb.ts`, `searchIndexer.ts`, `src/components/CopilotDrawer.tsx`, `src/workers/search.worker.ts` | Self-contained cluster; `CopilotDrawer` is never rendered by `App.tsx`. The live Gemini assistant (summarize/proofread/ideas) is `geminiService.ts` + `geminiAdapter.ts`, called directly from `NoteEditor.tsx` — much simpler, no vector search involved. |
+| Realtime collaboration | ~~`src/collaboration/*`~~ | **Deleted 2026-10-27**, see above. |
+| AI semantic search / RAG | `src/services/citationValidator.ts`, `lexicalIndexDb.ts`, `localSearchService.ts`, `src/workers/search.worker.ts` (the rest of the chain, `ragPipeline`, `hybridSearchEngine`, `vectorSearchService`, `searchIndexer` and `CopilotDrawer`, was deleted 2026-10-27) | What remains has no live caller. The live Gemini assistant (summarize/proofread/ideas) is `geminiService.ts` + `geminiAdapter.ts`, called directly from `NoteEditor.tsx` — much simpler, no vector search involved. |
 | Attachments / multimodal scaffolding | `src/services/attachmentStorage.ts`, `audioRecorder.ts`, `transcriptionService.ts`, `handwritingService.ts`, `webClipper.ts`, `processingJobQueue.ts` | Built for the 2.0 block editor's rich-attachment model. Not called from the live editor. (Voice **dictation**, a different and much simpler feature using the browser's `SpeechRecognition` API, is live — see `useSpeechRecognition.ts`. Don't confuse the two.) |
 | Data portability core | `src/services/portabilityCore.ts` | AST-based import/export contracts for the block model. Not used — the live import/export/backup features (`importPipeline.ts`, `exportPipeline.ts`, `exportService.ts`, `backupEngine.ts`) work directly against HTML `Note.content` and are wired into `ProfileModal.tsx`. |
 | Migration manager | `src/services/migrationManager.ts` | Journaled schema-migration engine built for the 2.0 data model changes (blocks, calendar, canvases). The live app's only real migration path is `src/services/migration.ts` (note: singular, different file), used for ordinary IndexedDB schema bumps in `localDb.ts`. |

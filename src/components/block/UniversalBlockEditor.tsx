@@ -12,16 +12,12 @@ import { indentBlock as indentOp, outdentBlock as outdentOp } from '../../servic
 import { BlockRenderer } from './BlockRenderer';
 import { BlockToolbar } from './BlockToolbar';
 import { BlockSlashMenu, type SlashMenuItem } from './BlockSlashMenu';
-import { useCollaboration } from '../../collaboration/useCollaboration';
-import type { CollaborationSessionConfig, ICollaborationProvider } from '../../collaboration/collaborationTypes';
 
 interface UniversalBlockEditorProps {
   initialDocument?: BlockDocument;
   noteId?: string;
   initialHtml?: string;
   onDocumentChange?: (doc: BlockDocument) => void;
-  collaborationConfig?: CollaborationSessionConfig;
-  customCollaborationProvider?: ICollaborationProvider;
 }
 
 export const UniversalBlockEditor: React.FC<UniversalBlockEditorProps> = ({
@@ -29,8 +25,6 @@ export const UniversalBlockEditor: React.FC<UniversalBlockEditorProps> = ({
   noteId = 'note-default',
   initialHtml = '',
   onDocumentChange,
-  collaborationConfig,
-  customCollaborationProvider,
 }) => {
   const initialBlockDoc = useMemo(() => {
     return initialDocument || createBlockDocument(noteId, initialHtml);
@@ -40,27 +34,12 @@ export const UniversalBlockEditor: React.FC<UniversalBlockEditorProps> = ({
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   const [isSlashMenuOpen, setIsSlashMenuOpen] = useState(false);
 
-  const handleRemoteDocChange = useCallback((remoteDoc: BlockDocument) => {
-    setDoc(remoteDoc);
-    onDocumentChange?.(remoteDoc);
-  }, [onDocumentChange]);
-
-  const { isCollabEnabled, status, collaborators, updateDocument: updateCollabDoc } = useCollaboration(
-    collaborationConfig || null,
-    initialBlockDoc,
-    handleRemoteDocChange,
-    customCollaborationProvider
-  );
-
   const updateState = useCallback(
     (newDoc: BlockDocument) => {
       setDoc(newDoc);
       onDocumentChange?.(newDoc);
-      if (isCollabEnabled) {
-        updateCollabDoc(newDoc);
-      }
     },
-    [onDocumentChange, isCollabEnabled, updateCollabDoc]
+    [onDocumentChange]
   );
 
   const handleSelectBlock = (blockId: string) => {
@@ -149,15 +128,6 @@ export const UniversalBlockEditor: React.FC<UniversalBlockEditorProps> = ({
         />
 
         <div className="flex items-center gap-2">
-          {isCollabEnabled && (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs bg-black/10 dark:bg-white/10">
-              <span className={`w-2 h-2 rounded-full ${status === 'connected' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
-              <span className="text-muted-foreground font-mono text-[10px]">
-                {status === 'connected' ? `${collaborators.length} active` : status}
-              </span>
-            </div>
-          )}
-
           <button
             onClick={() => setIsSlashMenuOpen(prev => !prev)}
             className="px-3 py-1.5 rounded-lg border border-accent/40 bg-accent/10 hover:bg-accent/20 text-accent text-xs font-semibold flex items-center gap-1 transition-colors"
