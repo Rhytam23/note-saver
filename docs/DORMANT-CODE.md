@@ -1,6 +1,6 @@
 # Dormant code: what's in the repo but not in the app
 
-Last verified: 2026-09-22.
+Last verified: 2026-09-22. Amended 2026-10-27: see "One exception" below.
 
 If you're reading this 20 years from now and wondering "why is there a Yjs
 CRDT collaboration engine, an AI RAG pipeline, and a block-based editor in
@@ -34,6 +34,18 @@ It was deliberately **not deleted** (the user's explicit choice when asked:
 kept in case a future collaborator wants to pick the block-editor/CRDT
 direction back up. Just don't mistake its presence for it being live.
 
+## One exception (since 2026-10-27)
+
+A security fix (PR #47) made the live `src/App.tsx` import `searchIndexer`
+from the search cluster: locking a note purges its search records, and
+removing a lock schedules indexing. Nothing else in that cluster is wired in,
+the feature flags are still all off, and the matching database tables do not
+exist in the live Supabase project, so these calls do nothing useful today.
+The reasoning and the follow-up (gate them behind a flag) are in
+[DECISIONS.md](./DECISIONS.md), 2026-10-27. `src/collaboration/realtimeProvider.ts`
+was also hardened (private channels, owner-only policies) but is still mounted
+by nothing live.
+
 ## How to verify this yourself
 
 ```bash
@@ -42,6 +54,9 @@ grep -rn "UniversalBlockEditor" src --include=*.tsx --include=*.ts
 
 # Nothing outside CopilotDrawer/ragPipeline/hybridSearchEngine imports them:
 grep -rln "ragPipeline\|hybridSearchEngine\|CopilotDrawer" src
+
+# Only App.tsx (lock/unlock, see "One exception") imports the indexer:
+grep -rln "searchIndexer" src --include=*.ts --include=*.tsx | grep -v __tests__
 
 # All feature flags default false, and only the two dormant modules below
 # ever check them:

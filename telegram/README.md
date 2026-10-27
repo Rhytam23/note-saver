@@ -113,8 +113,9 @@ is limited to 10 attempts per 10 minutes per user (enforced in the database).
   client. An unlinked chat can only use `/start` and `/help`.
 - **Service role, so scoping is in code.** The function uses the service-role
   key, which bypasses row-level security. Every `notes` query is filtered by
-  the linked `user_id`. Tests check that one user can't read, search, edit or
-  delete another user's notes.
+  the linked `user_id`, through the single helper `bot/_shared/tenantDb.ts`, which
+  rejects a missing or malformed user id. Tests check that one user can't read,
+  search, edit or delete another user's notes.
 - **Sync-safe writes.** Inserts use `version: 1`. Updates never set `version`
   or `updated_at`; the `notes_bump_version` trigger does, as for app writes.
   Content edits are guarded by the version that was read and retried once.

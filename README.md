@@ -68,7 +68,7 @@ Recorded from the live app at <https://notenirman.vercel.app> (other notes blurr
   quick-capture inbox. It reads and writes the same notes as the apps, so everything syncs. Try it at
   [@notenirman_bot](https://t.me/notenirman_bot) (link it from Profile > Telegram in the app), or host your
   own on Supabase with your own bot token: see [telegram/README.md](telegram/README.md).
-- **13 seasonal themes**, switched automatically by date/location or picked
+- **13 seasonal themes**, switched automatically by date and timezone or picked
   manually.
 
 ## Platforms
@@ -92,7 +92,7 @@ npm run dev              # http://localhost:3000
 ```bash
 npx tsc --noEmit   # type check
 npm run lint        # eslint
-npm test             # vitest — 463 tests as of 2026-09-22
+npm test             # vitest — 663 tests as of 2026-10-27
 npm run build         # production build
 ```
 

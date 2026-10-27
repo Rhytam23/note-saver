@@ -57,7 +57,7 @@ npm run preview    # serve the production build locally
 ```bash
 npx tsc --noEmit    # type check
 npm run lint         # eslint src --ext .ts,.tsx
-npm test              # vitest run (463 tests as of 2026-09-22)
+npm test              # vitest run (663 tests as of 2026-10-27)
 ```
 
 ## 5. Supabase backend (auth, sync, AI proxy)
@@ -69,6 +69,13 @@ just never leave the device). To get sync and the AI assistant working:
 2. Apply the SQL migrations in `supabase/migrations/` in filename order
    (via the Supabase SQL editor, or `supabase db push` if you have the CLI
    linked).
+   Two of them are special: `20261027000000_realtime_collaboration_authorization.sql`
+   locks collaboration channels to the note owner and is cheap to apply;
+   `20261027010000_purge_locked_notes_search.sql` needs the pgvector search
+   tables from `20260906000000_phase4_pgvector_search.sql` and only makes sense
+   if you turn semantic search on (it will fail without them). See
+   [DECISIONS.md](./DECISIONS.md), 2026-10-27, for what is applied on the live
+   project.
 3. Deploy the Edge Functions actually used by the live app:
    ```bash
    supabase functions deploy gemini-proxy
