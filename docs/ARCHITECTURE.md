@@ -126,7 +126,10 @@ code. Everything Telegram-related lives in [`telegram/`](../telegram); setup is 
   chat can do nothing; only `/start` and `/help` work.
 - **Service role, so scoping is in code.** The function uses the service-role
   key, which bypasses RLS. Every `notes` query is filtered by the linked
-  `user_id`; there is no code path that reads a note by id alone.
+  `user_id`; there is no code path that reads a note by id alone. Since
+  2026-10-27 that rule is enforced in one place: `_shared/tenantDb.ts` wraps
+  every table the bot touches, validates the user id and fails closed if it is
+  missing (see [DECISIONS.md](./DECISIONS.md)).
 - **Sync compatibility.** Inserts use `version: 1`. Updates never set
   `version` or `updated_at`; the `notes_bump_version` trigger does, exactly as
   for app writes. Content edits are guarded by the version that was read and

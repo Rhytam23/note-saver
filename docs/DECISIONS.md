@@ -11,6 +11,60 @@ archived.
 
 ---
 
+## 2026-10-27 - Security hardening from an outside contributor (PR #47): what changed, why, and what is not live yet
+
+**Problem.** An outside contributor (issue #46, PR #47) found four places where data could leak:
+1. **Collaboration rooms were public.** The Realtime channel `notenirman-room-<noteId>` was a public broadcast channel with no server-side check, so anyone who guessed a note id could listen in or inject edits.
+2. **Locked notes stayed searchable.** A passphrase-locked note is stored as ciphertext (`NNLOCK1:`), but plaintext search chunks and embeddings made before locking were never removed, and the AI "ask your notes" pipeline could still read them.
+3. **Telegram bot isolation depended on discipline.** The bot uses the service-role key, which bypasses row-level security, so every query had to remember to filter by the linked `user_id`.
+4. **Theme logic phoned home.** The seasonal themes called three third-party IP lookup services (`ipwho.is`, `geojs.io`, `ipapi.co`) and asked for GPS on every startup, leaking the user's IP address and location to those services.
+
+**Decision.** Accepted as written. What it does:
+1. `src/collaboration/realtimeProvider.ts` opens the channel with `private: true`, ignores messages for a different note, and shows an error state (not a silent retry) on `CHANNEL_ERROR`/`TIMED_OUT`. Supabase migration `20261027000000_realtime_collaboration_authorization.sql` adds row-level-security policies on `realtime.messages`: only the signed-in owner of a non-deleted note may read or send in that note's room.
+2. Locking a note now deletes its search data (`searchIndexer.purgeNoteSearchData`, `vectorSearchService.deleteEmbeddingsForNote`); indexing and the AI context skip locked notes; unlocking re-indexes. Migration `20261027010000_purge_locked_notes_search.sql` adds a database trigger that does the same server-side and tightens the `match_note_blocks` search function.
+3. `telegram/bot/_shared/tenantDb.ts` (copied to `supabase/functions/telegram-bot/` by `npm run bot:sync`) is now the only way the bot touches notes, calendar events, reminders and links. It validates the user id and always adds `.eq('user_id', ...)`, failing closed if the id is missing or malformed.
+4. `src/services/locationService.ts` no longer makes any network call. See "Behaviour you may notice" below. `vercel.json` and `src-tauri/tauri.conf.json` drop the three lookup hosts from the Content-Security-Policy, and `vercel.json` sets `Permissions-Policy: geolocation=()`.
+
+**Why it was accepted.** Typecheck, lint, 663 tests, the build and `bot:sync --check` all pass with the PR merged onto `main`; it adds no dependencies; the two migrations match the existing function signatures. The red Vercel check on the PR only said "Authorization required to deploy", which is what Vercel shows for any pull request from someone else's fork.
+
+**Behaviour you may notice.**
+- Theme location now comes from the browser timezone: `Asia/Kolkata`/`Asia/Calcutta` counts as India (India-only Navratri), a list of southern-hemisphere timezones flips the seasons, everything else is treated as northern hemisphere. Someone in India whose device timezone is not Indian time will no longer get India-only themes unless they set an override.
+- Overrides are read from `localStorage` keys `notenirman_user_location` (`{"country":"IN","latitude":20.6}`) and `notenirman_seasonal_theme`. There is no settings screen for them yet.
+- Realtime collaboration only works for the note's owner (this matches the product: there is no sharing model). The feature itself is dormant, see [DORMANT-CODE.md](./DORMANT-CODE.md).
+
+**What is live and what is not (as of 2026-10-27).**
+- Web app: live. `deployment` was fast-forwarded to `main` and the production deploy finished Ready.
+- Supabase migration 1 (realtime policies): **applied** to the NoteSaver project and verified (`realtime_collab_select_policy`, `realtime_collab_insert_policy`).
+- Supabase migration 2 (purge locked notes): **not applied, on purpose.** It needs the pgvector extension, the `note_block_embeddings` table and `match_note_blocks`, none of which exist in this project (it has only the `notes`, `tags` and `telegram_*` tables, because semantic search was never turned on). Running it now would fail on the first statement. If semantic search is ever enabled, apply `20260906000000_phase4_pgvector_search.sql` first, then this one. The project's migration history table lists only one entry, so do not run `supabase db push` without checking what it would re-run.
+- Telegram bot: **not redeployed.** The live `telegram-bot` Edge Function is still version 5, built before this change, so the `tenantDb` isolation is in the repo but not in production. To ship it: `supabase functions deploy telegram-bot --no-verify-jwt`.
+
+**Loose end.** `src/App.tsx` now imports `searchIndexer`, which belongs to the dormant AI-search cluster. Locking a note makes a delete call against a table that does not exist (returns an error that is ignored), and removing a lock schedules indexing, which tries to call the `gemini-embed` Edge Function (not deployed here) and stores search records on the device. I read the code and believe both fail quietly, but have not run it in a browser. A tidy follow-up would put those two calls behind the existing feature flags in `src/config/featureFlags.ts`.
+
+---
+
+## 2026-10-27 - Dependency-bot PRs: what was merged, what was refused, and how to take the refused ones later
+
+**Problem.** Dependabot opened a batch of PRs. CI (`.github/workflows/ci.yml`) runs only `tsc --noEmit` and `npm run build`, so a green check does not mean lint, the tests or the Rust build pass.
+
+**Decision.** Every PR was installed on a clean checkout and run through typecheck, lint, tests and build before merging.
+- **Merged:** #38 (Rust crates, lockfile only; not compiled locally, no Rust toolchain), #40 framer-motion 14, #42 @vercel/analytics 2, #44 undici, #45 vitest, #48 postcss-selector-parser.
+- **Closed (branches deleted), with the reason, so a reopened PR is not a mystery:**
+  - **katex 0.19** (#39 and an earlier one): `@tiptap/extension-mathematics` only accepts katex `^0.16 || ^0.17 || ^0.18`, so `npm ci` fails. Keep katex at `^0.18` until tiptap widens its range.
+  - **vite 8** (#41; plugin-react 6 in #35 needs it): needs `esbuild ^0.27 || ^0.28` (the repo had `^0.25`), `@vitejs/plugin-react ^6`, and `build.rollupOptions.output.manualChunks` in `vite.config.ts` rewritten from an object to a function (Vite 8 uses Rolldown, which rejects the object form). I built exactly that combination and all 663 tests and the build passed, but it was not merged. Do it as one deliberate PR.
+  - **eslint 10** (#43): ESLint 10 no longer reads `.eslintrc.json`, so `npm run lint` fails outright. CI stayed green only because CI never runs lint. Needs a flat-config migration first.
+  - **TypeScript 7** (#36): `typescript-eslint` supports TypeScript below 6.1.0, so install fails on the peer rule; with the check bypassed, `tsc` reports 77 errors (65 are TS7006 implicit-any). A Dependabot ignore for TypeScript majors was drafted as PR #37 but closed with its branch, so this PR will come back until that rule is added to `.github/dependabot.yml`.
+  - **pdfjs-dist 6** (#34): `PDFDocumentProxy.destroy()` was removed; in `src/services/pdfTextImport.ts` call `destroy()` on the loading task instead (`const loadingTask = getDocument(...)`, then `await loadingTask.destroy()`). The fix passed everything but was not merged.
+
+**Worth doing.** Add lint and `npm test` steps to `ci.yml`; that alone would have caught the eslint 10 problem.
+
+---
+
+## 2026-10-27 - Branches synced and production promoted
+
+`deployment` was fast-forwarded to `main` (commit `1228483`) and Vercel's production deploy finished Ready; `https://notenirman.vercel.app` returned 200. The eight `area/*` branches (`ai`, `android`, `backend`, `ci`, `desktop`, `docs`, `telegram`, `web`) were fast-forwarded to the same commit. None had commits of their own, so nothing was lost, and no force push or branch deletion was used. As before (see 2026-10-12), production only changes when `deployment` moves.
+
+---
+
 ## 2026-10-12 - One update prompt, driven by the website's version manifest
 
 **Problem.** The app had two update checks. An old dialog asked GitHub for the latest release on every platform, so it appeared on the website too, popped up the moment a release was published (before it was ready), ignored the Microsoft Store build, and showed raw release text ("Automated Release", an unclickable "Full Changelog" link). A newer banner already did it correctly (installed apps only, Store build excluded, driven by `/downloads/version.json`).
