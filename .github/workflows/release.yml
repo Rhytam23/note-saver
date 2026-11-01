@@ -101,7 +101,7 @@ jobs:
           }
 
       - name: Upload Windows Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: windows-artifacts
           path: artifacts-windows/*
@@ -121,7 +121,7 @@ jobs:
           ./src-tauri/msix/build-msix.ps1 @params
 
       - name: Upload MSIX Package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: msix-package
           path: src-tauri/msix/dist/*.msix
@@ -237,7 +237,7 @@ jobs:
           cp android/app/build/outputs/apk/release/*.apk "artifacts-android/NoteNirman-${GITHUB_REF_NAME}.apk"
 
       - name: Upload Android Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: android-artifacts
           path: artifacts-android/*
